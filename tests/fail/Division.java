@@ -1,5 +1,6 @@
 package fail;
 
+import java.lang.System;
 
 public class Division {
 
