@@ -47,6 +47,9 @@ PLUS_ASSIGN ::= "+="
 STAR        ::= "*"
 DIV         ::= "/"
 MOD         ::= "%"
+ALSHIFT     ::= "<<"
+ARSHIFT     ::= ">>"
+LRSHIFT     ::= ">>>"
 
 // Separators
 COMMA       ::= ","
