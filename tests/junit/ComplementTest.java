@@ -18,6 +18,6 @@ public class ComplementTest extends TestCase {
 	public void testComplement() {
 		this.assertEquals(complement.complement(2), -3);
 		this.assertEquals(complement.complement(17000), -17001);
-		this.assertEquals(-25, 24);
+		this.assertEquals(complement.complement(-25), 24);
 	}
 }
