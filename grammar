@@ -90,6 +90,7 @@ multiplicativeExpression ::= unaryExpression       // level 2
 
 unaryExpression ::= INC unaryExpression  // level 1
                   | MINUS unaryExpression
+                  | COMPLEMENT unaryExpression
                   | simpleUnaryExpression
 
 simpleUnaryExpression ::= LNOT unaryExpression
@@ -124,3 +125,6 @@ newArrayDeclarator ::= LBRACK expression RBRACK
 
 literal ::= INT_LITERAL | CHAR_LITERAL | STRING_LITERAL
           | TRUE        | FALSE        | NULL
+
+
+          
