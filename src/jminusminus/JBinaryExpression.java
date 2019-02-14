@@ -283,7 +283,6 @@ class JRemainderOp extends JBinaryExpression {
         super(line, "%", lhs, rhs);
     }
 
-
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);

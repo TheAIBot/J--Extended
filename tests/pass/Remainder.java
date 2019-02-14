@@ -1,6 +1,6 @@
 package pass;
 
-public class Modulus {
+public class Remainder {
 
     public int remainder(int x, int y){
         return x % y;
