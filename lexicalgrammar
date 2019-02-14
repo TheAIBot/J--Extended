@@ -46,6 +46,11 @@ PLUS        ::= "+"
 PLUS_ASSIGN ::= "+="
 STAR        ::= "*"
 COMPLEMENT  ::= "~"
+DIV         ::= "/"
+MOD         ::= "%"
+ALSHIFT     ::= "<<"
+ARSHIFT     ::= ">>"
+LRSHIFT     ::= ">>>"
 
 // Separators
 COMMA       ::= ","

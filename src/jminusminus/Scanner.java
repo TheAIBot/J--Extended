@@ -106,7 +106,7 @@ class Scanner {
                         nextCh();
                     }
                 } else {
-                    reportScannerError("Operator / is not supported in j--.");
+                    return new TokenInfo(DIV, line);
                 }
             } else {
                 moreWhiteSpace = false;
@@ -155,6 +155,9 @@ class Scanner {
         case '*':
             nextCh();
             return new TokenInfo(STAR, line);
+        case '%':
+            nextCh();
+            return new TokenInfo(MOD, line);
         case '+':
             nextCh();
             if (ch == '=') {
@@ -184,14 +187,27 @@ class Scanner {
                 return getNextToken();
             }
         case '>':
-            nextCh();
+        	nextCh();
+        	if (ch == '>') {
+        		nextCh();
+        		if (ch == '>') {
+        			nextCh();
+					return new TokenInfo(LRSHIFT, line);
+				}
+				return new TokenInfo(ARSHIFT, line);
+			}
             return new TokenInfo(GT, line);
         case '<':
             nextCh();
             if (ch == '=') {
                 nextCh();
                 return new TokenInfo(LE, line);
-            } else {
+            } 
+            else if (ch == '<') {
+				nextCh();
+				return new TokenInfo(ALSHIFT, line);
+			}
+            else {
                 reportScannerError("Operator < is not supported in j--.");
                 return getNextToken();
             }
