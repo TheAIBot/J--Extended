@@ -295,6 +295,6 @@ class JRemainderOp extends JBinaryExpression {
     public void codegen(CLEmitter output) {
         lhs.codegen(output);
         rhs.codegen(output);
-        output.addNoArgInstruction(IDIV);
+        output.addNoArgInstruction(IREM);
     }
 }
