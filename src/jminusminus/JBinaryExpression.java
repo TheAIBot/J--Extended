@@ -364,3 +364,72 @@ class JLogicRightShift extends JBinaryExpression {
         output.addNoArgInstruction(IUSHR);
     }
 }
+
+class JBitwiseAND extends JBinaryExpression {
+
+	public JBitwiseAND(int line, JExpression lhs, JExpression rhs) {
+		super(line, TokenKind.BAND.image(), lhs, rhs);
+	}
+	
+	public JExpression analyze(Context context) {
+		lhs = (JExpression) lhs.analyze(context);
+        rhs = (JExpression) rhs.analyze(context);
+        lhs.type().mustMatchExpected(line(), Type.INT);
+        rhs.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+	}
+	
+	public void codegen(CLEmitter output) {
+        lhs.codegen(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(IAND);
+    }
+	
+}
+
+class JBitwiseXOR extends JBinaryExpression {
+
+	public JBitwiseXOR(int line, JExpression lhs, JExpression rhs) {
+		super(line, TokenKind.BXOR.image(), lhs, rhs);
+	}
+	
+	public JExpression analyze(Context context) {
+		lhs = (JExpression) lhs.analyze(context);
+        rhs = (JExpression) rhs.analyze(context);
+        lhs.type().mustMatchExpected(line(), Type.INT);
+        rhs.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+	}
+	
+	public void codegen(CLEmitter output) {
+        lhs.codegen(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(IXOR);
+    }
+	
+}
+
+class JBitwiseOR extends JBinaryExpression {
+
+	public JBitwiseOR(int line, JExpression lhs, JExpression rhs) {
+		super(line, TokenKind.BOR.image(), lhs, rhs);
+	}
+	
+	public JExpression analyze(Context context) {
+		lhs = (JExpression) lhs.analyze(context);
+        rhs = (JExpression) rhs.analyze(context);
+        lhs.type().mustMatchExpected(line(), Type.INT);
+        rhs.type().mustMatchExpected(line(), Type.INT);
+        type = Type.INT;
+        return this;
+	}
+	
+	public void codegen(CLEmitter output) {
+        lhs.codegen(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(IOR);
+    }
+	
+}

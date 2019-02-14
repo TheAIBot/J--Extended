@@ -1016,10 +1016,10 @@ public class Parser {
     private JExpression conditionalAndExpression() {
         int line = scanner.token().line();
         boolean more = true;
-        JExpression lhs = equalityExpression();
+        JExpression lhs = bitwiseExpression();
         while (more) {
             if (have(LAND)) {
-                lhs = new JLogicalAndOp(line, lhs, equalityExpression());
+                lhs = new JLogicalAndOp(line, lhs, bitwiseExpression());
             } else {
                 more = false;
             }
@@ -1027,6 +1027,24 @@ public class Parser {
         return lhs;
     }
 
+    private JExpression bitwiseExpression() {
+    	int line = scanner.token().line();
+    	boolean more = true;
+    	JExpression lhs = equalityExpression();
+    	while (more) {
+    		if (have(BAND)) {
+    			lhs = new JBitwiseAND(line, lhs, equalityExpression());
+    		} else if (have(BXOR)) {
+    			lhs = new JBitwiseXOR(line, lhs, equalityExpression());
+    		} else if (have(BOR)) {
+    			lhs = new JBitwiseOR(line, lhs, equalityExpression());
+    		} else {
+    			more = false;
+    		}
+    	}
+    	return lhs;
+    }
+    
     /**
      * Parse an equality expression.
      *

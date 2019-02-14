@@ -22,6 +22,9 @@ public class JMinusMinusTestRunner {
         suite.addTestSuite(SeriesTest.class);
         suite.addTestSuite(ClassesTest.class);
         suite.addTestSuite(ComplementTest.class);
+        suite.addTestSuite(BANDTest.class);
+        suite.addTestSuite(BXORTest.class);
+        suite.addTestSuite(BORTest.class);
         suite.addTestSuite(DivisionTest.class);
         suite.addTestSuite(RemainderTest.class);
         suite.addTestSuite(ArithLeftShiftTest.class);

@@ -18,8 +18,9 @@ enum TokenKind {
             "protected"), PUBLIC("public"), RETURN("return"), STATIC("static"), SUPER(
             "super"), THIS("this"), TRUE("true"), VOID("void"), WHILE("while"), PLUS(
             "+"), ASSIGN("="), DEC("--"), EQUAL("=="), GT(">"), INC("++"), LAND(
-            "&&"), LE("<="), COMPLEMENT("~"), LNOT("!"), MINUS("-"), PLUS_ASSIGN("+="), STAR("*"), DIV("/"), ALSHIFT(
-            "<<"), ARSHIFT(">>"), LRSHIFT(">>>"), MOD("%"),LPAREN(
+            "&&"), LE("<="), COMPLEMENT("~"), LNOT("!"), MINUS("-"), PLUS_ASSIGN("+="), 
+    		STAR("*"), DIV("/"), ALSHIFT("<<"), ARSHIFT(">>"), LRSHIFT(">>>"), 
+    		MOD("%"), BAND("&"), BXOR("^"), BOR("|"), LPAREN(
             "("), RPAREN(")"), LCURLY("{"), RCURLY("}"), LBRACK("["), RBRACK(
             "]"), SEMI(";"), COMMA(","), DOT("."), IDENTIFIER("<IDENTIFIER>"), INT_LITERAL(
             "<INT_LITERAL>"), CHAR_LITERAL("<CHAR_LITERAL>"), STRING_LITERAL(

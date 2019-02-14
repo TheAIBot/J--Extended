@@ -183,9 +183,20 @@ class Scanner {
                 nextCh();
                 return new TokenInfo(LAND, line);
             } else {
-                reportScannerError("Operator & is not supported in j--.");
-                return getNextToken();
+                return new TokenInfo(BAND, line);
             }
+        case '^':
+        	nextCh();
+        	return new TokenInfo(BXOR, line);
+        case '|':
+        	nextCh();
+        	if (ch == '|') {
+        		nextCh();
+        		reportScannerError("Operator || not implemented yet.");
+        		return getNextToken();
+        	} else {
+        		return new TokenInfo(BOR, line);
+        	}
         case '>':
         	nextCh();
         	if (ch == '>') {
