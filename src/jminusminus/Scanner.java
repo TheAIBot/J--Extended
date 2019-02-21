@@ -195,7 +195,7 @@ class Scanner {
             nextCh();
             if (ch == '='){
                 nextCh();
-                return new TokenInfo(NE, line);
+                return new TokenInfo(NEQ, line);
             }
             return new TokenInfo(LNOT, line);
         case '~':
@@ -233,7 +233,7 @@ class Scanner {
                 return new TokenInfo(DEC, line);
             } else if (ch == '='){
                 nextCh();
-                return new TokenInfo(DEC_ASSIGN, line);
+                return new TokenInfo(MINUS_ASSIGN, line);
             }
             else {
                 return new TokenInfo(MINUS, line);
