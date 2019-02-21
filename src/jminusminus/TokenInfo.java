@@ -17,10 +17,11 @@ enum TokenKind {
             "null"), PACKAGE("package"), PRIVATE("private"), PROTECTED(
             "protected"), PUBLIC("public"), RETURN("return"), STATIC("static"), SUPER(
             "super"), THIS("this"), TRUE("true"), VOID("void"), WHILE("while"), PLUS(
-            "+"), ASSIGN("="), DEC("--"), EQUAL("=="), GT(">"), INC("++"), LAND(
-            "&&"), LE("<="), COMPLEMENT("~"), LNOT("!"), MINUS("-"), PLUS_ASSIGN("+="),
-    STAR("*"), DIV("/"), ALSHIFT("<<"), ARSHIFT(">>"), LRSHIFT(">>>"),
-    MOD("%"), BAND("&"), BXOR("^"), BOR("|"), LPAREN(
+            "+"), ASSIGN("="), DEC("--"), DEC_ASSIGN("-="),TER("?"), EQUAL("=="),NE("!="), GT(">"), GE(">="), INC("++"), LAND(
+            "&&"), LOR("||"), LE("<="), COMPLEMENT("~"), LNOT("!"), MINUS("-"), PLUS_ASSIGN("+="),
+    STAR("*"), STAR_ASSIGN("*="), DIV("/"),DIV_ASSIGN("/="), ALSHIFT("<<"), ALSHIFT_ASSIGN("<<="),
+    ARSHIFT(">>"), ARSHIFT_ASSIGN(">>="), LRSHIFT(">>>"), LRSHIFT_ASSIGN(">>>="),
+    MOD("%"), MOD_ASSIGN("%="), BAND("&"), BAND_ASSIGN("&="), BXOR("^"), BXOR_ASSIGN("^="), BOR("|"), BOR_ASSIGN("|="), LPAREN(
             "("), RPAREN(")"), LCURLY("{"), RCURLY("}"), LBRACK("["), RBRACK(
             "]"), SEMI(";"), COMMA(","), DOT("."), IDENTIFIER("<IDENTIFIER>"), INT_LITERAL(
             "<INT_LITERAL>"), CHAR_LITERAL("<CHAR_LITERAL>"), STRING_LITERAL(
