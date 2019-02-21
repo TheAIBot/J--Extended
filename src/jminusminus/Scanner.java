@@ -132,7 +132,15 @@ class Scanner {
                     while (ch != '\n' && ch != EOFCH) {
                         nextCh();
                     }
-                } else if (ch == '='){
+                } else if (ch == '*'){
+                    boolean seen_star = false;
+                    while ( !(ch == '/' && seen_star) && ch != EOFCH) {
+                        seen_star = ch == '*';
+                        nextCh();
+                    }
+                    nextCh();
+                }
+                else if (ch == '='){
                     nextCh();
                     return new TokenInfo(DIV_ASSIGN, line);
                 }
