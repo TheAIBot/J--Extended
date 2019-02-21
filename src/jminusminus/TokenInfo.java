@@ -5,7 +5,7 @@ package jminusminus;
 /**
  * An enum of token kinds. Each entry in this enum represents the kind of a
  * token along with its image (string representation).
- * 
+ * <p>
  * When you add a new token to the scanner, you must also add an entry to this
  * enum specifying the kind and image of the new token.
  */
@@ -18,22 +18,51 @@ enum TokenKind {
             "protected"), PUBLIC("public"), RETURN("return"), STATIC("static"), SUPER(
             "super"), THIS("this"), TRUE("true"), VOID("void"), WHILE("while"), PLUS(
             "+"), ASSIGN("="), DEC("--"), EQUAL("=="), GT(">"), INC("++"), LAND(
-            "&&"), LE("<="), COMPLEMENT("~"), LNOT("!"), MINUS("-"), PLUS_ASSIGN("+="), 
-    		STAR("*"), DIV("/"), ALSHIFT("<<"), ARSHIFT(">>"), LRSHIFT(">>>"), 
-    		MOD("%"), BAND("&"), BXOR("^"), BOR("|"), LPAREN(
+            "&&"), LE("<="), COMPLEMENT("~"), LNOT("!"), MINUS("-"), PLUS_ASSIGN("+="),
+    STAR("*"), DIV("/"), ALSHIFT("<<"), ARSHIFT(">>"), LRSHIFT(">>>"),
+    MOD("%"), BAND("&"), BXOR("^"), BOR("|"), LPAREN(
             "("), RPAREN(")"), LCURLY("{"), RCURLY("}"), LBRACK("["), RBRACK(
             "]"), SEMI(";"), COMMA(","), DOT("."), IDENTIFIER("<IDENTIFIER>"), INT_LITERAL(
             "<INT_LITERAL>"), CHAR_LITERAL("<CHAR_LITERAL>"), STRING_LITERAL(
-            "<STRING_LITERAL>");
+            "<STRING_LITERAL>"),
 
-    /** The token's string representation. */
+    BREAK("break"),
+    BYTE("byte"),
+    CASE("case"),
+    CATCH("catch"),
+    CONST("const"),
+    CONTINUE("continue"),
+    DEFAULT("default"),
+    DO("do"),
+    DOUBLE("double"),
+    FINAL("final"),
+    FINALLY("finally"),
+    FLOAT("float"),
+    FOR("for"),
+    GOTO("goto"),
+    IMPLEMENTS("implements"),
+    INTERFACE("interface"),
+    LONG("long"),
+    NATIVE("native"),
+    SHORT("short"),
+    STRICTFP("strictfp"),
+    SWITCH("switch"),
+    SYNCHRONIZED("synchronized"),
+    THROW("throw"),
+    THROWS("throws"),
+    TRANSIENT("transient"),
+    TRY("try"),
+    VOLATILE("volatile");
+
+    /**
+     * The token's string representation.
+     */
     private String image;
 
     /**
      * Construct an instance TokenKind given its string representation.
-     * 
-     * @param image
-     *            string representation of the token.
+     *
+     * @param image string representation of the token.
      */
 
     private TokenKind(String image) {
@@ -42,7 +71,7 @@ enum TokenKind {
 
     /**
      * Return the image of the token.
-     * 
+     *
      * @return the token's image.
      */
 
@@ -52,7 +81,7 @@ enum TokenKind {
 
     /**
      * Return the string representation of the token.
-     * 
+     *
      * @return the token's string representation.
      */
 
@@ -71,7 +100,9 @@ enum TokenKind {
 
 class TokenInfo {
 
-    /** Token kind. */
+    /**
+     * Token kind.
+     */
     private TokenKind kind;
 
     /**
@@ -82,19 +113,18 @@ class TokenInfo {
      */
     private String image;
 
-    /** Line in which the token occurs in the source file. */
+    /**
+     * Line in which the token occurs in the source file.
+     */
     private int line;
 
     /**
      * Construct a TokenInfo from its kind, the semantic text forming the token,
      * and its line number.
-     * 
-     * @param kind
-     *            the token's kind.
-     * @param image
-     *            the semantic text comprising the token.
-     * @param line
-     *            the line in which the token occurs in the source file.
+     *
+     * @param kind  the token's kind.
+     * @param image the semantic text comprising the token.
+     * @param line  the line in which the token occurs in the source file.
      */
 
     public TokenInfo(TokenKind kind, String image, int line) {
@@ -106,11 +136,9 @@ class TokenInfo {
     /**
      * Construct a TokenInfo from its kind, and its line number. Its image is
      * simply its string representation.
-     * 
-     * @param kind
-     *            the token's identifying number.
-     * @param line
-     *            identifying the line on which the token was found.
+     *
+     * @param kind the token's identifying number.
+     * @param line identifying the line on which the token was found.
      */
 
     public TokenInfo(TokenKind kind, int line) {
@@ -119,7 +147,7 @@ class TokenInfo {
 
     /**
      * Return the token's string representation.
-     * 
+     *
      * @return the string representation.
      */
 
@@ -129,7 +157,7 @@ class TokenInfo {
 
     /**
      * Return the semantic text associated with the token.
-     * 
+     *
      * @return the semantic text.
      */
 
@@ -139,7 +167,7 @@ class TokenInfo {
 
     /**
      * Return the line number associated with the token.
-     * 
+     *
      * @return the line number.
      */
 
@@ -149,7 +177,7 @@ class TokenInfo {
 
     /**
      * Return the token's kind.
-     * 
+     *
      * @return the kind.
      */
 
@@ -159,7 +187,7 @@ class TokenInfo {
 
     /**
      * Return the token's image.
-     * 
+     *
      * @return the image.
      */
 
