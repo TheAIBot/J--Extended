@@ -189,3 +189,23 @@ class JLogicalAndOp extends JBooleanBinaryExpression {
     }
 
 }
+
+class JLogicalOrOp extends JBooleanBinaryExpression {
+	
+	public JLogicalOrOp(int line, JExpression lhs, JExpression rhs) {
+		super(line, "||", lhs, rhs);
+	}
+	
+	public JExpression analyze(Context context) {
+		lhs = (JExpression) lhs.analyze(context);
+		rhs = (JExpression) rhs.analyze(context);
+		lhs.type().mustMatchExpected(line(), Type.BOOLEAN);
+        rhs.type().mustMatchExpected(line(), Type.BOOLEAN);
+        type = Type.BOOLEAN;
+        return this;
+	}
+	
+	public void codegen(CLEmitter output, String targetLabel, boolean onTrue) {
+		// TODO Not implemented!
+    }
+}

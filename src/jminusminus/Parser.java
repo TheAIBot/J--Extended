@@ -992,7 +992,7 @@ public class Parser {
 
     private JExpression assignmentExpression() {
         int line = scanner.token().line();
-        JExpression lhs = conditionalAndExpression();
+        JExpression lhs = bitwiseExpression();
         if (have(ASSIGN)) {
             return new JAssignOp(line, lhs, assignmentExpression());
         } else if (have(PLUS_ASSIGN)) {
@@ -1002,6 +1002,25 @@ public class Parser {
         }
     }
 
+    private JExpression bitwiseExpression() {
+    	int line = scanner.token().line();
+    	boolean more = true;
+    	JExpression lhs = conditionalAndExpression();
+    	while (more) {
+    		if (have(BAND)) {
+    			lhs = new JBitwiseAND(line, lhs, conditionalAndExpression());
+    		} else if (have(BXOR)) {
+    			lhs = new JBitwiseXOR(line, lhs, conditionalAndExpression());
+    		} else if (have(BOR)) {
+    			lhs = new JBitwiseOR(line, lhs, conditionalAndExpression());
+    		} else {
+    			more = false;
+    		}
+    	}
+    	return lhs;
+    }
+    
+    
     /**
      * Parse a conditional-and expression.
      *
@@ -1016,35 +1035,35 @@ public class Parser {
     private JExpression conditionalAndExpression() {
         int line = scanner.token().line();
         boolean more = true;
-        JExpression lhs = bitwiseExpression();
+        JExpression lhs = conditionalOrExpression();
         while (more) {
             if (have(LAND)) {
-                lhs = new JLogicalAndOp(line, lhs, bitwiseExpression());
+                lhs = new JLogicalAndOp(line, lhs, conditionalOrExpression());
             } else {
                 more = false;
             }
         }
         return lhs;
     }
-
-    private JExpression bitwiseExpression() {
+    
+    /**
+     * Parses a conditional-or expression.
+     * @return
+     */
+    private JExpression conditionalOrExpression() {
     	int line = scanner.token().line();
     	boolean more = true;
     	JExpression lhs = equalityExpression();
     	while (more) {
-    		if (have(BAND)) {
-    			lhs = new JBitwiseAND(line, lhs, equalityExpression());
-    		} else if (have(BXOR)) {
-    			lhs = new JBitwiseXOR(line, lhs, equalityExpression());
-    		} else if (have(BOR)) {
-    			lhs = new JBitwiseOR(line, lhs, equalityExpression());
+    		if (have(LOR)) {
+    			lhs = new JLogicalOrOp(line, lhs, equalityExpression());
     		} else {
     			more = false;
     		}
     	}
     	return lhs;
     }
-    
+
     /**
      * Parse an equality expression.
      *

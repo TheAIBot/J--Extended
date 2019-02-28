@@ -69,14 +69,17 @@ statementExpression ::= expression // but must have side-effect, eg i++
 
 expression ::= assignmentExpression
 
-assignmentExpression ::= conditionalAndExpression  // must be a valid lhs
-                           [(ASSIGN | PLUS_ASSIGN) assignmentExpression]
+assignmentExpression ::= bitwiseExpression  // must be a valid lhs
+                           [(ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | DIV_ASSIGN | STAR_ASSIGN | MOD_ASSIGN) bitwiseExpression]
 
-conditionalAndExpression ::= bitwiseExpression // level 10
-                               {LAND bitwiseExpression}
+bitwiseExpression ::= conditionalAndExpression // level 9
+						{(BAND | BXOR | BOR) conditionalAndExpression}
 
-bitwiseExpression ::= equalityExpression // level 7
-						{(BAND | BXOR | BOR) equalityExpression}
+conditionalAndExpression ::= conditionalOrExpression // level 8
+                               {LAND conditionalOrExpression}
+
+conditionalOrExpression ::= equalityExpression // level 7
+								{LOR equalityExpression}
 
 equalityExpression ::= relationalExpression  // level 6
                          {EQUAL relationalExpression}
