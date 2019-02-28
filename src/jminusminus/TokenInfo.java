@@ -24,7 +24,7 @@ enum TokenKind {
     MOD("%"), MOD_ASSIGN("%="), BAND("&"), BAND_ASSIGN("&="), BXOR("^"), BXOR_ASSIGN("^="), BOR("|"), BOR_ASSIGN("|="), LPAREN(
             "("), RPAREN(")"), LCURLY("{"), RCURLY("}"), LBRACK("["), RBRACK(
             "]"), SEMI(";"),COLON(":"), COMMA(","), DOT("."), IDENTIFIER("<IDENTIFIER>"), INT_LITERAL(
-            "<INT_LITERAL>"), CHAR_LITERAL("<CHAR_LITERAL>"), STRING_LITERAL(
+            "<INT_LITERAL>"), DOUBLE_LITERAL("<DOUBLE_LITERAL>"), CHAR_LITERAL("<CHAR_LITERAL>"), STRING_LITERAL(
             "<STRING_LITERAL>"),
 
     BREAK("break"),

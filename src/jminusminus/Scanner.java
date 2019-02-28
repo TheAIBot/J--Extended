@@ -358,13 +358,21 @@ class Scanner {
             return new TokenInfo(STRING_LITERAL, buffer.toString(), line);
         case '.':
             nextCh();
+
+            if (isDigit(ch)) {
+                buffer = new StringBuffer();
+                buffer.append('.');
+
+                readDigits(buffer);
+                readExponentIfPresent(buffer);
+                readDoubleSuffixIfPresent(buffer);
+
+                return new TokenInfo(DOUBLE_LITERAL, buffer.toString(), line);
+            }
             return new TokenInfo(DOT, line);
         case EOFCH:
             return new TokenInfo(EOF, line);
         case '0':
-            // Handle only simple decimal integers for now.
-            nextCh();
-            return new TokenInfo(INT_LITERAL, "0", line);
         case '1':
         case '2':
         case '3':
@@ -375,11 +383,10 @@ class Scanner {
         case '8':
         case '9':
             buffer = new StringBuffer();
-            while (isDigit(ch)) {
-                buffer.append(ch);
-                nextCh();
-            }
-            return new TokenInfo(INT_LITERAL, buffer.toString(), line);
+            readDigits(buffer);
+            return isDouble(buffer) ? new TokenInfo(DOUBLE_LITERAL, buffer.toString(), line) :
+                    new TokenInfo(INT_LITERAL, buffer.toString(), line);
+
         default:
             if (isIdentifierStart(ch)) {
                 buffer = new StringBuffer();
@@ -481,6 +488,80 @@ class Scanner {
 
     private boolean isDigit(char c) {
         return (c >= '0' && c <= '9');
+    }
+
+    private boolean isDouble(StringBuffer buffer){
+        if (ch == '.'){
+            buffer.append(ch);
+            nextCh();
+
+            readDigits(buffer);
+            readExponentIfPresent(buffer);
+            readDoubleSuffixIfPresent(buffer);
+
+            return true;
+        }
+
+        if (isExponent(ch)) {
+            buffer.append(ch);
+            nextCh();
+
+            // check for signed integer (optional)
+            if (ch == '+' || ch == '-'){
+                buffer.append(ch);
+                nextCh();
+            }
+            readDigits(buffer);
+            readDoubleSuffixIfPresent(buffer);
+            return true;
+        }
+
+        if (isDoubleSuffix(ch)){
+            buffer.append(ch);
+            nextCh();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isExponent(char c) {
+        return c == 'e' || c == 'E';
+    }
+
+    private boolean isDoubleSuffix(char c){
+        return c == 'd' || c == 'D';
+    }
+
+    private void readDigits(StringBuffer buffer){
+        while (isDigit(ch)) {
+            buffer.append(ch);
+            nextCh();
+        }
+    }
+
+    private boolean readExponentIfPresent(StringBuffer buffer){
+        if (isExponent(ch)) {
+            buffer.append(ch);
+            nextCh();
+
+            // check for signed integer (optional)
+            if (ch == '+' || ch == '-'){
+                buffer.append(ch);
+                nextCh();
+            }
+            readDigits(buffer);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean readDoubleSuffixIfPresent(StringBuffer buffer) {
+        if (isDoubleSuffix(ch)) {
+            buffer.append(ch);
+            nextCh();
+            return true;
+        }
+        return false;
     }
 
     /**
