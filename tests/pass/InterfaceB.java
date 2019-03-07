@@ -1,5 +1,7 @@
 package pass;
 
+import InterfaceA;
+
 /**
  * @author Kasper
  */
