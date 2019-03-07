@@ -2,7 +2,12 @@
 
 package jminusminus;
 
+import com.sun.codemodel.internal.JMethod;
+import com.sun.tools.javac.util.List;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static jminusminus.TokenKind.*;
 
@@ -393,7 +398,7 @@ public class Parser {
      * Parse a type declaration.
      *
      * <pre>
-     *   typeDeclaration ::= modifiers classDeclaration
+     *   typeDeclaration ::= modifiers (classDeclaration | interfaceDeclaration)
      * </pre>
      *
      * @return an AST for a typeDeclaration.
@@ -401,7 +406,14 @@ public class Parser {
 
     private JAST typeDeclaration() {
         ArrayList<String> mods = modifiers();
-        return classDeclaration(mods);
+
+        if (have(CLASS)) {
+            return classDeclaration(mods);
+        } else if (have(INTERFACE)){
+            return interfaceDeclaration(mods);
+        } else {
+            throw new NotImplementedException(); // only classes and interfaces are allowed
+        }
     }
 
     /**
@@ -478,6 +490,7 @@ public class Parser {
      * <pre>
      *   classDeclaration ::= CLASS IDENTIFIER
      *                        [EXTENDS qualifiedIdentifier]
+     *                        [IMPLEMENTS qualifiedIdentifier {COMMA qualifiedIdentifier}]
      *                        classBody
      * </pre>
      * <p>
@@ -490,7 +503,6 @@ public class Parser {
 
     private JClassDeclaration classDeclaration(ArrayList<String> mods) {
         int line = scanner.token().line();
-        mustBe(CLASS);
         mustBe(IDENTIFIER);
         String name = scanner.previousToken().image();
         Type superClass;
@@ -499,7 +511,45 @@ public class Parser {
         } else {
             superClass = Type.OBJECT;
         }
-        return new JClassDeclaration(line, mods, name, superClass, classBody());
+        ArrayList<String> implementsList = new ArrayList<String>();
+        if (have(IMPLEMENTS)) {
+            boolean moreInterfaces = true;
+            while (moreInterfaces){
+                mustBe(IDENTIFIER);
+                implementsList.add(scanner.previousToken().image());
+                moreInterfaces = have(COMMA);
+            }
+        }
+        return new JClassDeclaration(line, mods, name, superClass, implementsList, classBody());
+    }
+
+    /**
+     * Parse a interface declaration.
+     *
+     * <pre>
+     *   interfaceDeclaration ::= INTERFACE IDENTIFIER
+     *                             [extends qualifiedIdentifier]
+     *                             interfaceBody
+     * </pre>
+     * <p>
+     * An interface which doesn't explicitly extend another (super) class implicitly
+     * extends the superclass java.lang.Object.
+     *
+     * @param mods the interface modifiers.
+     * @return an AST for a interfaceDeclaration.
+     */
+
+    private JInterfaceDeclaration interfaceDeclaration(ArrayList<String> mods) {
+        int line = scanner.token().line();
+        mustBe(IDENTIFIER);
+        String name = scanner.previousToken().image();
+        Type superClass;
+        if (have(EXTENDS)) {
+            superClass = qualifiedIdentifier();
+        } else {
+            superClass = Type.OBJECT;
+        }
+        return new JInterfaceDeclaration(line, mods, name, superClass, interfaceBody());
     }
 
     /**
@@ -519,6 +569,27 @@ public class Parser {
         mustBe(LCURLY);
         while (!see(RCURLY) && !see(EOF)) {
             members.add(memberDecl(modifiers()));
+        }
+        mustBe(RCURLY);
+        return members;
+    }
+
+
+    /**
+     * Parse an interface body.
+     *
+     * <pre>
+     *   interfaceBody ::= LCURLY {modifiers memberSig} RCURLY
+     * </pre>
+     *
+     * @return list of members in the interface body.
+     */
+
+    private ArrayList<JMember> interfaceBody() {
+        ArrayList<JMember> members = new ArrayList<JMember>();
+        mustBe(LCURLY);
+        while (!see(RCURLY) && !see(EOF)) {
+            members.add(memberSig(modifiers()));
         }
         mustBe(RCURLY);
         return members;
@@ -583,6 +654,71 @@ public class Parser {
         }
         return memberDecl;
     }
+
+    /**
+     * Parse a member signature.
+     *
+     * <pre>
+     *   memberSig ::= IDENTIFIER formalParameters SEMI // constructor
+     *               | (VOID | type) IDENTIFIER formalParameters SEMI // method
+     *               | type variableDeclarators SEMI // field
+     * </pre>
+     *
+     * @return an AST for a memberSig.
+     */
+
+    private JMember memberSig(ArrayList<String> mods) {
+        int line = scanner.token().line();
+        JMember memberSig = null;
+
+        if (seeIdentLParen()) {
+            // A constructor
+            mustBe(IDENTIFIER);
+            String name = scanner.previousToken().image();
+            ArrayList<JFormalParameter> params = formalParameters();
+            memberSig = new JConstructorSignature(line, mods, name, params);
+        } else {
+            Type type = null;
+            if (have(VOID)){
+                // void method
+                type = Type.VOID;
+                memberSig = newMethodSignature(line, mods, type);
+            } else {
+                type = type();
+                if (seeIdentLParen()) {
+                    // non-void method
+                    memberSig = newMethodSignature(line, mods, type);
+                } else {
+                    // Field
+                    memberSig = new JFieldDeclaration(line,
+                            new ArrayList<String>(List.of("public", "static", "final")),
+                            variableDeclarators(type));
+
+                }
+            }
+        }
+        mustBe(SEMI);
+        return memberSig;
+    }
+
+    private JMethodSignature newMethodSignature(int line, ArrayList<String> mods, Type type){
+        mustBe(IDENTIFIER);
+        String name = scanner.previousToken().image();
+        ArrayList<JFormalParameter> params = formalParameters();
+        if (!mods.contains("public")) mods.add("public");
+        if (!mods.contains("abstract")) mods.add("abstract");
+        checkMethodSignatureModifiers(mods);
+        return new JMethodSignature(line, mods, name, type, params);
+    }
+
+    private boolean checkMethodSignatureModifiers(ArrayList<String> mods) {
+        if (mods.contains("static") || mods.contains("final")) {
+            reportParserError("method signatures are not allowed to have modifiers static or final");
+            return false;
+        }
+        return true;
+    }
+
 
     /**
      * Parse a block.

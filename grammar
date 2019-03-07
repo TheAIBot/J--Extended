@@ -7,15 +7,22 @@ compilationUnit ::= [PACKAGE qualifiedIdentifier SEMI]
 
 qualifiedIdentifier ::= IDENTIFIER {DOT IDENTIFIER}
 
-typeDeclaration ::= modifiers classDeclaration
+typeDeclaration ::= modifiers (classDeclaration | interfaceDeclaration)
 
 modifiers ::= {PUBLIC | PROTECTED | PRIVATE | STATIC | ABSTRACT}
 
 classDeclaration ::= CLASS IDENTIFIER 
-                       [EXTENDS qualifiedIdentifier] 
+                       [EXTENDS qualifiedIdentifier]
+                       [IMPLEMENTS qualifiedIdentifier {COMMA qualifiedIdentifier}]
                        classBody
 
+interfaceDeclaration ::= INTERFACE IDENTIFIER
+                            [extends qualifiedIdentifier]
+                            interfaceBody
+
 classBody ::= LCURLY {modifiers memberDecl} RCURLY
+
+interfaceBody ::= LCURLY {modifiers memberSig} RCURLY
 
 memberDecl ::= IDENTIFIER            // constructor
                  formalParameters block
@@ -23,6 +30,10 @@ memberDecl ::= IDENTIFIER            // constructor
                  formalParameters
                  (block | SEMI)
              | type variableDeclarators SEMI // field
+
+memberSig ::= IDENTIFIER formalParameters SEMI // constructor
+              | (VOID | type) IDENTIFIER formalParameters SEMI // method
+              | type variableDeclarators SEMI // field
 
 block ::= LCURLY {blockStatement} RCURLY 
 
