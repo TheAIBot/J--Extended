@@ -2,12 +2,10 @@
 
 package jminusminus;
 
-import com.sun.codemodel.internal.JMethod;
-import com.sun.tools.javac.util.List;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
 
 import static jminusminus.TokenKind.*;
 
@@ -412,7 +410,7 @@ public class Parser {
         } else if (have(INTERFACE)){
             return interfaceDeclaration(mods);
         } else {
-            throw new NotImplementedException(); // only classes and interfaces are allowed
+        	throw new UnsupportedOperationException(); // only classes and interfaces are allowed
         }
     }
 
@@ -802,6 +800,10 @@ public class Parser {
                 mustBe(SEMI);
                 return new JReturnStatement(line, expr);
             }
+        } else if (have(THROW)) {
+        	JExpression expr = expression();
+        	mustBe(SEMI);
+        	return new JThrowStatement(line, expr);
         } else if (have(SEMI)) {
             return new JEmptyStatement(line);
         } else { // Must be a statementExpression

@@ -34,8 +34,8 @@ memberDecl ::= IDENTIFIER            // constructor
              | type variableDeclarators SEMI // field
 
 memberSig ::= IDENTIFIER formalParameters SEMI // constructor
-              | (VOID |Â type) IDENTIFIER formalParameters SEMI // method
-              |Â type variableDeclarators SEMI // field
+              | (VOID | type) IDENTIFIER formalParameters SEMI // method
+              |  type variableDeclarators SEMI // field
 
 block ::= LCURLY {blockStatement} RCURLY 
 
@@ -44,8 +44,12 @@ blockStatement ::= localVariableDeclarationStatement
 
 statement ::= block
             | IF parExpression statement [ELSE statement]
-            | WHILE parExpression statement 
+            | WHILE parExpression statement
+            | TRY block 
+            	{CATCH (formalParameter) block} 
+            	[FINALLY block]
             | RETURN [expression] SEMI
+            | THROW expression SEMI
             | SEMI 
             | statementExpression SEMI
 

@@ -230,7 +230,7 @@ class JPostIncrementOp extends JUnaryExpression {
 	@Override
 	public void codegen(CLEmitter output) {
 		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException();
 	}
 	
 }
@@ -423,7 +423,7 @@ class JPreDecrementOp extends JUnaryExpression {
 	@Override
 	public void codegen(CLEmitter output) {
 		// TODO Auto-generated method stub
-		
+		throw new UnsupportedOperationException();
 	}
 	
 }

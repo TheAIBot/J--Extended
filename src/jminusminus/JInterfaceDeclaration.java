@@ -75,7 +75,7 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     @Override
     public void codegen(CLEmitter output) {
-        throw new NotImplementedException();
+    	throw new UnsupportedOperationException();
     }
 
     @Override
@@ -109,13 +109,13 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     @Override
     public void declareThisType(Context context) {
-        throw new NotImplementedException();
+    	throw new UnsupportedOperationException();
 
     }
 
     @Override
     public void preAnalyze(Context context) {
-        throw new NotImplementedException();
+    	throw new UnsupportedOperationException();
 
     }
 
