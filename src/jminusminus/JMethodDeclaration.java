@@ -9,8 +9,7 @@ import static jminusminus.CLConstants.*;
  * The AST node for a method declaration.
  */
 
-class JMethodDeclaration
-    extends JAST implements JMember {
+class JMethodDeclaration extends JAST implements JMember {
 
     /** Method modifiers. */
     protected ArrayList<String> mods;
