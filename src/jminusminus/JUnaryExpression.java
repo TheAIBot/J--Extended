@@ -206,6 +206,36 @@ class JComplementOp extends JUnaryExpression {
 	}
 }
 
+
+class JPostIncrementOp extends JUnaryExpression {
+	
+	public JPostIncrementOp(int line, JExpression arg) {
+		super(line, "post++", arg);
+	}
+
+	@Override
+	public JExpression analyze(Context context) {
+		if (!(arg instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line,
+                    "Operand to expr++ must have an LValue.");
+            type = Type.ANY;
+        } else {
+            arg = (JExpression) arg.analyze(context);
+            arg.type().mustMatchExpected(line(), Type.INT);
+            type = Type.INT;
+        }
+        return this;
+	}
+
+	@Override
+	public void codegen(CLEmitter output) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+}
+
+
 /**
  * The AST node for an expr--.
  */
@@ -368,4 +398,32 @@ class JPreIncrementOp extends JUnaryExpression {
         }
     }
 
+}
+
+class JPreDecrementOp extends JUnaryExpression {
+	
+	public JPreDecrementOp(int line, JExpression arg) {
+		super(line, "--expr", arg);
+	}
+
+	@Override
+	public JExpression analyze(Context context) {
+		if (!(arg instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line,
+                    "Operand to --expr must have an LValue.");
+            type = Type.ANY;
+        } else {
+            arg = (JExpression) arg.analyze(context);
+            arg.type().mustMatchExpected(line(), Type.INT);
+            type = Type.INT;
+        }
+        return this;
+	}
+
+	@Override
+	public void codegen(CLEmitter output) {
+		// TODO Auto-generated method stub
+		
+	}
+	
 }

@@ -623,6 +623,12 @@ public class Parser {
             JBlock body = block();
             memberDecl = new JConstructorDeclaration(line, mods, name, params,
                     body);
+        } else if (see(LCURLY)) {
+            JBlock body = block();
+            if(mods.contains("static"))
+                memberDecl = new JStaticInitializationBlock(line, body);
+            else
+                memberDecl = new JInitializationBlock(line, body);
         } else {
             Type type = null;
             if (have(VOID)) {
@@ -1349,6 +1355,8 @@ public class Parser {
         int line = scanner.token().line();
         if (have(INC)) {
             return new JPreIncrementOp(line, unaryExpression());
+        } else if (have(DEC)) {
+        	return new JPreDecrementOp(line, unaryExpression());
         } else if (have(MINUS)) {
             return new JNegateOp(line, unaryExpression());
         } else if (have(COMPLEMENT)) {
@@ -1408,6 +1416,9 @@ public class Parser {
         JExpression primaryExpr = primary();
         while (see(DOT) || see(LBRACK)) {
             primaryExpr = selector(primaryExpr);
+        }
+        while (have(INC)) {
+        	primaryExpr = new JPostIncrementOp(line, primaryExpr);
         }
         while (have(DEC)) {
             primaryExpr = new JPostDecrementOp(line, primaryExpr);

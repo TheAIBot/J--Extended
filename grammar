@@ -26,6 +26,8 @@ interfaceBody ::= LCURLY {modifiers memberSig} RCURLY
 
 memberDecl ::= IDENTIFIER            // constructor
                  formalParameters block
+             | STATIC block // static initializaion block
+             | block // instance initialization block
              | (VOID | type) IDENTIFIER  // method
                  formalParameters
                  (block | SEMI)
@@ -109,6 +111,7 @@ multiplicativeExpression ::= unaryExpression       // level 2
                                {(STAR | DIV | MOD) unaryExpression}
 
 unaryExpression ::= INC unaryExpression  // level 1
+				  | DEC unaryExpression
                   | MINUS unaryExpression
                   | COMPLEMENT unaryExpression
                   | PLUS unaryExpression
@@ -121,7 +124,7 @@ simpleUnaryExpression ::= LNOT unaryExpression
                           RPAREN simpleUnaryExpression
                         | postfixExpression 
 
-postfixExpression ::= primary {selector} {DEC}
+postfixExpression ::= primary {selector} {(INC | DEC)}
 
 selector ::= DOT qualifiedIdentifier [arguments]
            | LBRACK expression RBRACK
