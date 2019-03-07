@@ -19,6 +19,8 @@ classBody ::= LCURLY {modifiers memberDecl} RCURLY
 
 memberDecl ::= IDENTIFIER            // constructor
                  formalParameters block
+             | STATIC block // static initializaion block
+             | block // instance initialization block
              | (VOID | type) IDENTIFIER  // method
                  formalParameters
                  (block | SEMI)

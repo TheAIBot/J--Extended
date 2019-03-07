@@ -552,6 +552,12 @@ public class Parser {
             JBlock body = block();
             memberDecl = new JConstructorDeclaration(line, mods, name, params,
                     body);
+        } else if (see(LCURLY)) {
+            JBlock body = block();
+            if(mods.contains("static"))
+                memberDecl = new JStaticInitializationBlock(line, body);
+            else
+                memberDecl = new JInitializationBlock(line, body);
         } else {
             Type type = null;
             if (have(VOID)) {
