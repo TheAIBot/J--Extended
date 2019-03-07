@@ -227,7 +227,7 @@ class JMinusAssignOp extends JAssignment {
             type = Type.INT;
         } else {
             JAST.compilationUnit.reportSemanticError(line(),
-                    "Invalid lhs type for +=: " + lhs.type());
+                    "Invalid lhs type for -=: " + lhs.type());
         }
         return this;
 	}
@@ -246,4 +246,141 @@ class JMinusAssignOp extends JAssignment {
         }
         ((JLhs) lhs).codegenStore(output);
     }
+}
+
+class JDivAssignOp extends JAssignment {
+	
+	public JDivAssignOp(int line, JExpression lhs, JExpression rhs) {
+		super(line, "/=", lhs, rhs);
+	}
+	
+	/**
+	 * Analyze the '/=' assignment operator and its lhs and rhs operands.
+	 */
+	public JExpression analyze(Context context) {
+		if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+            return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+		rhs = (JExpression) rhs.analyze(context);
+        if (lhs.type().equals(Type.INT)) {
+            rhs.type().mustMatchExpected(line(), Type.INT);
+            type = Type.INT;
+        } else {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid lhs type for /=: " + lhs.type());
+        }
+        return this;
+	}
+	
+	/**
+	 * Code generation for -=.
+	 */
+	public void codegen(CLEmitter output) {
+        ((JLhs) lhs).codegenLoadLhsLvalue(output);
+        ((JLhs) lhs).codegenLoadLhsRvalue(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(IDIV);
+        if (!isStatementExpression) {
+            // Generate code to leave the r-value atop stack
+            ((JLhs) lhs).codegenDuplicateRvalue(output);
+        }
+        ((JLhs) lhs).codegenStore(output);
+    }
+	
+}
+
+
+class JStarAssignOp extends JAssignment {
+	
+	public JStarAssignOp(int line, JExpression lhs, JExpression rhs) {
+		super(line, "*=", lhs, rhs);
+	}
+	
+	/**
+	 * Analyze the '*=' assignment operator and its lhs and rhs operands.
+	 */
+	public JExpression analyze(Context context) {
+		if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+            return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+		rhs = (JExpression) rhs.analyze(context);
+        if (lhs.type().equals(Type.INT)) {
+            rhs.type().mustMatchExpected(line(), Type.INT);
+            type = Type.INT;
+        } else {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid lhs type for *=: " + lhs.type());
+        }
+        return this;
+	}
+	
+	/**
+	 * Code generation for *=.
+	 */
+	public void codegen(CLEmitter output) {
+        ((JLhs) lhs).codegenLoadLhsLvalue(output);
+        ((JLhs) lhs).codegenLoadLhsRvalue(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(IMUL);
+        if (!isStatementExpression) {
+            // Generate code to leave the r-value atop stack
+            ((JLhs) lhs).codegenDuplicateRvalue(output);
+        }
+        ((JLhs) lhs).codegenStore(output);
+    }
+	
+}
+
+
+class JModAssignOp extends JAssignment {
+	
+	public JModAssignOp(int line, JExpression lhs, JExpression rhs) {
+		super(line, "%=", lhs, rhs);
+	}
+	
+	/**
+	 * Analyze the '%=' assignment operator and its lhs and rhs operands.
+	 */
+	public JExpression analyze(Context context) {
+		if (!(lhs instanceof JLhs)) {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Illegal lhs for assignment");
+            return this;
+        } else {
+            lhs = (JExpression) ((JLhs) lhs).analyzeLhs(context);
+        }
+		rhs = (JExpression) rhs.analyze(context);
+        if (lhs.type().equals(Type.INT)) {
+            rhs.type().mustMatchExpected(line(), Type.INT);
+            type = Type.INT;
+        } else {
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Invalid lhs type for %=: " + lhs.type());
+        }
+        return this;
+	}
+	
+	/**
+	 * Code generation for *=.
+	 */
+	public void codegen(CLEmitter output) {
+        ((JLhs) lhs).codegenLoadLhsLvalue(output);
+        ((JLhs) lhs).codegenLoadLhsRvalue(output);
+        rhs.codegen(output);
+        output.addNoArgInstruction(IREM);
+        if (!isStatementExpression) {
+            // Generate code to leave the r-value atop stack
+            ((JLhs) lhs).codegenDuplicateRvalue(output);
+        }
+        ((JLhs) lhs).codegenStore(output);
+    }
+	
 }
