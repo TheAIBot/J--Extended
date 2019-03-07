@@ -74,14 +74,17 @@ expression ::= assignmentExpression
 assignmentExpression ::= bitwiseExpression  // must be a valid lhs
                            [(ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | DIV_ASSIGN | STAR_ASSIGN | MOD_ASSIGN) bitwiseExpression]
 
-bitwiseExpression ::= conditionalAndExpression // level 9
-						{(BAND | BXOR | BOR) conditionalAndExpression}
-
 conditionalAndExpression ::= conditionalOrExpression // level 8
                                {LAND conditionalOrExpression}
 
 conditionalOrExpression ::= equalityExpression // level 7
 								{LOR equalityExpression}
+
+inclusiveOrExpression ::= exclusiveOrExpression {BOR exclusiveOrExpression}
+
+exclusiveOrExpression ::= andExpression {BXOR andExpression}
+
+andExpression ::= equalityExpression {BAND equalityExpression}
 
 equalityExpression ::= relationalExpression  // level 6
                          {EQUAL relationalExpression}
@@ -102,11 +105,11 @@ multiplicativeExpression ::= unaryExpression       // level 2
 unaryExpression ::= INC unaryExpression  // level 1
 				  | DEC unaryExpression
                   | MINUS unaryExpression
-                  | COMPLEMENT unaryExpression
                   | PLUS unaryExpression
                   | simpleUnaryExpression
 
-simpleUnaryExpression ::= LNOT unaryExpression
+simpleUnaryExpression ::= COMPLEMENT unaryExpression
+						| LNOT unaryExpression
                         | LPAREN basicType RPAREN unaryExpression //casted
                         | LPAREN // casted               
                             referenceType

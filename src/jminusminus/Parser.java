@@ -998,7 +998,7 @@ public class Parser {
 
     private JExpression assignmentExpression() {
         int line = scanner.token().line();
-        JExpression lhs = bitwiseExpression();
+        JExpression lhs = conditionalAndExpression();
         if (have(ASSIGN)) {
             return new JAssignOp(line, lhs, assignmentExpression());
         } else if (have(PLUS_ASSIGN)) {
@@ -1015,25 +1015,6 @@ public class Parser {
             return lhs;
         }
     }
-
-    private JExpression bitwiseExpression() {
-    	int line = scanner.token().line();
-    	boolean more = true;
-    	JExpression lhs = conditionalAndExpression();
-    	while (more) {
-    		if (have(BAND)) {
-    			lhs = new JBitwiseAND(line, lhs, conditionalAndExpression());
-    		} else if (have(BXOR)) {
-    			lhs = new JBitwiseXOR(line, lhs, conditionalAndExpression());
-    		} else if (have(BOR)) {
-    			lhs = new JBitwiseOR(line, lhs, conditionalAndExpression());
-    		} else {
-    			more = false;
-    		}
-    	}
-    	return lhs;
-    }
-    
     
     /**
      * Parse a conditional-and expression.
@@ -1067,16 +1048,60 @@ public class Parser {
     private JExpression conditionalOrExpression() {
     	int line = scanner.token().line();
     	boolean more = true;
-    	JExpression lhs = equalityExpression();
+    	JExpression lhs = inclusiveOrExpression();
     	while (more) {
     		if (have(LOR)) {
-    			lhs = new JLogicalOrOp(line, lhs, equalityExpression());
+    			lhs = new JLogicalOrOp(line, lhs, inclusiveOrExpression());
     		} else {
     			more = false;
     		}
     	}
     	return lhs;
     }
+
+    
+    private JExpression inclusiveOrExpression() {
+    	int line = scanner.token().line();
+    	boolean more = true;
+    	JExpression lhs = exclusiveOrExpression();
+    	while (more) {
+    		if (have(BOR)) {
+    			lhs = new JBitwiseOR(line, lhs, exclusiveOrExpression());
+    		} else {
+    			more = false;
+    		}
+    	}
+    	return lhs;
+    }
+    
+    private JExpression exclusiveOrExpression() {
+    	int line = scanner.token().line();
+    	boolean more = true;
+    	JExpression lhs = andExpression();
+    	while (more) {
+    		if (have(BXOR)) {
+    			lhs = new JBitwiseXOR(line, lhs, andExpression());
+    		} else {
+    			more = false;
+    		}
+    	}
+    	return lhs;
+    }
+   
+    private JExpression andExpression() {
+    	int line = scanner.token().line();
+    	boolean more = true;
+    	JExpression lhs = equalityExpression();
+    	while (more) {
+    		if (have(BAND)) {
+    			lhs = new JBitwiseAND(line, lhs, equalityExpression());
+    		} else {
+    			more = false;
+    		}
+    	}
+    	return lhs;
+    }
+    
 
     /**
      * Parse an equality expression.
@@ -1223,8 +1248,6 @@ public class Parser {
         	return new JPreDecrementOp(line, unaryExpression());
         } else if (have(MINUS)) {
             return new JNegateOp(line, unaryExpression());
-        } else if (have(COMPLEMENT)) {
-        	return new JComplementOp(line, unaryExpression());
         } else if (have(PLUS)) {
             return new JUnaryPlus(line, unaryExpression());
         } else {
@@ -1250,7 +1273,9 @@ public class Parser {
 
     private JExpression simpleUnaryExpression() {
         int line = scanner.token().line();
-        if (have(LNOT)) {
+        if (have(COMPLEMENT)) {
+        	return new JComplementOp(line, unaryExpression());
+        } else if (have(LNOT)) {
             return new JLogicalNotOp(line, unaryExpression());
         } else if (seeCast()) {
             mustBe(LPAREN);
