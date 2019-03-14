@@ -63,13 +63,9 @@ parExpression ::= LPAREN expression RPAREN
 
 localVariableDeclarationStatement ::= type variableDeclarators SEMI
 
-bitwiseExpression  // must be a valid lhs
-                           [(ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | DIV_ASSIGN | STAR_ASSIGN | MOD_ASSIGN) bitwiseExpression]
-
-
 variableDeclarators ::= variableDeclarator {COMMA variableDeclarator}
 
-variableDeclarator ::= IDENTIFIER [ASSIGN variableInitializer]
+variableDeclarator ::= IDENTIFIER [(ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | DIV_ASSIGN | STAR_ASSIGN | MOD_ASSIGN) variableInitializer]
                     
 variableInitializer ::= arrayInitializer | expression
 
