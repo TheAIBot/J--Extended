@@ -97,7 +97,7 @@ conditionalOrExpression ::= conditionalAndExpression
 						  | conditionalOrExpression LOR conditionalAndExpression
 				
 //level 4				
-conditionalAndExpression ::= inclusiveOrExpression // level 8
+conditionalAndExpression ::= inclusiveOrExpression
                            | conditionalAndExpression LAND inclusiveOrExpression
 	
 //level 5	
