@@ -178,7 +178,7 @@ TOKEN:
 | < CATCH: "catch" >
 | < CONST: "const" >
 | < CONTINUE: "continue" >
-| < DEFAULT: "default" >
+| < DEFAULT_KEY: "default" >
 | < DO: "do" >
 | < DOUBLE: "double" >
 | < FINAL: "final" >
@@ -211,7 +211,6 @@ TOKEN:
 | < GT: ">" >
 | < INC: "++" >
 | < LAND: "&&" >
-| < LE: "<=" >
 | < LNOT: "!" >
 | < BAND: "&" >
 | < BOR: "|" >
@@ -233,12 +232,14 @@ TOKEN:
 | < MOD_ASSIGN: "%=" >
 | < ARSHIFT_ASSIGN: ">>=" >
 | < LRSHIFT_ASSIGN: ">>>=" >
-| < GE: ">=" >
 | < ALSHIFT_ASSIGN: "<<=" >
 | < BXOR_ASSIGN: "^=" >
 | < BOR_ASSIGN: "|=" >
 | < LOR: "||" >
 | < BAND_ASSIGN: "&=" >
+| < LT: "<" >
+| < LEQ: "<=" >
+| < GEQ: ">=" >
 }
 
 // Separators (these could be combined with the reserved words)
@@ -269,11 +270,11 @@ TOKEN:
 TOKEN:
 {
   < INT_LITERAL: ("0" | <NON_ZERO_DIGIT> (<DIGIT>)*) >
-//| < DOUBLE_LITERAL: ( ( <DIGIT> (<DIGIT>)*  (
-//                                            ( "." (<DIGIT>)* [("e" | "E") ["+" | "-"] (<DIGIT>)*] ["d" | "D"] )
-//                                            | ( ("e" | "E") ["+" | "-"] (<DIGIT>)* ["d" | "D"] )
-//                                            | ("d" | "D") ) )
-//                    | ( "." <DIGIT> (<DIGIT>)* [ ("e" | "E") ["+" | "-"] (<DIGIT>)* ] [ ("d" | "D") ] )) >
+//| < DOUBLE_LITERAL: ( ( <DIGIT> (<DIGIT>)*  (
+//                                            ( "." (<DIGIT>)* [("e" | "E") ["+" | "-"] (<DIGIT>)*] ["d" |�"D"] )
+//                                            |�( ("e" | "E") ["+" | "-"] (<DIGIT>)* ["d" |�"D"] )
+//                                            |�("d" |�"D") ) )
+//                    |�( "." <DIGIT> (<DIGIT>)* [ ("e" | "E") ["+" | "-"] (<DIGIT>)* ] [ ("d" |�"D") ] )) >
 | < CHAR_LITERAL: "'" (<ESC> | ~["'","\\","\n","\r"]) "'" >
 | < STRING_LITERAL: "\"" (<ESC> | ~["\"","\\","\n","\r"])* "\"" >   
 | < #ESC: "\\" ["n","t","b","r","f","\\","'","\""] >
