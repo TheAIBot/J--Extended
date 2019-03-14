@@ -1186,15 +1186,34 @@ public class Parser {
     private JExpression conditionalOrExpression() {
     	int line = scanner.token().line();
     	boolean more = true;
-    	JExpression lhs = inclusiveOrExpression();
+    	JExpression lhs = conditionalExpression();
     	while (more) {
     		if (have(LOR)) {
-    			lhs = new JLogicalOrOp(line, lhs, inclusiveOrExpression());
+    			lhs = new JLogicalOrOp(line, lhs, conditionalExpression());
     		} else {
     			more = false;
     		}
     	}
     	return lhs;
+    }
+    
+    /**
+     * Parses a conditional expression.
+     * @return
+     */
+    private JExpression conditionalExpression() {
+    	int line = scanner.token().line();
+    	
+    	JExpression conditional = inclusiveOrExpression();
+    	if (have(TER)) {
+    		JExpression ifTrue = inclusiveOrExpression();
+    		mustBe(COLON);
+			JExpression ifFalse = inclusiveOrExpression();
+			
+			return new JTernaryOp(line, conditional, ifTrue, ifFalse);
+		}
+    	
+    	return conditional;
     }
 
     

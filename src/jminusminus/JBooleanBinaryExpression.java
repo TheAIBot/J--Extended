@@ -55,6 +55,34 @@ abstract class JBooleanBinaryExpression extends JBinaryExpression {
 
 }
 
+final class JTernaryOp extends JExpression {
+	private final JExpression conditional;
+	private final JExpression ifTrue;
+	private final JExpression ifFalse;
+
+    public JTernaryOp(int line, JExpression conditional, JExpression ifTrue, JExpression ifFalse) {
+        super(line);
+        this.conditional = conditional;
+        this.ifTrue = ifTrue;
+        this.ifFalse = ifFalse;
+    }
+
+    public void codegen(CLEmitter output) {
+    	throw new Error("Code generator for the ternary operator isn't implemented yet.");
+    }
+
+	@Override
+	public JExpression analyze(Context context) {
+		throw new Error("Analyze for the ternary operator isn't implemented yet.");
+	}
+
+	@Override
+	public void writeToStdOut(PrettyPrinter p) {
+		throw new Error("writing to console for the ternary operator isn't implemented yet.");
+	}
+
+}
+
 /**
  * The AST node for an equality (==) expression. Implements short-circuiting
  * branching.

@@ -92,8 +92,11 @@ assignmentExpression ::= bitwiseExpression  // must be a valid lhs
 conditionalAndExpression ::= conditionalOrExpression // level 8
                                {LAND conditionalOrExpression}
 
-conditionalOrExpression ::= equalityExpression // level 7
-								{LOR equalityExpression}
+conditionalOrExpression ::= inclusiveOrExpression // level 7
+								{LOR inclusiveOrExpression}
+								
+conditionalExpression ::= inclusiveOrExpression
+						  | inclusiveOrExpression TER inclusiveOrExpression COLON inclusiveOrExpression
 
 inclusiveOrExpression ::= exclusiveOrExpression {BOR exclusiveOrExpression}
 
