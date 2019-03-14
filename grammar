@@ -89,58 +89,37 @@ expression ::= assignmentExpression
 assignmentExpression ::= conditionalExpression
 
 //level 2			 
-conditionalExpression ::= conditionalOrExpression
-						  | conditionalOrExpression TER expression COLON conditionalExpression
+conditionalExpression ::= conditionalOrExpression [TER expression COLON conditionalExpression]
 
 //level 3
-conditionalOrExpression ::= conditionalAndExpression
-						  | conditionalOrExpression LOR conditionalAndExpression
+conditionalOrExpression ::= conditionalAndExpression {LOR conditionalAndExpression}
 				
 //level 4				
-conditionalAndExpression ::= inclusiveOrExpression
-                           | conditionalAndExpression LAND inclusiveOrExpression
+conditionalAndExpression ::= inclusiveOrExpression {LAND inclusiveOrExpression}
 	
 //level 5	
-inclusiveOrExpression ::= exclusiveOrExpression
-						| inclusiveOrExpression BOR exclusiveOrExpression
+inclusiveOrExpression ::= exclusiveOrExpression {BOR exclusiveOrExpression}
 
 //level 6
-exclusiveOrExpression ::= andExpression
-						| exclusiveOrExpression BXOR andExpression
+exclusiveOrExpression ::= andExpression {BXOR andExpression}
 
 //level 7
-andExpression ::= equalityExpression
-				| andExpression BAND equalityExpression
+andExpression ::= equalityExpression {BAND equalityExpression}
 
 //level 8
-equalityExpression ::= relationalExpression
-                     | equalityExpression EQUAL relationalExpression
-					 | equalityExpression NEQ   relationalExpression
+equalityExpression ::= relationalExpression {(EQUAL | NEQ) relationalExpression}
 
 //level 9
-relationalExpression ::= shiftExpression
-					   | relationalExpression LT shiftExpression
-					   | relationalExpression GT shiftExpression
-					   | relationalExpression LEQ shiftExpression
-					   | relationalExpression GEQ shiftExpression
-					   | relationalExpression INSTANCEOF referenceType
+relationalExpression ::= shiftExpression [((LT | GT | LEQ | GEQ) shiftExpression
+							| INSTANCEOF referenceType)]
 
 //level 10
-shiftExpression ::= additiveExpression
-				  | shiftExpression ALSHIFT additiveExpression
-				  | shiftExpression ARSHIFT additiveExpression
-				  | shiftExpression LRSHIFT additiveExpression
+shiftExpression ::= additiveExpression {(ALSHIFT | ARSHIFT | LRSHIFT) additiveExpression}
 
 //level 11
-additiveExpression ::= multiplicativeExpression
-					 | additiveExpression PLUS  multiplicativeExpression
-					 | additiveExpression MINUS multiplicativeExpression
-
+additiveExpression ::= multiplicativeExpression {(PLUS | MINUS) multiplicativeExpression}
 //level 12
-multiplicativeExpression ::= unaryExpression
-						   | multiplicativeExpression STAR unaryExpression
-						   | multiplicativeExpression DIV  unaryExpression
-						   | multiplicativeExpression MOD  unaryExpression
+multiplicativeExpression ::= unaryExpression {(STAR | DIV | MOD) unaryExpression}
 
 
 unaryExpression ::= INC unaryExpression
