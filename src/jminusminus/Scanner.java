@@ -501,8 +501,7 @@ class Scanner {
 
             return true;
         }
-
-        if (isExponent(ch)) {
+        else if (isExponent(ch)) {
             buffer.append(ch);
             nextCh();
 
@@ -515,8 +514,7 @@ class Scanner {
             readDoubleSuffixIfPresent(buffer);
             return true;
         }
-
-        if (isDoubleSuffix(ch)){
+        else if (isDoubleSuffix(ch)){
             buffer.append(ch);
             nextCh();
             return true;
