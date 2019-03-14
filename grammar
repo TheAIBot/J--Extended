@@ -34,8 +34,8 @@ memberDecl ::= IDENTIFIER            // constructor
              | type variableDeclarators SEMI // field
 
 memberSig ::= IDENTIFIER formalParameters SEMI // constructor
-              | (VOID | type) IDENTIFIER formalParameters SEMI // method
-              |  type variableDeclarators SEMI // field
+              | (VOID | type) IDENTIFIER formalParameters SEMI // method
+              | type variableDeclarators SEMI // field
 
 block ::= LCURLY {blockStatement} RCURLY 
 
