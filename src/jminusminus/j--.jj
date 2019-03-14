@@ -142,6 +142,9 @@ SKIP: {" "|"\t"|"\n"|"\r"|"\f"}
 // Single line comment -- ignored
 SKIP: {<SINGLE_LINE_COMMENT: "//" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>}
 
+// Multi line comment -- ignored
+SKIP: {<MULTI_LINE_COMMENT: "/*" (~["*/"])* "*/">}
+
 // Reserved words
 TOKEN:
 {
@@ -169,6 +172,33 @@ TOKEN:
 | < TRUE: "true" >
 | < VOID: "void" >
 | < WHILE: "while" >
+| < BREAK: "break" >
+| < BYTE: "byte" >
+| < CASE: "case" >
+| < CATCH: "catch" >
+| < CONST: "const" >
+| < CONTINUE: "continue" >
+| < DEFAULT: "default" >
+| < DO: "do" >
+| < DOUBLE: "double" >
+| < FINAL: "final" >
+| < FINALLY: "finally" >
+| < FLOAT: "float" >
+| < FOR : "for" >
+| < GOTO: "goto" >
+| < IMPLEMENTS: "implements" >
+| < INTERFACE: "interface" >
+| < LONG: "long" >
+| < NATIVE: "native" >
+| < SHORT: "short" >
+| < STRICTFP: "strictfp" >
+| < SWITCH: "switch" >
+| < SYNCHRONIZED: "synchronized" >
+| < THROW: ("throw" >
+| < THROWS: "throws" >
+| < TRANSIENT: "transient" >
+| < TRY: "try" >
+| < VOLATILE: "volatile" >
 }
 
 // Operators (these could be combined with the reserved words)
@@ -183,9 +213,32 @@ TOKEN:
 | < LAND: "&&" >
 | < LE: "<=" >
 | < LNOT: "!" >
+| < BAND: "&" >
+| < BOR: "|" >
+| < BXOR: "^" >
 | < MINUS: "-" >
 | < PLUS_ASSIGN: "+=" >
 | < STAR: "*" >
+| < COMPLEMENT: "~" >
+| < DIV: "/" >
+| < MOD: "%" >
+| < ALSHIFT: "<<" >
+| < ARSHIFT: ">>" >
+| < LRSHIFT: ">>>" >
+| < TER: "?" >
+| < NEQ: "!=" >
+| < DIV_ASSIGN: "/=" >
+| < MINUS_ASSIGN: "-=" >
+| < STAR_ASSIGN: "*=" >
+| < MOD_ASSIGN: "%=" >
+| < ARSHIFT_ASSIGN: ">>=" >
+| < LRSHIFT_ASSIGN: ">>>=" >
+| < GE: ">=" >
+| < ALSHIFT_ASSIGN: "<<=" >
+| < BXOR_ASSIGN: "^=" >
+| < BOR_ASSIGN: "|=" >
+| < LOR: "||" >
+| < BAND_ASSIGN: "&=" >
 }
 
 // Separators (these could be combined with the reserved words)
@@ -200,6 +253,7 @@ TOKEN:
 | < SEMI: ";" >
 | < COMMA: "," >
 | < DOT: "." >
+| < COLON: ":" >
 }
 
 // Identifiers
