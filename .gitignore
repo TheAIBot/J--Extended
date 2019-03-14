@@ -4,6 +4,9 @@
 
 ### Eclipse ###
 
+src/jminusminus
+javadoc/
+java2html/
 .metadata
 bin/
 tmp/

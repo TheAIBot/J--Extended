@@ -29,36 +29,88 @@ public interface JavaCCParserConstants {
   int TRUE = 28;
   int VOID = 29;
   int WHILE = 30;
-  int PLUS = 31;
-  int ASSIGN = 32;
-  int DEC = 33;
-  int EQUAL = 34;
-  int GT = 35;
-  int INC = 36;
-  int LAND = 37;
-  int LE = 38;
-  int LNOT = 39;
-  int MINUS = 40;
-  int PLUS_ASSIGN = 41;
-  int STAR = 42;
-  int LPAREN = 43;
-  int RPAREN = 44;
-  int LCURLY = 45;
-  int RCURLY = 46;
-  int LBRACK = 47;
-  int RBRACK = 48;
-  int SEMI = 49;
-  int COMMA = 50;
-  int DOT = 51;
-  int IDENTIFIER = 52;
-  int LETTER = 53;
-  int DIGIT = 54;
-  int NON_ZERO_DIGIT = 55;
-  int INT_LITERAL = 56;
-  int CHAR_LITERAL = 57;
-  int STRING_LITERAL = 58;
-  int ESC = 59;
-  int ERROR = 60;
+  int BREAK = 31;
+  int BYTE = 32;
+  int CASE = 33;
+  int CATCH = 34;
+  int CONST = 35;
+  int CONTINUE = 36;
+  int DEFAULT_KEY = 37;
+  int DO = 38;
+  int DOUBLE = 39;
+  int FINAL = 40;
+  int FINALLY = 41;
+  int FLOAT = 42;
+  int FOR = 43;
+  int GOTO = 44;
+  int IMPLEMENTS = 45;
+  int INTERFACE = 46;
+  int LONG = 47;
+  int NATIVE = 48;
+  int SHORT = 49;
+  int STRICTFP = 50;
+  int SWITCH = 51;
+  int SYNCHRONIZED = 52;
+  int THROW = 53;
+  int THROWS = 54;
+  int TRANSIENT = 55;
+  int TRY = 56;
+  int VOLATILE = 57;
+  int PLUS = 58;
+  int ASSIGN = 59;
+  int DEC = 60;
+  int EQUAL = 61;
+  int GT = 62;
+  int INC = 63;
+  int LAND = 64;
+  int LNOT = 65;
+  int BAND = 66;
+  int BOR = 67;
+  int BXOR = 68;
+  int MINUS = 69;
+  int PLUS_ASSIGN = 70;
+  int STAR = 71;
+  int COMPLEMENT = 72;
+  int DIV = 73;
+  int MOD = 74;
+  int ALSHIFT = 75;
+  int ARSHIFT = 76;
+  int LRSHIFT = 77;
+  int TER = 78;
+  int NEQ = 79;
+  int DIV_ASSIGN = 80;
+  int MINUS_ASSIGN = 81;
+  int STAR_ASSIGN = 82;
+  int MOD_ASSIGN = 83;
+  int ARSHIFT_ASSIGN = 84;
+  int LRSHIFT_ASSIGN = 85;
+  int ALSHIFT_ASSIGN = 86;
+  int BXOR_ASSIGN = 87;
+  int BOR_ASSIGN = 88;
+  int LOR = 89;
+  int BAND_ASSIGN = 90;
+  int LT = 91;
+  int LEQ = 92;
+  int GEQ = 93;
+  int LPAREN = 94;
+  int RPAREN = 95;
+  int LCURLY = 96;
+  int RCURLY = 97;
+  int LBRACK = 98;
+  int RBRACK = 99;
+  int SEMI = 100;
+  int COMMA = 101;
+  int DOT = 102;
+  int COLON = 103;
+  int IDENTIFIER = 104;
+  int LETTER = 105;
+  int DIGIT = 106;
+  int NON_ZERO_DIGIT = 107;
+  int INT_LITERAL = 108;
+  int CHAR_LITERAL = 109;
+  int STRING_LITERAL = 110;
+  int ESC = 111;
+  int ERROR = 112;
 
   int DEFAULT = 0;
 
@@ -94,6 +146,33 @@ public interface JavaCCParserConstants {
     "\"true\"",
     "\"void\"",
     "\"while\"",
+    "\"break\"",
+    "\"byte\"",
+    "\"case\"",
+    "\"catch\"",
+    "\"const\"",
+    "\"continue\"",
+    "\"default\"",
+    "\"do\"",
+    "\"double\"",
+    "\"final\"",
+    "\"finally\"",
+    "\"float\"",
+    "\"for\"",
+    "\"goto\"",
+    "\"implements\"",
+    "\"interface\"",
+    "\"long\"",
+    "\"native\"",
+    "\"short\"",
+    "\"strictfp\"",
+    "\"switch\"",
+    "\"synchronized\"",
+    "\"throw\"",
+    "\"throws\"",
+    "\"transient\"",
+    "\"try\"",
+    "\"volatile\"",
     "\"+\"",
     "\"=\"",
     "\"--\"",
@@ -101,11 +180,35 @@ public interface JavaCCParserConstants {
     "\">\"",
     "\"++\"",
     "\"&&\"",
-    "\"<=\"",
     "\"!\"",
+    "\"&\"",
+    "\"|\"",
+    "\"^\"",
     "\"-\"",
     "\"+=\"",
     "\"*\"",
+    "\"~\"",
+    "\"/\"",
+    "\"%\"",
+    "\"<<\"",
+    "\">>\"",
+    "\">>>\"",
+    "\"?\"",
+    "\"!=\"",
+    "\"/=\"",
+    "\"-=\"",
+    "\"*=\"",
+    "\"%=\"",
+    "\">>=\"",
+    "\">>>=\"",
+    "\"<<=\"",
+    "\"^=\"",
+    "\"|=\"",
+    "\"||\"",
+    "\"&=\"",
+    "\"<\"",
+    "\"<=\"",
+    "\">=\"",
     "\"(\"",
     "\")\"",
     "\"{\"",
@@ -115,6 +218,7 @@ public interface JavaCCParserConstants {
     "\";\"",
     "\",\"",
     "\".\"",
+    "\":\"",
     "<IDENTIFIER>",
     "<LETTER>",
     "<DIGIT>",
