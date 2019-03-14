@@ -14,7 +14,9 @@ public class JConstructorSignature extends JMethodSignature implements JMember  
      *
      * @param line line in which the source for the AST was found.
      */
-    public JConstructorSignature(int line, ArrayList<String> mods, String name, ArrayList<JFormalParameter> params) {
-        super(line, mods, name, Type.CONSTRUCTOR, params);
+    public JConstructorSignature(int line, ArrayList<String> mods, String name, 
+    							ArrayList<JFormalParameter> params,
+    							ArrayList<Type> exceptionList) {
+        super(line, mods, name, Type.CONSTRUCTOR, params, exceptionList);
     }
 }

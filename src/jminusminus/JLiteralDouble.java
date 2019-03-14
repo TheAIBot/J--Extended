@@ -1,6 +1,5 @@
 package jminusminus;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * @author Kasper
@@ -30,7 +29,7 @@ public class JLiteralDouble extends JExpression {
 
     @Override
     public void codegen(CLEmitter output) {
-        throw new NotImplementedException(); // todo
+        
     }
 
     @Override

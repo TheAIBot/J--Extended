@@ -1,6 +1,5 @@
 package jminusminus;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
 
@@ -24,6 +23,9 @@ public class JMethodSignature extends JAST implements JMember  {
     /** The formal parameters. */
     protected ArrayList<JFormalParameter> params;
 
+    /** The declared exceptions thrown by the method. */
+    protected ArrayList<Type> exceptionList;
+    
     /** Built in analyze(). */
     protected MethodContext context;
 
@@ -56,12 +58,14 @@ public class JMethodSignature extends JAST implements JMember  {
      */
 
     public JMethodSignature(int line, ArrayList<String> mods, String name,
-                            Type returnType, ArrayList<JFormalParameter> params) {
+                            Type returnType, ArrayList<JFormalParameter> params,
+                            ArrayList<Type> exceptionList) {
         super(line);
         this.mods = mods;
         this.name = name;
         this.returnType = returnType;
         this.params = params;
+        this.exceptionList = exceptionList;
         this.isAbstract = mods.contains("abstract");
         this.isStatic = mods.contains("static");
         this.isPrivate = mods.contains("private");
