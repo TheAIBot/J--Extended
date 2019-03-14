@@ -695,7 +695,7 @@ public class Parser {
                 } else {
                     // Field
                     memberSig = new JFieldDeclaration(line,
-                            new ArrayList<String>(List.of("public", "static", "final")),
+                            new ArrayList<String>(Arrays.asList("public", "static", "final")),
                             variableDeclarators(type));
 
                 }
