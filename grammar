@@ -65,7 +65,7 @@ localVariableDeclarationStatement ::= type variableDeclarators SEMI
 
 variableDeclarators ::= variableDeclarator {COMMA variableDeclarator}
 
-variableDeclarator ::= IDENTIFIER [(ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | DIV_ASSIGN | STAR_ASSIGN | MOD_ASSIGN) variableInitializer]
+variableDeclarator ::= IDENTIFIER [ASSIGN variableInitializer]
                     
 variableInitializer ::= arrayInitializer | expression
 
@@ -86,7 +86,8 @@ statementExpression ::= expression // but must have side-effect, eg i++
 
 expression ::= assignmentExpression
 
-assignmentExpression ::= conditionalExpression
+//level 1
+assignmentExpression ::= conditionalExpression [(ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | DIV_ASSIGN | STAR_ASSIGN | MOD_ASSIGN) assignmentExpression]
 
 //level 2			 
 conditionalExpression ::= conditionalOrExpression [TER expression COLON conditionalExpression]
@@ -118,6 +119,7 @@ shiftExpression ::= additiveExpression {(ALSHIFT | ARSHIFT | LRSHIFT) additiveEx
 
 //level 11
 additiveExpression ::= multiplicativeExpression {(PLUS | MINUS) multiplicativeExpression}
+
 //level 12
 multiplicativeExpression ::= unaryExpression {(STAR | DIV | MOD) unaryExpression}
 
