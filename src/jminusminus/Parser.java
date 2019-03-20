@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
 import static jminusminus.TokenKind.*;
 
 /**
@@ -792,6 +791,47 @@ public class Parser {
             JExpression test = parExpression();
             JStatement statement = statement();
             return new JWhileStatement(line, test, statement);
+        } else if (have(FOR)) {
+            mustBe(LPAREN);
+            scanner.recordPosition(); //Record position so we can return and parse an expression if it's a for loop
+            if(!see(SEMI)) {
+                JFormalParameter internalVariable = formalParameter();
+                if(!see(ASSIGN)) {
+                    //For Each loop
+                    mustBe(COLON);
+                    mustBe(IDENTIFIER);
+                    String arrayName = scanner.previousToken().image();
+                    mustBe(RPAREN);
+                    JStatement statement = statement();
+                    return new JForEachStatement(line, internalVariable, arrayName, statement);
+                }
+            }
+            scanner.returnToPosition();
+
+            JVariableDeclaration before = null;
+            JExpression condition = null;
+            JExpression postIter = null;
+            //Variable declaration
+            if(!see(SEMI)) {
+                JVariableDeclarator varDec = variableDeclarator(type());
+                ArrayList<JVariableDeclarator> varDecs = new ArrayList<>();
+                varDecs.add(varDec);
+                before = new JVariableDeclaration(line, new ArrayList<>(), varDecs);
+            }
+            mustBe(SEMI);
+
+            //Condition test
+            if(!see(SEMI))
+                condition = expression();
+            mustBe(SEMI);
+
+            //Post iteration
+            if(!see(RPAREN))
+                postIter = expression();
+            mustBe(RPAREN);
+
+            JStatement statement = statement();
+            return new JForStatement(line, before, condition, statement, postIter);
         } else if (have(RETURN)) {
             if (have(SEMI)) {
                 return new JReturnStatement(line, null);
@@ -1196,27 +1236,27 @@ public class Parser {
     	}
     	return lhs;
     }
-    
+
     /**
      * Parses a conditional expression.
      * @return
      */
     private JExpression conditionalExpression() {
     	int line = scanner.token().line();
-    	
+
     	JExpression conditional = inclusiveOrExpression();
     	if (have(TER)) {
     		JExpression ifTrue = inclusiveOrExpression();
     		mustBe(COLON);
 			JExpression ifFalse = inclusiveOrExpression();
-			
+
 			return new JTernaryOp(line, conditional, ifTrue, ifFalse);
 		}
-    	
+
     	return conditional;
     }
 
-    
+
     private JExpression inclusiveOrExpression() {
     	int line = scanner.token().line();
     	boolean more = true;
@@ -1230,7 +1270,7 @@ public class Parser {
     	}
     	return lhs;
     }
-    
+
     private JExpression exclusiveOrExpression() {
     	int line = scanner.token().line();
     	boolean more = true;
@@ -1244,7 +1284,7 @@ public class Parser {
     	}
     	return lhs;
     }
-   
+
     private JExpression andExpression() {
     	int line = scanner.token().line();
     	boolean more = true;
