@@ -3,7 +3,7 @@ package jminusminus;
 /**
  * Created by Tobias on 3/7/2019.
  */
-public class JForEachExpression extends JAST {
+public class JForEachStatement extends JStatement {
 
     protected JFormalParameter internalVariable;
     protected String arrayName;
@@ -14,7 +14,7 @@ public class JForEachExpression extends JAST {
      *
      * @param line line in which the source for the AST was found.
      */
-    protected JForEachExpression(int line, JFormalParameter var, String arrayName) {
+    protected JForEachStatement(int line, JFormalParameter var, String arrayName, JStatement body) {
         super(line);
         this.internalVariable = var;
         this.arrayName = arrayName;
@@ -32,8 +32,8 @@ public class JForEachExpression extends JAST {
 
     @Override
     public void writeToStdOut(PrettyPrinter p) {
-        p.printf("<JForEachExpression line=\"%d\" var=\"%s\" array=\"%s\">\n",
+        p.printf("<JForEachStatement line=\"%d\" var=\"%s\" array=\"%s\">\n",
                 line(), internalVariable.toString(), arrayName);
-        p.println("</JForEachExpression>");
+        p.println("</JForEachStatement>");
     }
 }

@@ -45,9 +45,14 @@ blockStatement ::= localVariableDeclarationStatement
 statement ::= block
             | IF parExpression statement [ELSE statement]
             | WHILE parExpression statement 
+            | FOR LPAREN (forExpression | forEachExpression) RPAREN statement
             | RETURN [expression] SEMI
             | SEMI 
             | statementExpression SEMI
+
+forExpression ::= [expression] SEMI [expression] SEMI [expression]
+
+forEachExpression ::= formalParameter COLON referenceType
 
 formalParameters ::= LPAREN 
                        [formalParameter {COMMA formalParameter}]

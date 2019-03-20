@@ -2,12 +2,9 @@
 
 package jminusminus;
 
-import com.sun.codemodel.internal.JMethod;
-import com.sun.tools.javac.util.List;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static jminusminus.TokenKind.*;
 
@@ -412,7 +409,7 @@ public class Parser {
         } else if (have(INTERFACE)){
             return interfaceDeclaration(mods);
         } else {
-            throw new NotImplementedException(); // only classes and interfaces are allowed
+            throw new UnsupportedOperationException(); // only classes and interfaces are allowed
         }
     }
 
@@ -697,7 +694,7 @@ public class Parser {
                 } else {
                     // Field
                     memberSig = new JFieldDeclaration(line,
-                            new ArrayList<String>(List.of("public", "static", "final")),
+                            new ArrayList<String>(Arrays.asList("public", "static", "final")),
                             variableDeclarators(type));
 
                 }
@@ -794,6 +791,47 @@ public class Parser {
             JExpression test = parExpression();
             JStatement statement = statement();
             return new JWhileStatement(line, test, statement);
+        } else if (have(FOR)) {
+            mustBe(LPAREN);
+            scanner.recordPosition(); //Record position so we can return and parse an expression if it's a for loop
+            if(!see(SEMI)) {
+                JFormalParameter internalVariable = formalParameter();
+                if(!see(ASSIGN)) {
+                    //For Each loop
+                    mustBe(COLON);
+                    mustBe(IDENTIFIER);
+                    String arrayName = scanner.previousToken().image();
+                    mustBe(RPAREN);
+                    JStatement statement = statement();
+                    return new JForEachStatement(line, internalVariable, arrayName, statement);
+                }
+            }
+            scanner.returnToPosition();
+
+            JVariableDeclaration before = null;
+            JExpression condition = null;
+            JExpression postIter = null;
+            //Variable declaration
+            if(!see(SEMI)) {
+                JVariableDeclarator varDec = variableDeclarator(type());
+                ArrayList<JVariableDeclarator> varDecs = new ArrayList<>();
+                varDecs.add(varDec);
+                before = new JVariableDeclaration(line, new ArrayList<>(), varDecs);
+            }
+            mustBe(SEMI);
+
+            //Condition test
+            if(!see(SEMI))
+                condition = expression();
+            mustBe(SEMI);
+
+            //Post iteration
+            if(!see(RPAREN))
+                postIter = expression();
+            mustBe(RPAREN);
+
+            JStatement statement = statement();
+            return new JForStatement(line, before, condition, statement, postIter);
         } else if (have(RETURN)) {
             if (have(SEMI)) {
                 return new JReturnStatement(line, null);
@@ -1151,7 +1189,7 @@ public class Parser {
             return lhs;
         }
     }
-    
+
     /**
      * Parse a conditional-and expression.
      *
@@ -1195,7 +1233,7 @@ public class Parser {
     	return lhs;
     }
 
-    
+
     private JExpression inclusiveOrExpression() {
     	int line = scanner.token().line();
     	boolean more = true;
@@ -1209,7 +1247,7 @@ public class Parser {
     	}
     	return lhs;
     }
-    
+
     private JExpression exclusiveOrExpression() {
     	int line = scanner.token().line();
     	boolean more = true;
@@ -1223,7 +1261,7 @@ public class Parser {
     	}
     	return lhs;
     }
-   
+
     private JExpression andExpression() {
     	int line = scanner.token().line();
     	boolean more = true;
@@ -1237,7 +1275,7 @@ public class Parser {
     	}
     	return lhs;
     }
-    
+
 
     /**
      * Parse an equality expression.
