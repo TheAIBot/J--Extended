@@ -1214,16 +1214,16 @@ private JExpression assignmentExpression(): {
             { lhs = new JPlusAssignOp( line, lhs, rhs ); } |
 			<MINUS_ASSIGN>
             rhs = assignmentExpression()
-            { lhs = new JPlusAssignOp( line, lhs, rhs ); } |
+            { lhs = new JMinusAssignOp( line, lhs, rhs ); } |
 			<DIV_ASSIGN>
             rhs = assignmentExpression()
-            { lhs = new JPlusAssignOp( line, lhs, rhs ); } |
+            { lhs = new JDivAssignOp( line, lhs, rhs ); } |
 			<STAR_ASSIGN>
             rhs = assignmentExpression()
-            { lhs = new JPlusAssignOp( line, lhs, rhs ); } |
+            { lhs = new JStarAssignOp( line, lhs, rhs ); } |
 			<MOD_ASSIGN>
             rhs = assignmentExpression()
-            { lhs = new JPlusAssignOp( line, lhs, rhs ); }
+            { lhs = new JModAssignOp( line, lhs, rhs ); }
         ]
     } 
     catch ( ParseException e ) { 
