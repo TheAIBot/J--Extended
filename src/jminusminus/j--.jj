@@ -701,10 +701,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
                 name = token.image; 
             } 
             params = formalParameters()
-            LOOKAHEAD( <THROWS> )
-            (
-            	thrownExceptions = throwsDeclaration()
-            )
+            thrownExceptions = throwsDeclaration()
             body = block()
             { 
                 memberDecl = 
@@ -721,10 +718,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
             { line = token.beginLine; }
             <IDENTIFIER> { name = token.image; } 
             params = formalParameters()
-            LOOKAHEAD( <THROWS> )
-            (
-            	thrownExceptions = throwsDeclaration()
-            )
+            thrownExceptions = throwsDeclaration()
             ( 
                 body = block() | 
                 <SEMI> 
@@ -770,6 +764,7 @@ private JMember memberSig( ArrayList<String>  mods ): {
     Type type = null;
     String name = "";
     ArrayList<JFormalParameter> params = null;
+    ArrayList<TypeName> thrownExceptions = null;
     JBlock body = null;
     ArrayList<JVariableDeclarator> variableDeclarators = null;
     JMember memberSig = null;
@@ -784,11 +779,12 @@ private JMember memberSig( ArrayList<String>  mods ): {
                 name = token.image;
             }
             params = formalParameters()
+            thrownExceptions = throwsDeclaration()
             <SEMI>
             {
                 memberSig =
-                new JConstructorSignature( line, mods,
-                                             name, params );
+                new JConstructorSignature( line, mods, name, 
+                							params, thrownExceptions );
             }
         ) |
         LOOKAHEAD( ( <VOID> | type() ) <IDENTIFIER> <LPAREN> )
@@ -800,11 +796,12 @@ private JMember memberSig( ArrayList<String>  mods ): {
             { line = token.beginLine; }
             <IDENTIFIER> { name = token.image; }
             params = formalParameters()
+            thrownExceptions = throwsDeclaration()
             <SEMI>
             {
                 memberSig =
-                   new JMethodSignature( line, mods, name,
-                                           type, params );
+                   new JMethodSignature( line, mods, name, type, 
+                   						 params, thrownExceptions );
             }
         ) |
         (
@@ -1080,14 +1077,16 @@ private ArrayList<TypeName> throwsDeclaration(): {
 }
 {
 	try {
-		<THROWS>
-		line = token.beginLine;
-		aType = qualifiedIdentifier()
-		{ types.add(aType); }
-		(
-			<COMMA> aType = qualifiedIdentifier()
+		[
+			<THROWS>
+			{ line = token.beginLine; }
+			aType = qualifiedIdentifier()
 			{ types.add(aType); }
-		)*
+			(
+				<COMMA> aType = qualifiedIdentifier()
+				{ types.add(aType); }
+			)*
+		]
 	}
 	catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
