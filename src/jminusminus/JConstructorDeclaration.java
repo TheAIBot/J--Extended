@@ -37,7 +37,7 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
      */
 
     public JConstructorDeclaration(int line, ArrayList<String> mods, String name,
-                                   ArrayList<JFormalParameter> params, ArrayList<Type> exceptionList,
+                                   ArrayList<JFormalParameter> params, ArrayList<TypeName> exceptionList,
                                    JBlock body) {
         super(line, mods, name, Type.CONSTRUCTOR, params, exceptionList, body);
     }
@@ -188,6 +188,15 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
                 p.indentLeft();
             }
             p.println("</FormalParameters>");
+        }
+        if (exceptionList != null) {
+        	p.println("<ThrownExceptions>");
+        	p.indentRight();
+        	for (TypeName type : exceptionList) {
+        		p.printf("<Exception type=\"%s\"/>\n", type.toString());
+        	}
+        	p.indentLeft();
+        	p.println("</ThrownExceptions>");
         }
         if (body != null) {
             p.println("<Body>");

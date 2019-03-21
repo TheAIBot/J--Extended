@@ -69,7 +69,7 @@ public class JTryStatement extends JStatement {
 			p.println("</FormalParameters>");
 			catchBlocks.get(i).writeToStdOut(p);
 			p.indentLeft();
-			p.println("</Catch");
+			p.println("</Catch>");
 		}
 		if (finallyBlock != null) {
 			p.println("<Finally>");

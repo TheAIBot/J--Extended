@@ -24,7 +24,7 @@ class JMethodDeclaration extends JAST implements JMember {
     protected ArrayList<JFormalParameter> params;
 
     /** The exception types thrown by the method. */
-    protected ArrayList<Type> exceptionList;
+    protected ArrayList<TypeName> exceptionList;
     
     /** Method body. */
     protected JBlock body;
@@ -67,7 +67,7 @@ class JMethodDeclaration extends JAST implements JMember {
     public JMethodDeclaration(int line, ArrayList<String> mods,
         String name, Type returnType,
         ArrayList<JFormalParameter> params, 
-        ArrayList<Type> exceptionList, JBlock body)
+        ArrayList<TypeName> exceptionList, JBlock body)
 
     {
         super(line);
@@ -247,6 +247,15 @@ class JMethodDeclaration extends JAST implements JMember {
                 p.indentLeft();
             }
             p.println("</FormalParameters>");
+        }
+        if (exceptionList != null) {
+        	p.println("<ThrownExceptions>");
+        	p.indentRight();
+        	for (TypeName type : exceptionList) {
+        		p.printf("<Exception type=\"%s\"/>\n", type.toString());
+        	}
+        	p.indentLeft();
+        	p.println("</ThrownExceptions>");
         }
         if (body != null) {
             p.println("<Body>");

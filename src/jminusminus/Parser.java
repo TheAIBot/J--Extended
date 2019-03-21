@@ -617,7 +617,7 @@ public class Parser {
             mustBe(IDENTIFIER);
             String name = scanner.previousToken().image();
             ArrayList<JFormalParameter> params = formalParameters();
-            ArrayList<Type> exceptionTypes = null;
+            ArrayList<TypeName> exceptionTypes = null;
             if (see(THROWS)) {
             	exceptionTypes = readThrowsDeclaration();
             }
@@ -638,7 +638,7 @@ public class Parser {
                 mustBe(IDENTIFIER);
                 String name = scanner.previousToken().image();
                 ArrayList<JFormalParameter> params = formalParameters();
-                ArrayList<Type> exceptionTypes = null;
+                ArrayList<TypeName> exceptionTypes = null;
                 if (see(THROWS)) {
                 	exceptionTypes = readThrowsDeclaration();
                 }
@@ -652,7 +652,7 @@ public class Parser {
                     mustBe(IDENTIFIER);
                     String name = scanner.previousToken().image();
                     ArrayList<JFormalParameter> params = formalParameters();
-                    ArrayList<Type> exceptionTypes = null;
+                    ArrayList<TypeName> exceptionTypes = null;
                     if (see(THROWS)) {
                     	exceptionTypes = readThrowsDeclaration();
                     }
@@ -691,7 +691,7 @@ public class Parser {
             mustBe(IDENTIFIER);
             String name = scanner.previousToken().image();
             ArrayList<JFormalParameter> params = formalParameters();
-            ArrayList<Type> exceptionTypes = null;
+            ArrayList<TypeName> exceptionTypes = null;
             if (see(THROWS)) {
             	exceptionTypes = readThrowsDeclaration();
             }
@@ -720,8 +720,8 @@ public class Parser {
         return memberSig;
     }
     
-    private ArrayList<Type> readThrowsDeclaration() {
-    	ArrayList<Type> exceptionTypes = new ArrayList();
+    private ArrayList<TypeName> readThrowsDeclaration() {
+    	ArrayList<TypeName> exceptionTypes = new ArrayList();
     	mustBe(THROWS);
     	exceptionTypes.add(qualifiedIdentifier());
     	while (have(COMMA)) {
@@ -737,7 +737,7 @@ public class Parser {
         if (!mods.contains("public")) mods.add("public");
         if (!mods.contains("abstract")) mods.add("abstract");
         checkMethodSignatureModifiers(mods);
-        ArrayList<Type> exceptionList = null;
+        ArrayList<TypeName> exceptionList = null;
         if (see(THROWS)) {
         	exceptionList = readThrowsDeclaration();
         }

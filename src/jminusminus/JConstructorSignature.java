@@ -16,7 +16,7 @@ public class JConstructorSignature extends JMethodSignature implements JMember  
      */
     public JConstructorSignature(int line, ArrayList<String> mods, String name, 
     							ArrayList<JFormalParameter> params,
-    							ArrayList<Type> exceptionList) {
+    							ArrayList<TypeName> exceptionList) {
         super(line, mods, name, Type.CONSTRUCTOR, params, exceptionList);
     }
 }
