@@ -29,7 +29,7 @@ public class JLiteralDouble extends JExpression {
 
     @Override
     public void codegen(CLEmitter output) {
-        
+        throw new Error("Not implemented yet"); // todo
     }
 
     @Override

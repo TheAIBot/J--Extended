@@ -52,15 +52,21 @@ blockStatement ::= localVariableDeclarationStatement
 statement ::= block
             | IF parExpression statement [ELSE statement]
             | WHILE parExpression statement
-            | TRY block 
-            	{CATCH (formalParameter) block} 
+            | TRY block
+            	{CATCH (formalParameter) block}
             	[FINALLY block]
+            | WHILE parExpression statement
+            | FOR LPAREN (forExpression | forEachExpression) RPAREN statement
             | RETURN [expression] SEMI
             | THROW expression SEMI
-            | SEMI 
+            | SEMI
             | statementExpression SEMI
 
-formalParameters ::= LPAREN 
+forExpression ::= [expression] SEMI [expression] SEMI [expression]
+
+forEachExpression ::= formalParameter COLON referenceType
+
+formalParameters ::= LPAREN
                        [formalParameter {COMMA formalParameter}]
                      RPAREN
 
@@ -72,7 +78,7 @@ localVariableDeclarationStatement ::= type variableDeclarators SEMI
 
 variableDeclarators ::= variableDeclarator {COMMA variableDeclarator}
 
-variableDeclarator ::= IDENTIFIER [(ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | DIV_ASSIGN | STAR_ASSIGN | MOD_ASSIGN) variableInitializer]
+variableDeclarator ::= IDENTIFIER [ASSIGN variableInitializer]
                     
 variableInitializer ::= arrayInitializer | expression
 
@@ -93,61 +99,42 @@ statementExpression ::= expression // but must have side-effect, eg i++
 
 expression ::= assignmentExpression
 
-assignmentExpression ::= conditionalExpression
+//level 1
+assignmentExpression ::= conditionalExpression [(ASSIGN | PLUS_ASSIGN | MINUS_ASSIGN | DIV_ASSIGN | STAR_ASSIGN | MOD_ASSIGN) assignmentExpression]
 
-//level 2			 
-conditionalExpression ::= conditionalOrExpression
-						  | conditionalOrExpression TER expression COLON conditionalExpression
+//level 2
+conditionalExpression ::= conditionalOrExpression [TER expression COLON conditionalExpression]
 
 //level 3
-conditionalOrExpression ::= conditionalAndExpression
-						  | conditionalOrExpression LOR conditionalAndExpression
-				
-//level 4				
-conditionalAndExpression ::= inclusiveOrExpression
-                           | conditionalAndExpression LAND inclusiveOrExpression
-	
-//level 5	
-inclusiveOrExpression ::= exclusiveOrExpression
-						| inclusiveOrExpression BOR exclusiveOrExpression
+conditionalOrExpression ::= conditionalAndExpression {LOR conditionalAndExpression}
+
+//level 4
+conditionalAndExpression ::= inclusiveOrExpression {LAND inclusiveOrExpression}
+
+//level 5
+inclusiveOrExpression ::= exclusiveOrExpression {BOR exclusiveOrExpression}
 
 //level 6
-exclusiveOrExpression ::= andExpression
-						| exclusiveOrExpression BXOR andExpression
+exclusiveOrExpression ::= andExpression {BXOR andExpression}
 
 //level 7
-andExpression ::= equalityExpression
-				| andExpression BAND equalityExpression
+andExpression ::= equalityExpression {BAND equalityExpression}
 
 //level 8
-equalityExpression ::= relationalExpression
-                     | equalityExpression EQUAL relationalExpression
-					 | equalityExpression NEQ   relationalExpression
+equalityExpression ::= relationalExpression {(EQUAL | NEQ) relationalExpression}
 
 //level 9
-relationalExpression ::= shiftExpression
-					   | relationalExpression LT shiftExpression
-					   | relationalExpression GT shiftExpression
-					   | relationalExpression LEQ shiftExpression
-					   | relationalExpression GEQ shiftExpression
-					   | relationalExpression INSTANCEOF referenceType
+relationalExpression ::= shiftExpression [((LT | GT | LEQ | GEQ) shiftExpression
+							| INSTANCEOF referenceType)]
 
 //level 10
-shiftExpression ::= additiveExpression
-				  | shiftExpression ALSHIFT additiveExpression
-				  | shiftExpression ARSHIFT additiveExpression
-				  | shiftExpression LRSHIFT additiveExpression
+shiftExpression ::= additiveExpression {(ALSHIFT | ARSHIFT | LRSHIFT) additiveExpression}
 
 //level 11
-additiveExpression ::= multiplicativeExpression
-					 | additiveExpression PLUS  multiplicativeExpression
-					 | additiveExpression MINUS multiplicativeExpression
+additiveExpression ::= multiplicativeExpression {(PLUS | MINUS) multiplicativeExpression}
 
 //level 12
-multiplicativeExpression ::= unaryExpression
-						   | multiplicativeExpression STAR unaryExpression
-						   | multiplicativeExpression DIV  unaryExpression
-						   | multiplicativeExpression MOD  unaryExpression
+multiplicativeExpression ::= unaryExpression {(STAR | DIV | MOD) unaryExpression}
 
 
 unaryExpression ::= INC unaryExpression
