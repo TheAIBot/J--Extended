@@ -55,7 +55,6 @@ statement ::= block
             | TRY block
             	{CATCH (formalParameter) block}
             	[FINALLY block]
-            | WHILE parExpression statement
             | FOR LPAREN (forExpression | forEachExpression) RPAREN statement
             | RETURN [expression] SEMI
             | THROW expression SEMI
