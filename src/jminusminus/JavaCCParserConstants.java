@@ -108,10 +108,11 @@ public interface JavaCCParserConstants {
   int DIGIT = 107;
   int NON_ZERO_DIGIT = 108;
   int INT_LITERAL = 109;
-  int CHAR_LITERAL = 110;
-  int STRING_LITERAL = 111;
-  int ESC = 112;
-  int ERROR = 113;
+  int DOUBLE_LITERAL = 110;
+  int CHAR_LITERAL = 111;
+  int STRING_LITERAL = 112;
+  int ESC = 113;
+  int ERROR = 114;
 
   int DEFAULT = 0;
 
@@ -226,6 +227,7 @@ public interface JavaCCParserConstants {
     "<DIGIT>",
     "<NON_ZERO_DIGIT>",
     "<INT_LITERAL>",
+    "<DOUBLE_LITERAL>",
     "<CHAR_LITERAL>",
     "<STRING_LITERAL>",
     "<ESC>",

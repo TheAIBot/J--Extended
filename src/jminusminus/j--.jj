@@ -364,12 +364,12 @@ private TypeName qualifiedIdentifier(): {
 {
     try {
         <IDENTIFIER> 
-        { 
-            line = token.beginLine; 
+        {
+            line = token.beginLine;
             qualifiedIdentifier = token.image; 
         }
         ( 
-            <DOT> <IDENTIFIER> 
+            LOOKAHEAD( <DOT> <IDENTIFIER> ) <DOT> <IDENTIFIER>
             { qualifiedIdentifier += "." + token.image; } 
         )*
     } 
@@ -384,7 +384,7 @@ private TypeName qualifiedIdentifier(): {
  * Parse a type declaration.
  * 
  * <pre>
- *   typeDeclaration ::= modifiers classDeclaration
+ *   typeDeclaration ::= modifiers (classDeclaration | interfaceDeclaration)
  * </pre>
  * 
  * @return an AST for a typeDeclaration.
@@ -397,8 +397,17 @@ private JAST typeDeclaration(): {
 {
     try {
         mods = modifiers()
-        classDeclaration = classDeclaration( mods )
-    } 
+        (
+        <CLASS>
+        {
+           classDeclaration = classDeclaration( mods );
+        } |
+        <INTERFACE>
+        {
+            classDeclaration = interfaceDeclaration( mods );
+        }
+        )
+    }
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
@@ -490,8 +499,9 @@ private ArrayList<String> modifiers(): {
  * Parse a class declaration.
  * 
  * <pre>
- *   classDeclaration ::= CLASS IDENTIFIER 
- *                        [EXTENDS qualifiedIdentifier] 
+ *   classDeclaration ::= CLASS IDENTIFIER
+ *                        [EXTENDS qualifiedIdentifier]
+ *                        [IMPLEMENTS qualifiedIdentifier {COMMA qualifiedIdentifier}]
  *                        classBody
  * </pre>
  * 
@@ -507,13 +517,29 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
     String name = "";
     Type superClass = Type.OBJECT;
     ArrayList<JMember> classBody = null;
+    ArrayList<String> implementsList = new ArrayList<String>();
 }
 {
     try {
-        <CLASS> { line = token.beginLine; }
-        <IDENTIFIER> { name = token.image; }
+        <IDENTIFIER>
+        {
+            line = token.beginLine;
+            name = token.image;
+        }
         [ 
             <EXTENDS> superClass = qualifiedIdentifier() 
+        ]
+        [
+            <IMPLEMENTS> <IDENTIFIER>
+            {
+                implementsList.add(token.image);
+            }
+            (
+                <COMMA> <IDENTIFIER>
+                {
+                    implementsList.add(token.image);
+                }
+            )*
         ]
         classBody = classBody()           
     } 
@@ -525,6 +551,52 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
             name, superClass, classBody ); 
     }
 }
+
+
+/**
+ * Parse a interface declaration.
+ *
+ * <pre>
+ *   interfaceDeclaration ::= INTERFACE IDENTIFIER
+ *                             [extends qualifiedIdentifier]
+ *                             interfaceBody
+ * </pre>
+ * <p>
+ * An interface which doesn't explicitly extend another (super) class implicitly
+ * extends the superclass java.lang.Object.
+ *
+ * @param mods the interface modifiers.
+ * @return an AST for a interfaceDeclaration.
+ */
+ private JInterfaceDeclaration interfaceDeclaration( ArrayList<String> mods ): {
+     int line = 0;
+     String name = "";
+     Type superClass = Type.OBJECT;
+     ArrayList<JMember> interfaceBody = null;
+     ArrayList<String> implementsList = new ArrayList<String>();
+ }
+ {
+     try {
+         <IDENTIFIER>
+         {
+             line = token.beginLine;
+             name = token.image;
+         }
+         [
+             <EXTENDS> superClass = qualifiedIdentifier()
+         ]
+         interfaceBody = interfaceBody()
+     }
+     catch ( ParseException e ) {
+         recoverFromError( new int[] { SEMI, EOF }, e );
+     }
+     {
+         return new JInterfaceDeclaration( line, mods,
+             name, superClass, interfaceBody );
+     }
+ }
+
+
 
 /**
  * Parse a class body.
@@ -557,6 +629,40 @@ private ArrayList<JMember> classBody(): {
     }
     { return members; }
 }
+
+
+/**
+ * Parse a interface body.
+ *
+ * <pre>
+ *   interfaceBody ::= LCURLY
+ *                       {modifiers memberSig}
+ *                     RCURLY
+ * </pre>
+ *
+ * @return list of members in the interface body.
+ */
+
+private ArrayList<JMember> interfaceBody(): {
+    ArrayList<String> mods = null;
+    JMember aMember = null;
+    ArrayList<JMember> members = new ArrayList<JMember>();
+}
+{
+    try {
+        <LCURLY>
+        (
+            mods = modifiers()
+            aMember = memberSig( mods ) { members.add( aMember ); }
+        )*
+        <RCURLY>
+    }
+    catch ( ParseException e ) {
+        recoverFromError( new int[] { SEMI, EOF }, e );
+    }
+    { return members; }
+}
+
 
 /**
  * Parse a member declaration.
@@ -645,6 +751,79 @@ private JMember memberDecl( ArrayList<String>  mods ): {
     { return memberDecl; }
 }
 
+
+/**
+ * Parse a member signature.
+ *
+ * <pre>
+ *   memberSig ::= IDENTIFIER formalParameters SEMI // constructor
+ *                 | (VOID | type) IDENTIFIER formalParameters SEMI // method
+ *                 | type variableDeclarators SEMI // field
+ * </pre>
+ *
+ * @param mods the class member modifiers.
+ * @return an AST for a memberSig.
+ */
+
+private JMember memberSig( ArrayList<String>  mods ): {
+    int line = 0;
+    Type type = null;
+    String name = "";
+    ArrayList<JFormalParameter> params = null;
+    JBlock body = null;
+    ArrayList<JVariableDeclarator> variableDeclarators = null;
+    JMember memberSig = null;
+}
+{
+    try {
+        LOOKAHEAD( <IDENTIFIER> <LPAREN> )
+        (
+            <IDENTIFIER>
+            {
+                line = token.beginLine;
+                name = token.image;
+            }
+            params = formalParameters()
+            <SEMI>
+            {
+                memberSig =
+                new JConstructorSignature( line, mods,
+                                             name, params );
+            }
+        ) |
+        LOOKAHEAD( ( <VOID> | type() ) <IDENTIFIER> <LPAREN> )
+        (
+            (
+                <VOID> { type = Type.VOID; } |
+                type = type()
+            )
+            { line = token.beginLine; }
+            <IDENTIFIER> { name = token.image; }
+            params = formalParameters()
+            <SEMI>
+            {
+                memberSig =
+                   new JMethodSignature( line, mods, name,
+                                           type, params );
+            }
+        ) |
+        (
+            type = type() { line = token.beginLine; }
+            variableDeclarators = variableDeclarators( type )
+            <SEMI>
+            {
+                memberSig = new JFieldDeclaration( line, mods,
+                    variableDeclarators );
+            }
+        )
+    }
+    catch ( ParseException e ) {
+        recoverFromError( new int[] { SEMI, EOF }, e );
+    }
+    { return memberSig; }
+}
+
+
 /**
  * Parse a block.
  * 
@@ -730,6 +909,11 @@ private JStatement statement(): {
     JBlock block = null;
     JBlock finallyBlock = null;
     JExpression expr = null;
+    JExpression condition = null;
+    JExpression postIter = null;
+    JFormalParameter internalVar = null;
+    JVariableDeclaration varDec = null;
+    Type ref = null;
 }
 {       
     try {
@@ -768,6 +952,39 @@ private JStatement statement(): {
         ]
         { statement = new JTryStatement(line, tryBlock, catchParameters,
         								catchBlocks, finallyBlock); } |
+        <FOR> {line = token.beginLine; }
+        (
+            //Look ahead to see if it's a for loop
+            LOOKAHEAD(<LPAREN> formalParameter() <COLON>)
+            <LPAREN>
+            internalVar = formalParameter()
+            <COLON>
+            ref = referenceType()
+            <RPAREN>
+            body = statement()
+            {statement = new JForEachStatement(line, internalVar, ref.simpleName(), body);} |
+
+            //Look ahead to see if it's a for loop
+            LOOKAHEAD(<LPAREN> <SEMI>)
+            <LPAREN>
+            <SEMI>
+            [condition = expression()]
+            <SEMI>
+            [postIter = expression()]
+            <RPAREN>
+            body = statement()
+            { statement = new JForStatement(line, varDec, condition, body, postIter);} |
+
+            //LOOKAHEAD(type() <IDENTIFIER> <EQUAL>)
+            <LPAREN>
+            varDec = localVariableDeclarationStatement()
+            [condition = expression()]
+            <SEMI>
+            [postIter = expression()]
+            <RPAREN>
+            body = statement()
+            { statement = new JForStatement(line, varDec, condition, body, postIter);}
+        )|
         <RETURN> { line = token.beginLine; }
         [ 
             expr = expression() 
@@ -781,7 +998,7 @@ private JStatement statement(): {
         <SEMI> 
         { statement = new JEmptyStatement( line ); } |
         // Must be a statementExpression
-        statement = statementExpression() 
+        statement = statementExpression()
         <SEMI>
     } 
     catch ( ParseException e ) { 
@@ -1271,19 +1488,19 @@ private JExpression assignmentExpression(): {
             { lhs = new JAssignOp( line, lhs, rhs ); } |
             <PLUS_ASSIGN>
             rhs = assignmentExpression()
-            { lhs = new JPlusAssignOp( line, lhs, rhs ); }
+            { lhs = new JPlusAssignOp( line, lhs, rhs ); } |
 			<MINUS_ASSIGN>
             rhs = assignmentExpression()
-            { lhs = new JPlusAssignOp( line, lhs, rhs ); }
+            { lhs = new JMinusAssignOp( line, lhs, rhs ); } |
 			<DIV_ASSIGN>
             rhs = assignmentExpression()
-            { lhs = new JPlusAssignOp( line, lhs, rhs ); }
+            { lhs = new JDivAssignOp( line, lhs, rhs ); } |
 			<STAR_ASSIGN>
             rhs = assignmentExpression()
-            { lhs = new JPlusAssignOp( line, lhs, rhs ); }
+            { lhs = new JStarAssignOp( line, lhs, rhs ); } |
 			<MOD_ASSIGN>
             rhs = assignmentExpression()
-            { lhs = new JPlusAssignOp( line, lhs, rhs ); }
+            { lhs = new JModAssignOp( line, lhs, rhs ); }
         ]
     } 
     catch ( ParseException e ) { 
@@ -1320,7 +1537,7 @@ private JExpression conditionalExpression(): {
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
-    { return ter; }
+    { return ter == null ? cond : ter; }
 }
 
 /**
@@ -1368,10 +1585,10 @@ private JExpression conditionalAndExpression(): {
 }
 {
     try {
-        lhs = equalityExpression() { line = lhs.line(); }
+        lhs = inclusiveOrExpression() { line = lhs.line(); }
         ( 
             <LAND>
-            rhs = equalityExpression()
+            rhs = inclusiveOrExpression()
             { lhs = new JLogicalAndOp( line, lhs, rhs ); }
         )*
     } 
@@ -1519,7 +1736,7 @@ private JExpression relationalExpression(): {
 }
 {
     try {
-        lhs = additiveExpression() { line = lhs.line(); }
+        lhs = shiftExpression() { line = lhs.line(); }
         [ 
             //<LT> 
             //rhs = shiftExpression()

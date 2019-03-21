@@ -62,7 +62,7 @@ statement ::= block
             | SEMI
             | statementExpression SEMI
 
-forExpression ::= [expression] SEMI [expression] SEMI [expression]
+forExpression ::= [localVariableDeclarationStatement] SEMI [expression] SEMI [expression]
 
 forEachExpression ::= formalParameter COLON referenceType
 

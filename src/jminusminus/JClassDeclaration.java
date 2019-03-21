@@ -67,6 +67,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         this.mods = mods;
         this.name = name;
         this.superType = superType;
+        this.implementsList = new ArrayList<String>();
         this.classBlock = classBlock;
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
