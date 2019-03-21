@@ -894,6 +894,11 @@ private JStatement statement(): {
     JStatement alternate = null;
     JStatement body = null;
     JExpression expr = null;
+    JExpression condition = null;
+    JExpression postIter = null;
+    JFormalParameter internalVar = null;
+    JVariableDeclaration varDec = null;
+    Type ref = null;
 }
 {       
     try {
@@ -916,6 +921,39 @@ private JStatement statement(): {
         test = parExpression() 
         body = statement()
         { statement = new JWhileStatement( line, test, body ); } |
+        <FOR> {line = token.beginLine; }
+        (
+            //Look ahead to see if it's a for loop
+            LOOKAHEAD(<LPAREN> formalParameter() <COLON>)
+            <LPAREN>
+            internalVar = formalParameter()
+            <COLON>
+            ref = referenceType()
+            <RPAREN>
+            body = statement()
+            {statement = new JForEachStatement(line, internalVar, ref.simpleName(), body);} |
+
+            //Look ahead to see if it's a for loop
+            LOOKAHEAD(<LPAREN> <SEMI>)
+            <LPAREN>
+            <SEMI>
+            [condition = expression()]
+            <SEMI>
+            [postIter = expression()]
+            <RPAREN>
+            body = statement()
+            { statement = new JForStatement(line, varDec, condition, body, postIter);} |
+
+            //LOOKAHEAD(type() <IDENTIFIER> <EQUAL>)
+            <LPAREN>
+            varDec = localVariableDeclarationStatement()
+            [condition = expression()]
+            <SEMI>
+            [postIter = expression()]
+            <RPAREN>
+            body = statement()
+            { statement = new JForStatement(line, varDec, condition, body, postIter);}
+        )|
         <RETURN> { line = token.beginLine; }
         [ 
             expr = expression() 
@@ -925,7 +963,7 @@ private JStatement statement(): {
         <SEMI> 
         { statement = new JEmptyStatement( line ); } |
         // Must be a statementExpression
-        statement = statementExpression() 
+        statement = statementExpression()
         <SEMI>
     } 
     catch ( ParseException e ) { 

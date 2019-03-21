@@ -799,11 +799,10 @@ public class Parser {
                 if(!see(ASSIGN)) {
                     //For Each loop
                     mustBe(COLON);
-                    mustBe(IDENTIFIER);
-                    String arrayName = scanner.previousToken().image();
+                    Type ref = referenceType();
                     mustBe(RPAREN);
                     JStatement statement = statement();
-                    return new JForEachStatement(line, internalVariable, arrayName, statement);
+                    return new JForEachStatement(line, internalVariable, ref.simpleName(), statement);
                 }
             }
             scanner.returnToPosition();
