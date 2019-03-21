@@ -1260,7 +1260,7 @@ private JExpression conditionalExpression(): {
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
-    { return ter; }
+    { return ter == null ? cond : ter; }
 }
 
 /**
