@@ -270,11 +270,11 @@ TOKEN:
 TOKEN:
 {
   < INT_LITERAL: ("0" | <NON_ZERO_DIGIT> (<DIGIT>)*) >
-//| < DOUBLE_LITERAL: ( ( <DIGIT> (<DIGIT>)*  (
-//                                            ( "." (<DIGIT>)* [("e" | "E") ["+" | "-"] (<DIGIT>)*] ["d" |�"D"] )
-//                                            | ( ("e" | "E") ["+" | "-"] (<DIGIT>)* ["d" |�"D"] )
-//                                            | ("d" | "D") ) )
-//                    | ( "." <DIGIT> (<DIGIT>)* [ ("e" | "E") ["+" | "-"] (<DIGIT>)* ] [ ("d" |�"D") ] )) >
+| < DOUBLE_LITERAL: ( ( <DIGIT> (<DIGIT>)*  (
+                                            ( "." (<DIGIT>)* (("e" | "E") ("+" | "-")? (<DIGIT>)*)? ("d" | "D")? )
+                                            | ( ("e" | "E") ("+" | "-")? (<DIGIT>)* ("d" | "D")? )
+                                            | ("d" | "D") ) )
+                    | ( "." <DIGIT> (<DIGIT>)* ( ("e" | "E") ("+" | "-")? (<DIGIT>)* )? ( ("d" | "D") )? )) >
 | < CHAR_LITERAL: "'" (<ESC> | ~["'","\\","\n","\r"]) "'" >
 | < STRING_LITERAL: "\"" (<ESC> | ~["\"","\\","\n","\r"])* "\"" >   
 | < #ESC: "\\" ["n","t","b","r","f","\\","'","\""] >
@@ -1341,7 +1341,7 @@ private JExpression inclusiveOrExpression(): {
         ( 
             <BOR>
             rhs = exclusiveOrExpression()
-            { lhs = new JBOROp( line, lhs, rhs ); }
+            { lhs = new JBitwiseOR( line, lhs, rhs ); }
         )*
     } 
     catch ( ParseException e ) { 
@@ -1370,7 +1370,7 @@ private JExpression exclusiveOrExpression(): {
         ( 
             <BXOR>
             rhs = andExpression()
-            { lhs = new JBXOROp( line, lhs, rhs ); }
+            { lhs = new JBitwiseXOR( line, lhs, rhs ); }
         )*
     } 
     catch ( ParseException e ) { 
@@ -1399,7 +1399,7 @@ private JExpression andExpression(): {
         ( 
             <BAND>
             rhs = equalityExpression()
-            { lhs = new JBANDOp( line, lhs, rhs ); }
+            { lhs = new JBitwiseAND( line, lhs, rhs ); }
         )*
     } 
     catch ( ParseException e ) { 
@@ -1428,10 +1428,11 @@ private JExpression equalityExpression(): {
         ( 
             <EQUAL> 
             rhs = relationalExpression()
-            { lhs = new JEqualOp( line, lhs, rhs ); } |
-			<NEQ> 
-            rhs = relationalExpression()
-            { lhs = new JNEQOp( line, lhs, rhs ); }
+            { lhs = new JEqualOp( line, lhs, rhs ); }
+            // |
+			//<NEQ> 
+            //rhs = relationalExpression()
+            //{ lhs = new JNEQOp( line, lhs, rhs ); }
         )*
     } 
     catch ( ParseException e ) { 
@@ -1460,21 +1461,22 @@ private JExpression relationalExpression(): {
     try {
         lhs = additiveExpression() { line = lhs.line(); }
         [ 
-            <LT> 
-            rhs = shiftExpression()
-            { lhs = new JLessThanOp( line, lhs, rhs ); } |
+            //<LT> 
+            //rhs = shiftExpression()
+            //{ lhs = new JLessThanOp( line, lhs, rhs ); } |
             <GT> 
             rhs = shiftExpression()
             { lhs = new JGreaterThanOp( line, lhs, rhs ); } |
             <LEQ> 
             rhs = shiftExpression()
-            { lhs = new JLessEqualOp( line, lhs, rhs ); } |
-            <GEQ> 
-            rhs = shiftExpression()
-            { lhs = new JGreaterEqualOp( line, lhs, rhs ); } |
-            <INSTANCEOF> 
-            type = referenceType()
-            { lhs = new JInstanceOfOp( line, lhs, type ); }
+            { lhs = new JLessEqualOp( line, lhs, rhs ); }
+            // |
+            //<GEQ> 
+            //rhs = shiftExpression()
+            //{ lhs = new JGreaterEqualOp( line, lhs, rhs ); } |
+            //<INSTANCEOF> 
+            //type = referenceType()
+            //{ lhs = new JInstanceOfOp( line, lhs, type ); }
         ]
     } 
     catch ( ParseException e ) { 
@@ -1503,13 +1505,13 @@ private JExpression shiftExpression(): {
         ( 
             <ALSHIFT> 
             rhs = additiveExpression()
-            { lhs = new JALSHIFTOp( line, lhs, rhs ); } |
+            { lhs = new JArithLeftShift( line, lhs, rhs ); } |
 			<ARSHIFT> 
             rhs = additiveExpression()
-            { lhs = new JARSHIFTOp( line, lhs, rhs ); } |
+            { lhs = new JArithRightShift( line, lhs, rhs ); } |
 			<LRSHIFT> 
             rhs = additiveExpression()
-            { lhs = new JLRSHIFTOp( line, lhs, rhs ); }
+            { lhs = new JLogicRightShift( line, lhs, rhs ); }
         )*
     } 
     catch ( ParseException e ) { 
@@ -1573,10 +1575,10 @@ private JExpression multiplicativeExpression(): {
             { lhs = new JMultiplyOp( line, lhs, rhs ); } |
             <DIV> 
             rhs = unaryExpression()
-            { lhs = new JDivOp( line, lhs, rhs ); } |
+            { lhs = new JDivideOp( line, lhs, rhs ); } |
             <MOD> 
             rhs = unaryExpression()
-            { lhs = new JModOp( line, lhs, rhs ); }
+            { lhs = new JRemainderOp( line, lhs, rhs ); }
         )*
     } 
     catch ( ParseException e ) { 
@@ -1606,9 +1608,15 @@ private JExpression unaryExpression(): {
         <INC> { line = token.beginLine; }
         unaryExpr = unaryExpression()
         { expr = new JPreIncrementOp( line, unaryExpr ); } | 
+        <DEC> { line = token.beginLine; }
+        unaryExpr = unaryExpression()
+        { expr = new JPreDecrementOp( line, unaryExpr ); } | 
         <MINUS> { line = token.beginLine; }
         unaryExpr = unaryExpression()
-        { expr = new JNegateOp( line, unaryExpr ); } |
+        { expr = new JNegateOp( line, unaryExpr ); } | 
+        <PLUS> { line = token.beginLine; }
+        unaryExpr = unaryExpression()
+        { expr = new JUnaryPlus( line, unaryExpr ); } |
         expr = simpleUnaryExpression()
     } 
     catch ( ParseException e ) { 
@@ -1640,6 +1648,9 @@ private JExpression simpleUnaryExpression(): {
 }
 {
     try {
+        <COMPLEMENT> { line = token.beginLine; }
+        unaryExpr = unaryExpression()
+        { expr = new JComplementOp( line, unaryExpr ); } |
         <LNOT> { line = token.beginLine; }
         unaryExpr = unaryExpression()
         { expr = new JLogicalNotOp( line, unaryExpr ); } |
