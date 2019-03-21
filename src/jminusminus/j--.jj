@@ -582,6 +582,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
     ArrayList<JFormalParameter> params = null;
     JBlock body = null;
     ArrayList<JVariableDeclarator> variableDeclarators = null;
+    ArrayList<TypeName> thrownExceptions = null;
     JMember memberDecl = null;
 }
 {
@@ -593,12 +594,16 @@ private JMember memberDecl( ArrayList<String>  mods ): {
                 line = token.beginLine; 
                 name = token.image; 
             } 
-            params = formalParameters() 
+            params = formalParameters()
+            LOOKAHEAD( <THROWS> )
+            (
+            	thrownExceptions = throwsDeclaration()
+            )
             body = block()
             { 
                 memberDecl = 
-                new JConstructorDeclaration( line, mods, 
-                                             name, params, body );
+                new JConstructorDeclaration( line, mods, name, params, 
+                							 thrownExceptions, body );
             }
         ) |     
         LOOKAHEAD( ( <VOID> | type() ) <IDENTIFIER> <LPAREN> )
@@ -609,15 +614,19 @@ private JMember memberDecl( ArrayList<String>  mods ): {
             ) 
             { line = token.beginLine; }
             <IDENTIFIER> { name = token.image; } 
-            params = formalParameters() 
+            params = formalParameters()
+            LOOKAHEAD( <THROWS> )
+            (
+            	thrownExceptions = throwsDeclaration()
+            )
             ( 
                 body = block() | 
                 <SEMI> 
             )
             { 
                 memberDecl = 
-                   new JMethodDeclaration( line, mods, name, 
-                                           type, params, body ); 
+                   new JMethodDeclaration( line, mods, name, type, 
+                   						   params, thrownExceptions, body ); 
             } 
         ) | 
         ( 
@@ -714,6 +723,12 @@ private JStatement statement(): {
     JStatement consequent = null;
     JStatement alternate = null;
     JStatement body = null;
+    JBlock tryBlock = null;
+    ArrayList<ArrayList<JFormalParameter>> catchParameters = null;
+    ArrayList<JBlock> catchBlocks = null;
+    ArrayList<JFormalParameter> parameters = null;
+    JBlock block = null;
+    JBlock finallyBlock = null;
     JExpression expr = null;
 }
 {       
@@ -737,12 +752,32 @@ private JStatement statement(): {
         test = parExpression() 
         body = statement()
         { statement = new JWhileStatement( line, test, body ); } |
+        <TRY> { line = token.beginLine; }
+        tryBlock = block()
+        { catchParameters = new ArrayList(); }
+        { catchBlocks = new ArrayList(); }
+        (
+        	<CATCH>
+        	parameters = formalParameters()
+        	block = block()
+        	{ catchParameters.add(parameters); }
+        	{ catchBlocks.add(block); }
+        )*
+        [
+        	<FINALLY> finallyBlock = block()
+        ]
+        { statement = new JTryStatement(line, tryBlock, catchParameters,
+        								catchBlocks, finallyBlock); } |
         <RETURN> { line = token.beginLine; }
         [ 
             expr = expression() 
         ] 
         <SEMI>
         { statement = new JReturnStatement( line, expr ); } |
+        <THROW> { line = token.beginLine; }
+        expr = expression()
+        <SEMI>
+        { statement = new JThrowStatement( line, expr ); } |
         <SEMI> 
         { statement = new JEmptyStatement( line ); } |
         // Must be a statementExpression
@@ -816,6 +851,31 @@ private JFormalParameter formalParameter(): {
         recoverFromError( new int[] { SEMI, EOF }, e ); 
     }
     { return new JFormalParameter( line, name, type ); }
+}
+
+/**
+*	Parse a throws-declaration as a list of qualified identifiers.
+*/
+private ArrayList<TypeName> throwsDeclaration(): {
+	int line = 0;
+	ArrayList<TypeName> types = new ArrayList<TypeName>();
+	TypeName aType;
+}
+{
+	try {
+		<THROWS>
+		line = token.beginLine;
+		aType = qualifiedIdentifier()
+		{ types.add(aType); }
+		(
+			<COMMA> aType = qualifiedIdentifier()
+			{ types.add(aType); }
+		)*
+	}
+	catch ( ParseException e ) { 
+        recoverFromError( new int[] { SEMI, EOF }, e ); 
+    }
+    { return types; }
 }
 
 /**
