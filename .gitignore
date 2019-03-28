@@ -4,6 +4,7 @@
 
 ### Eclipse ###
 
+src/jminusminus/JavaCCParser*.java
 javadoc/
 java2html/
 .metadata
