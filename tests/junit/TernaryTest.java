@@ -11,7 +11,7 @@ public class TernaryTest extends TestCase {
     	boolean ff2 = false;
     	
     	TestCase.assertEquals(tt1 == tt2 ? 1 : 2, 1);
-    	TestCase.assertEquals(tt1 != tt2 ? 1 : 2, 2);
+    	TestCase.assertEquals(!(tt1 == tt2) ? 1 : 2, 2);
     	TestCase.assertEquals((tt1 || ff1) && (ff1 && ff2) ? 1 : 2, 2);
     	TestCase.assertEquals((tt1 || ff1) || (ff1 && ff2) ? 1 : 2, 1);
     }
