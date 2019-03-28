@@ -78,7 +78,25 @@ final class JTernaryOp extends JExpression {
 
 	@Override
 	public void writeToStdOut(PrettyPrinter p) {
-		throw new Error("writing to console for the ternary operator isn't implemented yet.");
+        p.printf("<JTernaryOp line=\"%d\">\n", line());
+        p.indentRight();
+        p.printf("<TestExpression>\n");
+        p.indentRight();
+        conditional.writeToStdOut(p);
+        p.indentLeft();
+        p.printf("</TestExpression>\n");
+        p.printf("<ThenClause>\n");
+        p.indentRight();
+        ifTrue.writeToStdOut(p);
+        p.indentLeft();
+        p.printf("</ThenClause>\n");
+        p.printf("<ElseClause>\n");
+        p.indentRight();
+        ifFalse.writeToStdOut(p);
+        p.indentLeft();
+        p.printf("</ElseClause>\n");
+        p.indentLeft();
+        p.printf("</JTernaryOp>\n");
 	}
 
 }
