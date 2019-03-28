@@ -32,6 +32,7 @@ public class JMinusMinusTestRunner {
         suite.addTestSuite(LogicRightShiftTest.class);
         suite.addTestSuite(UnaryPlusTest.class);
         suite.addTestSuite(AssignmentsTest.class);
+        suite.addTestSuite(ThrowTest.class);
         return suite;
     }
 
