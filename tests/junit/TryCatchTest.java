@@ -3,9 +3,9 @@ package junit;
 import junit.framework.TestCase;
 import pass.ExceptionThrow;
 import pass.TryCatch;
-import pass.TryCatch.ExceptionA;
-import pass.TryCatch.ExceptionB;
-import pass.TryCatch.ExceptionThrower;
+import pass.ExceptionA;
+import pass.ExceptionB;
+import pass.ExceptionThrower;
 
 public class TryCatchTest extends TestCase {
 

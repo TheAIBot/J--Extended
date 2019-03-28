@@ -27,26 +27,24 @@ public class TryCatch {
 		}
 		return returnStr;
 	}
-	
-	public static class ExceptionA extends Exception {
-		public ExceptionA(String string) {
-			super(string);
-		}
-	}
-	
-	public static class ExceptionB extends Exception {
-		public ExceptionB(String string) {
-			super(string);
-		}
-	}
-	
-	public static interface ExceptionThrower {
-		public void throwExceptionA () throws ExceptionA;
-		public void throwExceptionB () throws ExceptionB;
+}
+
+public class ExceptionA extends Exception {
+	public ExceptionA(String string) {
+		super(string);
 	}
 }
 
+public class ExceptionB extends Exception {
+	public ExceptionB(String string) {
+		super(string);
+	}
+}
 
+public interface ExceptionThrower {
+	public void throwExceptionA () throws ExceptionA;
+	public void throwExceptionB () throws ExceptionB;
+}
 
 
 
