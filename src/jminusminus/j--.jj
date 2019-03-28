@@ -737,7 +737,12 @@ private JMember memberDecl( ArrayList<String>  mods ): {
                 memberDecl = new JFieldDeclaration( line, mods, 
                     variableDeclarators ); 
             }
-        )
+        ) |
+        body = block() { line = token.beginLine; }
+        { if(mods.contains("static"))
+            memberDecl = new JStaticInitializationBlock(line, body);
+                else
+            memberDecl = new JInitializationBlock(line, body); }
     } 
     catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
