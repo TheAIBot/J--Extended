@@ -2,6 +2,7 @@ package jminusminus;
 
 public class JThrowStatement extends JStatement {
 
+	/** The expression thrown. */
 	private JExpression expr;
 	
 	/**

@@ -22,6 +22,9 @@ public class JMethodSignature extends JAST implements JMember  {
     /** The formal parameters. */
     protected ArrayList<JFormalParameter> params;
 
+    /** The declared exceptions thrown by the method. */
+    protected ArrayList<TypeName> exceptionList;
+    
     /** Built in analyze(). */
     protected MethodContext context;
 
@@ -54,12 +57,14 @@ public class JMethodSignature extends JAST implements JMember  {
      */
 
     public JMethodSignature(int line, ArrayList<String> mods, String name,
-                            Type returnType, ArrayList<JFormalParameter> params) {
+                            Type returnType, ArrayList<JFormalParameter> params,
+                            ArrayList<TypeName> exceptionList) {
         super(line);
         this.mods = mods;
         this.name = name;
         this.returnType = returnType;
         this.params = params;
+        this.exceptionList = exceptionList;
         this.isAbstract = mods.contains("abstract");
         this.isStatic = mods.contains("static");
         this.isPrivate = mods.contains("private");
@@ -101,6 +106,15 @@ public class JMethodSignature extends JAST implements JMember  {
                 p.indentLeft();
             }
             p.println("</FormalParameters>");
+        }
+        if (exceptionList != null) {
+        	p.println("<ThrownExceptions>");
+        	p.indentRight();
+        	for (TypeName type : exceptionList) {
+        		p.printf("<Exception type=\"%s\"/>\n", type.toString());
+        	}
+        	p.indentLeft();
+        	p.println("</ThrownExceptions>");
         }
         p.indentLeft();
         p.println("</JMethodSignature>");
