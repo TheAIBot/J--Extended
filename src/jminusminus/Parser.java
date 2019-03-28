@@ -281,7 +281,7 @@ public class Parser {
      */
 
     private boolean seeBasicType() {
-        if (see(BOOLEAN) || see(CHAR) || see(INT)) {
+        if (see(BOOLEAN) || see(CHAR) || see(INT) || see(DOUBLE)) {
             return true;
         } else {
             return false;
@@ -304,7 +304,7 @@ public class Parser {
             return true;
         } else {
             scanner.recordPosition();
-            if (have(BOOLEAN) || have(CHAR) || have(INT)) {
+            if (have(BOOLEAN) || have(CHAR) || have(INT) || have(DOUBLE)) {
                 if (have(LBRACK) && see(RBRACK)) {
                     scanner.returnToPosition();
                     return true;
@@ -1079,6 +1079,8 @@ public class Parser {
             return Type.CHAR;
         } else if (have(INT)) {
             return Type.INT;
+        } else if (have(DOUBLE)){
+            return Type.DOUBLE;
         } else {
             reportParserError("Type sought where %s found", scanner.token()
                     .image());
