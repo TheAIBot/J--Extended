@@ -7,7 +7,7 @@ package pass;
 public class Doubles {
 
 
-    private static double x = 1.0;
+    private double x = 1.0;
 
 
 }

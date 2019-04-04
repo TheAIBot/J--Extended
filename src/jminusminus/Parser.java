@@ -508,12 +508,12 @@ public class Parser {
         } else {
             superClass = Type.OBJECT;
         }
-        ArrayList<String> implementsList = new ArrayList<String>();
+        ArrayList<TypeName> implementsList = new ArrayList<TypeName>();
         if (have(IMPLEMENTS)) {
             boolean moreInterfaces = true;
             while (moreInterfaces){
                 mustBe(IDENTIFIER);
-                implementsList.add(scanner.previousToken().image());
+                implementsList.add(new TypeName(line, scanner.previousToken().image()));
                 moreInterfaces = have(COMMA);
             }
         }

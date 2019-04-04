@@ -66,6 +66,65 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
         staticFieldInitializations = new ArrayList<JFieldDeclaration>();
     }
 
+
+
+    /**
+     * Pre-analyze the members of this declaration in the parent context.
+     * Pre-analysis extends to the member headers (including method headers) but
+     * not into the bodies.
+     *
+     * @param context
+     *            the parent (compilation unit) context.
+     */
+    @Override
+    public void preAnalyze(Context context) {
+        // Construct a class context
+        this.context = new ClassContext(this, context);
+
+        // Resolve superclass
+        superType = superType.resolve(this.context);
+
+        // Creating a partial class in memory can result in a
+        // java.lang.VerifyError if the semantics below are
+        // violated, so we can't defer these checks to analyze()
+        thisType.checkAccess(line, superType);
+        if (superType.isFinal()) {
+            JAST.compilationUnit.reportSemanticError(line,
+                    "Cannot extend a final type: %s", superType.toString());
+        }
+
+        // Create the (partial) class
+        CLEmitter partial = new CLEmitter(false);
+
+        // Add the class header to the partial class
+        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+                : JAST.compilationUnit.packageName() + "/" + name;
+        partial.addClass(mods, qualifiedName, superType.jvmName(), null, false);
+
+        // Pre-analyze the members and add them to the partial
+        // class
+        for (JMember member : interfaceBlock) {
+            member.preAnalyze(this.context, partial);
+            if (member instanceof JConstructorSignature
+                    && ((JConstructorSignature) member).params.size() == 0) {
+                hasExplicitConstructor = true;
+            }
+        }
+
+        // Add the implicit empty constructor?
+        if (!hasExplicitConstructor) {
+            codegenPartialImplicitConstructor(partial);
+        }
+
+        // Get the Class rep for the (partial) class and make it
+        // the representation for this type
+        Type id = this.context.lookupType(name);
+        if (id != null && !JAST.compilationUnit.errorHasOccurred()) {
+            id.setClassRep(partial.toClass());
+        }
+    }
+
+
     @Override
     public JAST analyze(Context context) {
         return null;
@@ -74,6 +133,10 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
     @Override
     public void codegen(CLEmitter output) {
     	throw new UnsupportedOperationException();
+    }
+
+    private void codegenPartialImplicitConstructor(CLEmitter partial) {
+
     }
 
     @Override
@@ -105,16 +168,21 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     }
 
-    @Override
+    /**
+     * Declare this class in the parent (compilation unit) context.
+     *
+     * @param context
+     *            the parent (compilation unit) context.
+     */
+
     public void declareThisType(Context context) {
-    	throw new UnsupportedOperationException();
-
-    }
-
-    @Override
-    public void preAnalyze(Context context) {
-    	throw new UnsupportedOperationException();
-
+        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+                : JAST.compilationUnit.packageName() + "/" + name;
+        CLEmitter partial = new CLEmitter(false);
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null,
+                false); // Object for superClass, just for now
+        thisType = Type.typeFor(partial.toClass());
+        context.addType(line, thisType);
     }
 
     @Override

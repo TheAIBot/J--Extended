@@ -3,6 +3,9 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static jminusminus.CLConstants.*;
 
 /**
@@ -27,7 +30,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     private Type superType;
 
     /** Implements list */
-    private ArrayList<String> implementsList;
+    private ArrayList<TypeName> implementsList;
 
     /** This class type. */
     private Type thisType;
@@ -67,7 +70,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         this.mods = mods;
         this.name = name;
         this.superType = superType;
-        this.implementsList = new ArrayList<String>();
+        this.implementsList = new ArrayList<TypeName>();
         this.classBlock = classBlock;
         hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
@@ -75,7 +78,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     }
 
     public JClassDeclaration(int line, ArrayList<String> mods, String name,
-                             Type superType, ArrayList<String> implementsList, ArrayList<JMember> classBlock) {
+                             Type superType, ArrayList<TypeName> implementsList, ArrayList<JMember> classBlock) {
         super(line);
         this.mods = mods;
         this.name = name;
@@ -139,7 +142,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         CLEmitter partial = new CLEmitter(false);
-        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null,
+        ArrayList<String> superInterfaces = (ArrayList<String>) implementsList.stream().map(TypeName::jvmName).collect(Collectors.toList());
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), superInterfaces,
                 false); // Object for superClass, just for now
         thisType = Type.typeFor(partial.toClass());
         context.addType(line, thisType);

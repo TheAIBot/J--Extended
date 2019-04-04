@@ -8,8 +8,6 @@ import java.util.ArrayList;
 
 public class JMethodSignature extends JAST implements JMember  {
 
-    // todo: kasper
-
     /** Method modifiers. */
     protected ArrayList<String> mods;
 
