@@ -17,6 +17,27 @@ public class JStaticInitializationBlock extends JInitializationBlock implements 
         this.isStatic = true;
     }
 
+    public JBlock analyze(Context context) {
+        this.context = new LocalContext(context);
+
+        for (int i = 0; i < statements.size(); i++) {
+            statements.set(i, (JStatement) statements.get(i).analyze(this.context));
+
+            JStatementExpression se = (JStatementExpression) statements.get(i);
+            if (se.expr instanceof JAssignment) {
+                JAssignment assignment = (JAssignment) se.expr;
+                if (assignment.lhs instanceof JFieldSelection) {
+                    JFieldSelection fs = (JFieldSelection) assignment.lhs;
+                    if(!fs.field.isStatic()) {
+                        JAST.compilationUnit.reportSemanticError(fs.line(), "Non-static field" + fs.fieldName
+                                + " cannot be set from a static initialization block");
+                    }
+                }
+            }
+        }
+        return this;
+    }
+
     @Override
     public void writeToStdOut(PrettyPrinter p) {
         p.printf("<JStaticInitializationBlock line=\"%d\">\n", line());

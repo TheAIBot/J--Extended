@@ -18,10 +18,10 @@ class JFieldSelection extends JExpression implements JLhs {
     private AmbiguousName ambiguousPart;
 
     /** The field name. */
-    private String fieldName;
+    public String fieldName;
 
     /** The Field representing this field. */
-    private Field field;
+    public Field field;
 
     /**
      * Construct an AST node for a field selection without an ambiguous part.

@@ -25,11 +25,6 @@ class JInitializationBlock extends JBlock implements JMember {
     }
 
     @Override
-    public JBlock analyze(Context context) {
-        return null;
-    }
-
-    @Override
     public void codegen(CLEmitter output) {
 
     }
