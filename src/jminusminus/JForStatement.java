@@ -25,7 +25,13 @@ public class JForStatement extends JStatement {
 
     @Override
     public JAST analyze(Context context) {
-        return null;
+        before = (JVariableDeclaration) before.analyze(context);
+        condition = condition.analyze(context);
+        condition.type().mustMatchExpected(line(), Type.BOOLEAN);
+        postIter = postIter.analyze(context);
+        postIter.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
+        body = (JStatement) body.analyze(context);
+        return this;
     }
 
     @Override
@@ -40,6 +46,11 @@ public class JForStatement extends JStatement {
                 before != null ? before.toString() : "null",
                 condition != null ? condition.toString() : "null",
                 postIter != null ? postIter.toString() : "null");
+            p.printf("<Body>\n");
+            p.indentRight();
+            body.writeToStdOut(p);
+            p.indentLeft();
+            p.printf("</Body>\n");
         p.println("</JForStatement>");
     }
 }

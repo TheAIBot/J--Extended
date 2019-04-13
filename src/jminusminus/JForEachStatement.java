@@ -7,6 +7,7 @@ public class JForEachStatement extends JStatement {
 
     protected JFormalParameter internalVariable;
     protected String arrayName;
+    JStatement body;
 
     /**
      * Construct an AST node for a for each expression given its line number in the source file,
@@ -18,11 +19,24 @@ public class JForEachStatement extends JStatement {
         super(line);
         this.internalVariable = var;
         this.arrayName = arrayName;
+        this.body = body;
     }
 
     @Override
     public JAST analyze(Context context) {
-        return null;
+        //Declare the variable
+        LocalVariableDefn defn = new LocalVariableDefn(internalVariable.type(), context.methodContext().nextOffset());
+        defn.initialize();
+        context.addEntry(internalVariable.line(), internalVariable.name(), defn);
+
+        //Make sure the array exists
+        IDefn array = context.lookup(arrayName);
+        if (array == null || !array.type().isArray()) {
+            JAST.compilationUnit.reportSemanticError(line(), arrayName + " is not a declared array");
+        }
+
+        body = (JStatement) body.analyze(context);
+        return this;
     }
 
     @Override
@@ -34,6 +48,11 @@ public class JForEachStatement extends JStatement {
     public void writeToStdOut(PrettyPrinter p) {
         p.printf("<JForEachStatement line=\"%d\" var=\"%s\" array=\"%s\">\n",
                 line(), internalVariable.toString(), arrayName);
+            p.printf("<Body>\n");
+            p.indentRight();
+            body.writeToStdOut(p);
+            p.indentLeft();
+            p.printf("</Body>\n");
         p.println("</JForEachStatement>");
     }
 }
