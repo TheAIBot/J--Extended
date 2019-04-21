@@ -3,6 +3,7 @@
 package jminusminus;
 
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -306,6 +307,9 @@ class LocalContext extends Context {
 
     /** Next offset for a local variable. */
     protected int offset;
+    
+    /** The exceptions that might occur in this local context. */
+    protected ArrayList<Type> exceptions;
 
     /**
      * Construct a local context. A local context is constructed for each block.
@@ -386,6 +390,9 @@ class MethodContext extends LocalContext {
     /** Does (non-void) method have at least one return? */
     private boolean hasReturnStatement = false;
 
+    /** The exceptions thrown by statements in the method. */
+    private ArrayList<Type> declaredExceptions;
+    
     /**
      * Construct a method context.
      * 
@@ -395,13 +402,16 @@ class MethodContext extends LocalContext {
      *            is this method static?
      * @param methodReturnType
      *            return type of this method.
+     * @param declaredExceptions
+     * 			  the exceptions declared to be thrown.
      */
 
     public MethodContext(Context surrounding, boolean isStatic,
-            Type methodReturnType) {
+            Type methodReturnType, ArrayList<Type> declaredExceptions) {
         super(surrounding);
         this.isStatic = isStatic;
         this.methodReturnType = methodReturnType;
+        this.declaredExceptions = declaredExceptions;
         offset = 0;
     }
 
@@ -443,6 +453,11 @@ class MethodContext extends LocalContext {
         return methodReturnType;
     }
 
+    
+    public boolean methodDeclaresException(Type exception) {
+    	return declaredExceptions.contains(exception);
+    }
+    
     /**
      * @inheritDoc
      */

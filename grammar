@@ -53,13 +53,15 @@ statement ::= block
             | IF parExpression statement [ELSE statement]
             | WHILE parExpression statement
             | TRY block
-            	{CATCH (formalParameter) block}
+            	{catchStatement}
             	[FINALLY block]
             | FOR LPAREN (forExpression | forEachExpression) RPAREN statement
             | RETURN [expression] SEMI
             | THROW expression SEMI
             | SEMI
             | statementExpression SEMI
+
+catchStatement ::= CATCH LPAREN [{type BOR}] type IDENTIFIER RPAREN block
 
 forExpression ::= [localVariableDeclarationStatement] SEMI [expression] SEMI [expression]
 

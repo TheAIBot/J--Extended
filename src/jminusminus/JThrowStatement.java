@@ -23,8 +23,8 @@ public class JThrowStatement extends JStatement {
 
 	@Override
 	public void codegen(CLEmitter output) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		expr.codegen(output);
+		output.addNoArgInstruction(CLConstants.ATHROW);
 	}
 
 	/**

@@ -21,7 +21,10 @@ public class JMethodSignature extends JAST implements JMember  {
     protected ArrayList<JFormalParameter> params;
 
     /** The declared exceptions thrown by the method. */
-    protected ArrayList<TypeName> exceptionList;
+    protected ArrayList<Type> exceptions;
+    
+    /** The exception names in internal form. Computed by preAnalyze(). */
+    protected ArrayList<String> exceptionNames;
     
     /** Built in analyze(). */
     protected MethodContext context;
@@ -56,13 +59,13 @@ public class JMethodSignature extends JAST implements JMember  {
 
     public JMethodSignature(int line, ArrayList<String> mods, String name,
                             Type returnType, ArrayList<JFormalParameter> params,
-                            ArrayList<TypeName> exceptionList) {
+                            ArrayList<Type> exceptions) {
         super(line);
         this.mods = mods;
         this.name = name;
         this.returnType = returnType;
         this.params = params;
-        this.exceptionList = exceptionList;
+        this.exceptions = exceptions;
         this.isAbstract = mods.contains("abstract");
         this.isStatic = mods.contains("static");
         this.isPrivate = mods.contains("private");
@@ -75,7 +78,7 @@ public class JMethodSignature extends JAST implements JMember  {
 
     @Override
     public void codegen(CLEmitter output) {
-
+    	// Remember to include exceptionNames in addMethod(..)
     }
 
     @Override
@@ -105,10 +108,10 @@ public class JMethodSignature extends JAST implements JMember  {
             }
             p.println("</FormalParameters>");
         }
-        if (exceptionList != null) {
+        if (exceptions != null) {
         	p.println("<ThrownExceptions>");
         	p.indentRight();
-        	for (TypeName type : exceptionList) {
+        	for (Type type : exceptions) {
         		p.printf("<Exception type=\"%s\"/>\n", type.toString());
         	}
         	p.indentLeft();
@@ -120,6 +123,13 @@ public class JMethodSignature extends JAST implements JMember  {
 
     @Override
     public void preAnalyze(Context context, CLEmitter partial) {
+    	
 
+    	exceptionNames = new ArrayList<String>();
+        // Resolve exception types
+        for (int i = 0; i < exceptions.size(); i++) {
+        	exceptions.set(i, exceptions.get(i).resolve(context));
+        	exceptionNames.add(exceptions.get(i).jvmName());
+        }
     }
 }

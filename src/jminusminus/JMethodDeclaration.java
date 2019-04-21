@@ -24,7 +24,10 @@ class JMethodDeclaration extends JAST implements JMember {
     protected ArrayList<JFormalParameter> params;
 
     /** The exception types thrown by the method. */
-    protected ArrayList<TypeName> exceptionList;
+    protected ArrayList<Type> exceptions;
+    
+    /** The exception names in internal form. Computed by preAnalyze(). */
+    protected ArrayList<String> exceptionNames;
     
     /** Method body. */
     protected JBlock body;
@@ -67,7 +70,7 @@ class JMethodDeclaration extends JAST implements JMember {
     public JMethodDeclaration(int line, ArrayList<String> mods,
         String name, Type returnType,
         ArrayList<JFormalParameter> params, 
-        ArrayList<TypeName> exceptionList, JBlock body)
+        ArrayList<Type> exceptions, JBlock body)
 
     {
         super(line);
@@ -75,7 +78,7 @@ class JMethodDeclaration extends JAST implements JMember {
         this.name = name;
         this.returnType = returnType;
         this.params = params;
-        this.exceptionList = exceptionList;
+        this.exceptions = exceptions;
         this.body = body;
         this.isAbstract = mods.contains("abstract");
         this.isStatic = mods.contains("static");
@@ -116,6 +119,13 @@ class JMethodDeclaration extends JAST implements JMember {
                 "static method cannot be declared abstract");
         }
 
+        exceptionNames = new ArrayList<String>();
+        // Resolve exception types
+        for (int i = 0; i < exceptions.size(); i++) {
+        	exceptions.set(i, exceptions.get(i).resolve(context));
+        	exceptionNames.add(exceptions.get(i).jvmName());
+        }
+        
         // Compute descriptor
         descriptor = "(";
         for (JFormalParameter param : params) {
@@ -182,7 +192,7 @@ class JMethodDeclaration extends JAST implements JMember {
         // Generate a method with an empty body; need a return to
         // make
         // the class verifier happy.
-        partial.addMethod(mods, name, descriptor, null, false);
+        partial.addMethod(mods, name, descriptor, exceptionNames, false);
 
         // Add implicit RETURN
         if (returnType == Type.VOID) {
@@ -207,7 +217,7 @@ class JMethodDeclaration extends JAST implements JMember {
      */
 
     public void codegen(CLEmitter output) {
-        output.addMethod(mods, name, descriptor, null, false);
+        output.addMethod(mods, name, descriptor, exceptionNames, false);
         if (body != null) {
             body.codegen(output);
         }
@@ -248,10 +258,10 @@ class JMethodDeclaration extends JAST implements JMember {
             }
             p.println("</FormalParameters>");
         }
-        if (exceptionList != null) {
+        if (exceptions != null) {
         	p.println("<ThrownExceptions>");
         	p.indentRight();
-        	for (TypeName type : exceptionList) {
+        	for (Type type : exceptions) {
         		p.printf("<Exception type=\"%s\"/>\n", type.toString());
         	}
         	p.indentLeft();
