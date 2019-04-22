@@ -309,7 +309,7 @@ class LocalContext extends Context {
     protected int offset;
     
     /** The exceptions that might occur in this local context. */
-    protected ArrayList<Type> allowedExceptions;
+    protected ArrayList<Type> allowedExceptions = new ArrayList();
 
     /**
      * Construct a local context. A local context is constructed for each block.
@@ -359,11 +359,11 @@ class LocalContext extends Context {
     }
     
     /**
-     * Get list of exceptions that are allowed in this context.
+     * Is the exception allowed to be thrown within this context?
      * @return
      */
-    public ArrayList<Type> getAllowedExceptions() {
-    	return allowedExceptions;
+    public boolean isExceptionAllowed(Type exception) {
+    	return allowedExceptions.contains(exception);
     }
 
     /**
@@ -419,14 +419,19 @@ class MethodContext extends LocalContext {
      * @param methodReturnType
      *            return type of this method.
      * @param declaredExceptions
-     * 			  the exceptions declared to be thrown.
+     * 			  the exceptions declared to be thrown. 
+     * 			  These exceptions become part of the allowed exceptions
+     * 			  inside this context. Can be null.
      */
 
     public MethodContext(Context surrounding, boolean isStatic,
-            Type methodReturnType) {
+            Type methodReturnType, ArrayList<Type> declaredExceptions) {
         super(surrounding);
         this.isStatic = isStatic;
         this.methodReturnType = methodReturnType;
+        if (declaredExceptions != null) {
+        	super.allowedExceptions = declaredExceptions;
+        }
         offset = 0;
     }
 
