@@ -309,9 +309,7 @@ class LocalContext extends Context {
     protected int offset;
     
     /** The exceptions that might occur in this local context. */
-    protected ArrayList<Type> exceptions;
-    
-    protected ArrayList<Type> caughtExceptions;
+    protected ArrayList<Type> allowedExceptions;
 
     /**
      * Construct a local context. A local context is constructed for each block.
@@ -347,6 +345,25 @@ class LocalContext extends Context {
 
     public int nextOffset() {
         return offset++;
+    }
+    
+    /**
+     * Add an exception that is allowed to be thrown in this context, 
+     * because the exception is either part of the method declaration 
+     * or because we are currently inside a try-block where it can be
+     * caught.
+     * @param exception
+     */
+    public void addAllowedException(Type exception) {
+    	allowedExceptions.add(exception);
+    }
+    
+    /**
+     * Get list of exceptions that are allowed in this context.
+     * @return
+     */
+    public ArrayList<Type> getAllowedExceptions() {
+    	return allowedExceptions;
     }
 
     /**
@@ -391,9 +408,6 @@ class MethodContext extends LocalContext {
 
     /** Does (non-void) method have at least one return? */
     private boolean hasReturnStatement = false;
-
-    /** The exceptions thrown by statements in the method. */
-    private ArrayList<Type> declaredExceptions;
     
     /**
      * Construct a method context.
@@ -409,11 +423,10 @@ class MethodContext extends LocalContext {
      */
 
     public MethodContext(Context surrounding, boolean isStatic,
-            Type methodReturnType, ArrayList<Type> declaredExceptions) {
+            Type methodReturnType) {
         super(surrounding);
         this.isStatic = isStatic;
         this.methodReturnType = methodReturnType;
-        this.declaredExceptions = declaredExceptions;
         offset = 0;
     }
 
@@ -455,11 +468,6 @@ class MethodContext extends LocalContext {
         return methodReturnType;
     }
 
-    
-    public boolean methodDeclaresException(Type exception) {
-    	return declaredExceptions.contains(exception);
-    }
-    
     /**
      * @inheritDoc
      */
