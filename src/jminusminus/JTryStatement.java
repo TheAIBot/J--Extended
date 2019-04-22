@@ -40,9 +40,8 @@ public class JTryStatement extends JStatement {
 		for (int i = 0; i < catchStatements.size(); i++) {
 			catchStatements.set(i, catchStatements.get(i).analyze(context));
 		}
-		this.context = new LocalContext(context);
 		// thrown exceptions are added to local context in tryBlock.analyze()
-		tryBlock = tryBlock.analyze(this.context);
+		tryBlock = tryBlock.analyze(context);
 		// check that an exception type is caught only once
 		TreeSet<Type> caughtExceptions = new TreeSet();
 		for (JCatchStatement cStatement : catchStatements) {
