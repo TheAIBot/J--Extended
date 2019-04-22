@@ -1,5 +1,6 @@
 package jminusminus;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.TreeSet;
 
@@ -13,6 +14,9 @@ public class JTryStatement extends JStatement {
 	
 	/** The finally-block of this statement. */
 	private JBlock finallyBlock;
+	
+	/** The local context of the try-block. */
+	private LocalContext context;
 	
 	/**
 	 * Constructs an AST-node for the try-catch-finally statement.
@@ -31,11 +35,14 @@ public class JTryStatement extends JStatement {
 	}
 
 	@Override
-	public JAST analyze(Context context) {
-		// thrown exceptions are added to local context in body.analyze()
-		
+	public JTryStatement analyze(Context context) {
 		// analyze each catch statement
-		
+		for (int i = 0; i < catchStatements.size(); i++) {
+			catchStatements.set(i, catchStatements.get(i).analyze(context));
+		}
+		this.context = new LocalContext(context);
+		// thrown exceptions are added to local context in tryBlock.analyze()
+		tryBlock = tryBlock.analyze(this.context);
 		// check that an exception type is caught only once
 		TreeSet<Type> caughtExceptions = new TreeSet();
 		for (JCatchStatement cStatement : catchStatements) {
@@ -53,6 +60,7 @@ public class JTryStatement extends JStatement {
 		// that are also thrown by the enclosing method, or
 		// the ones that are caught by an enclosing try-catch
 		
+		
 		return this;
 	}
 
@@ -69,8 +77,6 @@ public class JTryStatement extends JStatement {
 			cStatement.setTryStartLabel(startLabel);
 			cStatement.setTryEndLabel(endLabel);
 			cStatement.codegen(output);
-			endLabel = output.createLabel();
-			output.addLabel(endLabel);
 		}
 		output.addLabel(finallyLabel);
 		if (finallyBlock != null) {
@@ -146,10 +152,15 @@ class JCatchStatement extends JStatement {
 	}
 				
 	@Override
-	public JAST analyze(Context context) {
-		// Resolve exception types
+	public JCatchStatement analyze(Context context) {
+		Type throwableType = Type.typeFor(java.lang.Throwable.class);
+		// Resolve exception types and ensure that it inherits Throwable
 		for (int i = 0; i < exceptions.size(); i++) {
         	exceptions.set(i, exceptions.get(i).resolve(context));
+        	if (!exceptions.get(i).isJavaAssignableFrom(throwableType)) {
+        		JAST.compilationUnit.reportSemanticError(line(), 
+        				"Type " + exceptions.get(i) + " is not a Throwable type.");
+        	}
         }
 		// add caught exceptions to local context
 		
@@ -158,8 +169,7 @@ class JCatchStatement extends JStatement {
 		// If this is a multicatch, then the Throwable-type should be used.
 		LocalVariableDefn defn;
 		if (exceptions.size() > 1) {
-			defn = new LocalVariableDefn(context.lookupType("java.lang.Throwable"), 
-					this.context.nextOffset());
+			defn = new LocalVariableDefn(throwableType, this.context.nextOffset());
 		} else {
 			defn = new LocalVariableDefn(exceptions.get(0), this.context.nextOffset());
 		}

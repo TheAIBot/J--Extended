@@ -310,6 +310,8 @@ class LocalContext extends Context {
     
     /** The exceptions that might occur in this local context. */
     protected ArrayList<Type> exceptions;
+    
+    protected ArrayList<Type> caughtExceptions;
 
     /**
      * Construct a local context. A local context is constructed for each block.
