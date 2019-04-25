@@ -363,18 +363,32 @@ class LocalContext extends Context {
     
     /**
      * Is the exception allowed to be thrown within this context or the
-     * surrounding contexts?
+     * surrounding contexts? 
+     * All unchecked exceptions (subtypes of java.lang.Error and 
+     * java.lang.RuntimeException) are allowed.
+     * A subtype of an allowed exception is also allowed.
      * @return
      */
     public boolean isExceptionAllowed(Type exception) {
+    	if (Type.typeFor(java.lang.Error.class).isJavaAssignableFrom(exception)
+    			|| Type.typeFor(java.lang.RuntimeException.class)
+    					.isJavaAssignableFrom(exception)) {
+    		return true;
+    	} 
     	if (allowedExceptions.contains(exception)) {
     		return true;
     	}
-    	else if (surroundingContext() instanceof LocalContext) {
+    	// Is the exception a subtype of an allowed exception
+		for (Type allowedEx : allowedExceptions) {
+			if (allowedEx.isJavaAssignableFrom(exception)) {
+				return true;
+			}
+		}
+		// Does the surrounding contexts allow this exception?
+    	if (surroundingContext() instanceof LocalContext) {
     		return ((LocalContext)surroundingContext()).isExceptionAllowed(exception);
-    	} else {
-    		return false;
-    	}
+    	} 
+        return false;
     }
     
     /**

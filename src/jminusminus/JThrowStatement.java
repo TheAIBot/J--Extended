@@ -18,7 +18,16 @@ public class JThrowStatement extends JStatement {
 	@Override
 	public JThrowStatement analyze(Context context) {
 		expr = expr.analyze(context);
-		
+		Type type = expr.type();
+		if (Type.typeFor(java.lang.Throwable.class).isJavaAssignableFrom(type)) {
+			JAST.compilationUnit.reportSemanticError(line(), "Type " + type 
+					+ " is not a Throwable type.");
+		}
+		if (!((LocalContext)context).isExceptionAllowed(type)) {
+			JAST.compilationUnit.reportSemanticError(line(), "Exception " 
+					+ type + " is never caught or declared in the method declaration.");
+		}
+		((LocalContext)context).addThrownException(type);
 		return this;
 	}
 
