@@ -151,9 +151,9 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
                             .superType().jvmName(), "<init>", "()V");
         }
         // Field initializations
-        for (JFieldDeclaration field : definingClass
+        for (JStatement field : definingClass
                 .instanceFieldInitializations()) {
-            field.codegenInitializations(output);
+            field.codegen(output);
         }
         // And then the body
         body.codegen(output);

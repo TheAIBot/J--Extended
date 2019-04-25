@@ -5,6 +5,8 @@ package jminusminus;
  */
 public class JForStatement extends JStatement {
 
+    private Context context;
+
     JVariableDeclaration before;
     JExpression condition, postIter;
     JStatement body;
@@ -25,12 +27,24 @@ public class JForStatement extends JStatement {
 
     @Override
     public JAST analyze(Context context) {
-        before = (JVariableDeclaration) before.analyze(context);
-        condition = condition.analyze(context);
-        condition.type().mustMatchExpected(line(), Type.BOOLEAN);
-        postIter = postIter.analyze(context);
-        postIter.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
-        body = (JStatement) body.analyze(context);
+        this.context = new LocalContext(context);
+
+        if(before != null)
+            before = (JVariableDeclaration) before.analyze(this.context);
+
+        if(condition != null) {
+            condition = condition.analyze(this.context);
+            condition.type().mustMatchExpected(line(), Type.BOOLEAN);
+        } else {
+            condition = new JLiteralTrue(line()).analyze(this.context);
+        }
+
+        if(postIter != null) {
+            postIter = postIter.analyze(this.context);
+            postIter.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
+        }
+
+        body = (JStatement) body.analyze(this.context);
         return this;
     }
 

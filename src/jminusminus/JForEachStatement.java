@@ -9,6 +9,8 @@ public class JForEachStatement extends JStatement {
     protected String arrayName;
     JStatement body;
 
+    private Context context;
+
     /**
      * Construct an AST node for a for each expression given its line number in the source file,
      * internal variable and array name.
@@ -24,18 +26,20 @@ public class JForEachStatement extends JStatement {
 
     @Override
     public JAST analyze(Context context) {
+        this.context = new LocalContext(context);
+
         //Declare the variable
-        LocalVariableDefn defn = new LocalVariableDefn(internalVariable.type(), context.methodContext().nextOffset());
+        LocalVariableDefn defn = new LocalVariableDefn(internalVariable.type(), this.context.methodContext().nextOffset());
         defn.initialize();
-        context.addEntry(internalVariable.line(), internalVariable.name(), defn);
+        this.context.addEntry(internalVariable.line(), internalVariable.name(), defn);
 
         //Make sure the array exists
-        IDefn array = context.lookup(arrayName);
+        IDefn array = this.context.lookup(arrayName);
         if (array == null || !array.type().isArray()) {
             JAST.compilationUnit.reportSemanticError(line(), arrayName + " is not a declared array");
         }
 
-        body = (JStatement) body.analyze(context);
+        body = (JStatement) body.analyze(this.context);
         return this;
     }
 

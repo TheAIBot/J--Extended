@@ -17,7 +17,7 @@ class JFieldDeclaration extends JAST implements JMember {
     private ArrayList<JVariableDeclarator> decls;
 
     /** Variable initializations. */
-    private ArrayList<JStatement> initializations;
+    public ArrayList<JStatement> initializations;
 
     /**
      * Construct an AST node for a field declaration given the line number,
