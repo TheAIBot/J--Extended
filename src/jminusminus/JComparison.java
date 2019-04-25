@@ -41,9 +41,13 @@ abstract class JComparison extends JBooleanBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-        lhs.type().mustMatchExpected(line(), Type.INT);
-        rhs.type().mustMatchExpected(line(), lhs.type());
-        type = Type.BOOLEAN;
+        if (lhs.type() == rhs.type()) {
+            type = Type.BOOLEAN;
+        } else {
+            type = Type.ANY;
+            JAST.compilationUnit.reportSemanticError(line(),
+                    "Right and left hand side of the comparison are not of the same type");
+        }
         return this;
     }
 
