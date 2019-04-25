@@ -7,4 +7,10 @@ public class DivAssign {
 		t /= y;
 		return t;
 	}
+	
+	public double divAssignD(double x, double y) {
+		double t = x;
+		t /= y;
+		return t;
+	}
 }

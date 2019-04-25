@@ -20,5 +20,10 @@ public class PlusAssignTest extends TestCase {
 		TestCase.assertEquals(plusAssign.plusAssign(6 , 6),  6 + 6);
 		TestCase.assertEquals(plusAssign.plusAssign(7 , 3),  7 + 3);
 		TestCase.assertEquals(plusAssign.plusAssign(13, 2), 13 + 2);
+		
+		TestCase.assertEquals(plusAssign.plusAssignD(3d , 6d),  3d + 6d);
+		TestCase.assertEquals(plusAssign.plusAssignD(6d , 6d),  6d + 6d);
+		TestCase.assertEquals(plusAssign.plusAssignD(7d , 3d),  7d + 3d);
+		TestCase.assertEquals(plusAssign.plusAssignD(13d, 2d), 13d + 2d);
 	}
 }

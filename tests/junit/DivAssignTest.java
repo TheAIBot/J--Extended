@@ -20,5 +20,10 @@ public class DivAssignTest extends TestCase {
 		TestCase.assertEquals(divAssign.divAssign(6 , 6),  6 / 6);
 		TestCase.assertEquals(divAssign.divAssign(7 , 3),  7 / 3);
 		TestCase.assertEquals(divAssign.divAssign(13, 2), 13 / 2);
+		
+		TestCase.assertEquals(divAssign.divAssignD(3d , 6d),  3d / 6d);
+		TestCase.assertEquals(divAssign.divAssignD(6d , 6d),  6d / 6d);
+		TestCase.assertEquals(divAssign.divAssignD(7d , 3d),  7d / 3d);
+		TestCase.assertEquals(divAssign.divAssignD(13d, 2d), 13d / 2d);
 	}
 }

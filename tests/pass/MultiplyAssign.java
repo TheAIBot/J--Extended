@@ -7,4 +7,10 @@ public class MultiplyAssign {
 		t *= y;
 		return t;
 	}
+	
+	public double multiplyAssignD(double x, double y) {
+		double t = x;
+		t *= y;
+		return t;
+	}
 }
