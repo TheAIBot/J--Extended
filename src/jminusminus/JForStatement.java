@@ -3,6 +3,9 @@ package jminusminus;
 /**
  * Created by Tobias on 3/7/2019.
  */
+
+import static jminusminus.CLConstants.*;
+
 public class JForStatement extends JStatement {
 
     private Context context;
@@ -50,7 +53,27 @@ public class JForStatement extends JStatement {
 
     @Override
     public void codegen(CLEmitter output) {
+        // Need two labels
+        String test = output.createLabel();
+        String out = output.createLabel();
 
+        if(before != null)
+            before.codegen(output);
+        // Branch out of the loop on the test condition
+        // being false
+        output.addLabel(test);
+        condition.codegen(output, out, false);
+
+        // Codegen body
+        body.codegen(output);
+        if(postIter != null)
+            postIter.codegen(output);
+
+        // Unconditional jump back up to test
+        output.addBranchInstruction(GOTO, test);
+
+        // The label below and outside the loop
+        output.addLabel(out);
     }
 
     @Override
