@@ -42,10 +42,10 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     private boolean hasExplicitConstructor;
 
     /** Instance fields of this class. */
-    private ArrayList<JFieldDeclaration> instanceFieldInitializations;
+    private ArrayList<JStatement> instanceFieldInitializations;
 
     /** Static (class) fields of this class. */
-    private ArrayList<JFieldDeclaration> staticFieldInitializations;
+    private ArrayList<JStatement> staticFieldInitializations;
 
     /**
      * Construct an AST node for a class declaration given the line number, list
@@ -73,8 +73,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         this.implementsList = new ArrayList<TypeName>();
         this.classBlock = classBlock;
         hasExplicitConstructor = false;
-        instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
-        staticFieldInitializations = new ArrayList<JFieldDeclaration>();
+        instanceFieldInitializations = new ArrayList<JStatement>();
+        staticFieldInitializations = new ArrayList<JStatement>();
     }
 
     public JClassDeclaration(int line, ArrayList<String> mods, String name,
@@ -86,8 +86,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         this.implementsList = implementsList;
         this.classBlock = classBlock;
         hasExplicitConstructor = false;
-        instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
-        staticFieldInitializations = new ArrayList<JFieldDeclaration>();
+        instanceFieldInitializations = new ArrayList<JStatement>();
+        staticFieldInitializations = new ArrayList<JStatement>();
     }
 
     /**
@@ -127,7 +127,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      * @return the field declarations having initializations.
      */
 
-    public ArrayList<JFieldDeclaration> instanceFieldInitializations() {
+    public ArrayList<JStatement> instanceFieldInitializations() {
         return instanceFieldInitializations;
     }
 
@@ -227,10 +227,16 @@ class JClassDeclaration extends JAST implements JTypeDecl {
             if (member instanceof JFieldDeclaration) {
                 JFieldDeclaration fieldDecl = (JFieldDeclaration) member;
                 if (fieldDecl.mods().contains("static")) {
-                    staticFieldInitializations.add(fieldDecl);
+                    staticFieldInitializations.addAll(fieldDecl.initializations);
                 } else {
-                    instanceFieldInitializations.add(fieldDecl);
+                    instanceFieldInitializations.addAll(fieldDecl.initializations);
                 }
+            } else if(member instanceof JStaticInitializationBlock) {
+                JStaticInitializationBlock staticBlock = (JStaticInitializationBlock) member;
+                staticFieldInitializations.addAll(staticBlock.statements);
+            } else if(member instanceof JInitializationBlock) {
+                JInitializationBlock block = (JInitializationBlock) member;
+                instanceFieldInitializations.addAll(block.statements);
             }
         }
 
@@ -352,8 +358,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
         // If there are instance field initializations, generate
         // code for them
-        for (JFieldDeclaration instanceField : instanceFieldInitializations) {
-            instanceField.codegenInitializations(output);
+        for (JStatement instanceField : instanceFieldInitializations) {
+            instanceField.codegen(output);
         }
 
         // Return
@@ -377,8 +383,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
         // If there are instance initializations, generate code
         // for them
-        for (JFieldDeclaration staticField : staticFieldInitializations) {
-            staticField.codegenInitializations(output);
+        for (JStatement staticField : staticFieldInitializations) {
+            staticField.codegen(output);
         }
 
         // Return
