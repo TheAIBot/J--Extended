@@ -191,7 +191,10 @@ class JMethodDeclaration extends JAST implements JMember {
             || returnType == Type.BOOLEAN || returnType == Type.CHAR || returnType == Type.DOUBLE) {
             partial.addNoArgInstruction(ICONST_0);
             partial.addNoArgInstruction(IRETURN);
-        } else {
+        } else if (returnType == Type.DOUBLE) {
+                partial.addNoArgInstruction(DCONST_0);
+                partial.addNoArgInstruction(DRETURN);
+            } else {
             // A reference type.
             partial.addNoArgInstruction(ACONST_NULL);
             partial.addNoArgInstruction(ARETURN);
