@@ -3,6 +3,7 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -180,10 +181,10 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         // Add the class header to the partial class
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
-        partial.addClass(mods, qualifiedName, superType.jvmName(), null, false);
+        ArrayList<String> superInterfaces = (ArrayList<String>) implementsList.stream().map(TypeName::jvmName).collect(Collectors.toList());
+        partial.addClass(mods, qualifiedName, superType.jvmName(), superInterfaces, false);
 
-        // Pre-analyze the members and add them to the partial
-        // class
+        // Pre-analyze the members and add them to the partial class
         for (JMember member : classBlock) {
             member.preAnalyze(this.context, partial);
             if (member instanceof JConstructorDeclaration
@@ -198,8 +199,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         }
 
         // Get the Class rep for the (partial) class and make it
-        // the
-        // representation for this type
+        // the representation for this type
         Type id = this.context.lookupType(name);
         if (id != null && !JAST.compilationUnit.errorHasOccurred()) {
             id.setClassRep(partial.toClass());
@@ -211,8 +211,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      * given context. Analysis includes field initializations and the method
      * bodies.
      * 
-     * @param context
-     *            the parent (compilation unit) context. Ignored here.
+     * @param context the parent (compilation unit) context. Ignored here.
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
 
@@ -221,6 +220,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         for (JMember member : classBlock) {
             ((JAST) member).analyze(this.context);
         }
+
+        List<JMethodDeclaration> jmethods = new ArrayList<>();
 
         // Copy declared fields for purposes of initialization.
         for (JMember member : classBlock) {
@@ -231,8 +232,59 @@ class JClassDeclaration extends JAST implements JTypeDecl {
                 } else {
                     instanceFieldInitializations.add(fieldDecl);
                 }
+            } else if (member instanceof JMethodDeclaration){
+                jmethods.add((JMethodDeclaration) member);
             }
         }
+
+
+        //todo:kasper check at metoder i interfaces er implementeret
+        for (TypeName curInterface : implementsList){
+            Class classRep = curInterface.resolve(context).classRep();
+            java.lang.reflect.Method[] methods = classRep.getMethods();
+            for (java.lang.reflect.Method method : methods){
+                List<JMethodDeclaration> jmethodOptions = jmethods.stream().filter(m -> m.name.equals(method.getName())).collect(Collectors.toList());
+                if (jmethodOptions.isEmpty()){
+                    JAST.compilationUnit.reportSemanticError(line, "Class must implement %s " +
+                            "as defined in interface %s", method.getName(), curInterface.simpleName());
+                    break;
+                }
+                List<Class> parameterTypes = Arrays.asList(method.getParameterTypes());
+                JMethodDeclaration thisMethod = null;
+                for (JMethodDeclaration jMethodDeclaration : jmethodOptions){
+                    // check return type
+                    if (!jMethodDeclaration.returnType.classRep().equals(method.getReturnType())){
+                        break;
+                    }
+
+                    // check parameters
+                    if (jMethodDeclaration.params.size() != parameterTypes.size()){
+                        break;
+                    }
+
+                    boolean paramsMatch = true;
+                    for (JFormalParameter param : jMethodDeclaration.params){
+                        if (!parameterTypes.contains(param.type().classRep())){
+                               paramsMatch = false;
+                               break;
+                        }
+                    }
+                    if (!paramsMatch){
+                        break;
+                    }
+
+                    // todo: check modifiers
+
+
+                    thisMethod = jMethodDeclaration;
+                }
+                if (thisMethod == null){
+                    JAST.compilationUnit.reportSemanticError(line, "Method %s from interface %s" +
+                            " must be implemented!", method.getName(), curInterface.simpleName());
+                }
+            }
+        }
+
 
         // Finally, ensure that a non-abstract class has
         // no abstract methods.
@@ -261,7 +313,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         // The class header
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
-        output.addClass(mods, qualifiedName, superType.jvmName(), null, false);
+        ArrayList<String> superInterfaces = (ArrayList<String>) implementsList.stream().map(TypeName::jvmName).collect(Collectors.toList());
+        output.addClass(mods, qualifiedName, superType.jvmName(), superInterfaces, false);
 
         // The implicit empty constructor?
         if (!hasExplicitConstructor) {
