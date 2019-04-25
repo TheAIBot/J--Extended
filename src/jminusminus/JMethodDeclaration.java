@@ -188,7 +188,7 @@ class JMethodDeclaration extends JAST implements JMember {
         if (returnType == Type.VOID) {
             partial.addNoArgInstruction(RETURN);
         } else if (returnType == Type.INT
-            || returnType == Type.BOOLEAN || returnType == Type.CHAR) {
+            || returnType == Type.BOOLEAN || returnType == Type.CHAR || returnType == Type.DOUBLE) {
             partial.addNoArgInstruction(ICONST_0);
             partial.addNoArgInstruction(IRETURN);
         } else {
