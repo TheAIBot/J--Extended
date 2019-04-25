@@ -13,7 +13,7 @@ public class ForLoops {
 
         }
 
-        for(;true;) {
+        for(;;) {
 
         }
 
