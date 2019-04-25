@@ -1225,27 +1225,27 @@ public class Parser {
         if (have(ASSIGN)) {
             return new JAssignOp(line, lhs, assignmentExpression());
         } else if (have(PLUS_ASSIGN)) {
-        	return new JAssignOp(line, lhs, JPlusOp(line, lhs, assignmentExpression()));
+        	return new JAssignOp(line, lhs, new JPlusOp(line, lhs, assignmentExpression()));
 		} else if (have(MINUS_ASSIGN)) {
-        	return new JAssignOp(line, lhs, JSubtractOp(line, lhs, assignmentExpression()));
+        	return new JAssignOp(line, lhs, new JSubtractOp(line, lhs, assignmentExpression()));
 		} else if (have(STAR_ASSIGN)) {
-        	return new JAssignOp(line, lhs, JMultiplyOp(line, lhs, assignmentExpression()));
+        	return new JAssignOp(line, lhs, new JMultiplyOp(line, lhs, assignmentExpression()));
 		} else if (have(DIV_ASSIGN)) {
-        	return new JAssignOp(line, lhs, JDivideOp(line, lhs, assignmentExpression()));
+        	return new JAssignOp(line, lhs, new JDivideOp(line, lhs, assignmentExpression()));
 		} else if (have(ALSHIFT_ASSIGN)) {
-        	return new JAssignOp(line, lhs, JArithLeftShift(line, lhs, assignmentExpression()));
+        	return new JAssignOp(line, lhs, new JArithLeftShift(line, lhs, assignmentExpression()));
 		} else if (have(ARSHIFT_ASSIGN)) {
-        	return new JAssignOp(line, lhs, JArithRightShift(line, lhs, assignmentExpression()));
+        	return new JAssignOp(line, lhs, new JArithRightShift(line, lhs, assignmentExpression()));
 		} else if (have(LRSHIFT_ASSIGN)) {
-        	return new JAssignOp(line, lhs, JLogicRightShift(line, lhs, assignmentExpression()));
+        	return new JAssignOp(line, lhs, new JLogicRightShift(line, lhs, assignmentExpression()));
 		} else if (have(MOD_ASSIGN)) {
-        	return new JAssignOp(line, lhs, JRemainderOp(line, lhs, assignmentExpression()));
+        	return new JAssignOp(line, lhs, new JRemainderOp(line, lhs, assignmentExpression()));
 		} else if (have(BAND_ASSIGN)) {
-        	return new JAssignOp(line, lhs, JBitwiseAND(line, lhs, assignmentExpression()));
+        	return new JAssignOp(line, lhs, new JBitwiseAND(line, lhs, assignmentExpression()));
 		} else if (have(BXOR_ASSIGN)) {
-        	return new JAssignOp(line, lhs, JBitwiseXOR(line, lhs, assignmentExpression()));
+        	return new JAssignOp(line, lhs, new JBitwiseXOR(line, lhs, assignmentExpression()));
 		} else if (have(BOR_ASSIGN)) {
-        	return new JAssignOp(line, lhs, JBitwiseOR(line, lhs, assignmentExpression()));
+        	return new JAssignOp(line, lhs, new JBitwiseOR(line, lhs, assignmentExpression()));
 		} else {
             return lhs;
         }
