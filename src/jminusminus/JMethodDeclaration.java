@@ -152,8 +152,8 @@ class JMethodDeclaration extends JAST implements JMember {
 
     public JAST analyze(Context context) {
         MethodContext methodContext = 
-	    new MethodContext(context, isStatic, returnType);
-	this.context = methodContext;
+        		new MethodContext(context, isStatic, returnType, exceptions);
+        this.context = methodContext;
 
         if (!isStatic) {
             // Offset 0 is used to address "this".

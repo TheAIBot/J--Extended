@@ -308,9 +308,12 @@ class LocalContext extends Context {
     /** Next offset for a local variable. */
     protected int offset;
     
-    /** The exceptions that might occur in this local context. */
+    /** The exceptions that are allowed to occur in this local context. */
     protected ArrayList<Type> allowedExceptions = new ArrayList();
 
+    /** The exceptions that actually gets thrown inside this context. */
+    protected ArrayList<Type> thrownExceptions = new ArrayList();
+    
     /**
      * Construct a local context. A local context is constructed for each block.
      * 
@@ -351,7 +354,7 @@ class LocalContext extends Context {
      * Add an exception that is allowed to be thrown in this context, 
      * because the exception is either part of the method declaration 
      * or because we are currently inside a try-block where it can be
-     * caught.
+     * caught. 
      * @param exception
      */
     public void addAllowedException(Type exception) {
@@ -359,11 +362,47 @@ class LocalContext extends Context {
     }
     
     /**
-     * Is the exception allowed to be thrown within this context?
+     * Is the exception allowed to be thrown within this context or the
+     * surrounding contexts?
      * @return
      */
     public boolean isExceptionAllowed(Type exception) {
-    	return allowedExceptions.contains(exception);
+    	if (allowedExceptions.contains(exception)) {
+    		return true;
+    	}
+    	else if (surroundingContext() instanceof LocalContext) {
+    		return ((LocalContext)surroundingContext()).isExceptionAllowed(exception);
+    	} else {
+    		return false;
+    	}
+    }
+    
+    /**
+     * Add an exception that is thrown inside this context. An 
+     * exception should be added every time an exception is declared
+     * to be thrown through a method call or a throw-statement.
+     * @param exception
+     */
+    public void addThrownException(Type exception) {
+    	if (allowedExceptions.contains(exception)) {
+    		thrownExceptions.add(exception);
+    	} else if (surroundingContext() instanceof LocalContext) {
+    		// If this context doesnt allow this exception, perhaps the surrounding
+    		// context does
+    		((LocalContext)surroundingContext()).addThrownException(exception);
+    	} else {
+    		thrownExceptions.add(exception);
+    	}
+    }
+    
+    /**
+     * The exceptions that are actually thrown in this context. Only 
+     * valid after this context has been analyzed.
+     * @param exception
+     * @return
+     */
+    public ArrayList<Type> getThrownExceptions() {
+    	return thrownExceptions;
     }
 
     /**
@@ -430,7 +469,7 @@ class MethodContext extends LocalContext {
         this.isStatic = isStatic;
         this.methodReturnType = methodReturnType;
         if (declaredExceptions != null) {
-        	super.allowedExceptions = declaredExceptions;
+        	super.allowedExceptions.addAll(declaredExceptions);
         }
         offset = 0;
     }

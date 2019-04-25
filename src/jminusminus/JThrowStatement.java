@@ -1,7 +1,7 @@
 package jminusminus;
 
 public class JThrowStatement extends JStatement {
-
+	
 	/** The expression thrown. */
 	private JExpression expr;
 	
@@ -16,9 +16,10 @@ public class JThrowStatement extends JStatement {
 	}
 
 	@Override
-	public JStatement analyze(Context context) {
-		// TODO
-		throw new UnsupportedOperationException();
+	public JThrowStatement analyze(Context context) {
+		expr = expr.analyze(context);
+		
+		return this;
 	}
 
 	@Override

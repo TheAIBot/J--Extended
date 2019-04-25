@@ -36,30 +36,35 @@ public class JTryStatement extends JStatement {
 
 	@Override
 	public JTryStatement analyze(Context context) {
+		this.context = new LocalContext(context);
+		TreeSet<Type> caughtExceptions = new TreeSet();
 		// analyze each catch statement
 		for (int i = 0; i < catchStatements.size(); i++) {
 			catchStatements.set(i, catchStatements.get(i).analyze(context));
-		}
-		// thrown exceptions are added to local context in tryBlock.analyze()
-		tryBlock = tryBlock.analyze(context);
-		// check that an exception type is caught only once
-		TreeSet<Type> caughtExceptions = new TreeSet();
-		for (JCatchStatement cStatement : catchStatements) {
-			for (Type exception : cStatement.getCaughtExceptions()) {
+			for (Type exception : catchStatements.get(i).getCaughtExceptions()) {
+				// check that an exception type is caught only once
 				if (caughtExceptions.contains(exception)) {
-					JAST.compilationUnit.reportSemanticError(cStatement.line(), 
+					JAST.compilationUnit.reportSemanticError(catchStatements.get(i).line(), 
 							"The exception " + exception + " is already caught "
 									+ "by another catch statement.");
 				}
 				caughtExceptions.add(exception);
+				this.context.addAllowedException(exception);
 			}
 		}
-		
-		// check that all exceptions are caught, except for those 
-		// that are also thrown by the enclosing method, or
-		// the ones that are caught by an enclosing try-catch
-		
-		
+		// thrown exceptions are added to local context in tryBlock.analyze()
+		tryBlock = tryBlock.analyze(this.context);
+		// Go through each catch statement and check that every caught exception
+		// is actually thrown inside the try-block.
+		for (JCatchStatement cStatement : catchStatements) {
+			for (Type exception : cStatement.getCaughtExceptions()) {
+				if (!this.context.thrownExceptions.contains(exception)) {
+					JAST.compilationUnit.reportSemanticError(cStatement.line(), 
+							"Exception " + exception + " is never thrown "
+									+ "in the corresponding try-block.");
+				}
+			}
+		}
 		return this;
 	}
 
