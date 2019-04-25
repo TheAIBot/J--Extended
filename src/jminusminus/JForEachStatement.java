@@ -25,7 +25,7 @@ public class JForEachStatement extends JStatement {
     @Override
     public JAST analyze(Context context) {
         //Declare the variable
-        LocalVariableDefn defn = new LocalVariableDefn(internalVariable.type(), context.methodContext().nextOffset());
+        LocalVariableDefn defn = new LocalVariableDefn(internalVariable.type(), context.methodContext().nextOffset(internalVariable.type()));
         defn.initialize();
         context.addEntry(internalVariable.line(), internalVariable.name(), defn);
 
