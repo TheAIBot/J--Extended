@@ -1225,16 +1225,28 @@ public class Parser {
         if (have(ASSIGN)) {
             return new JAssignOp(line, lhs, assignmentExpression());
         } else if (have(PLUS_ASSIGN)) {
-            return new JPlusAssignOp(line, lhs, assignmentExpression());
-        } else if (have(MINUS_ASSIGN)) {
-        	return new JMinusAssignOp(line, lhs, assignmentExpression());
-        } else if (have(STAR_ASSIGN)) {
-        	return new JStarAssignOp(line, lhs, assignmentExpression());
-        } else if (have(DIV_ASSIGN)) {
-        	return new JDivAssignOp(line, lhs, assignmentExpression());
-        } else if (have(MOD_ASSIGN)) {
-        	return new JModAssignOp(line, lhs, assignmentExpression());
-        } else {
+        	return new JAssignOp(line, lhs, JPlusOp(line, lhs, assignmentExpression()));
+		} else if (have(MINUS_ASSIGN)) {
+        	return new JAssignOp(line, lhs, JSubtractOp(line, lhs, assignmentExpression()));
+		} else if (have(STAR_ASSIGN)) {
+        	return new JAssignOp(line, lhs, JMultiplyOp(line, lhs, assignmentExpression()));
+		} else if (have(DIV_ASSIGN)) {
+        	return new JAssignOp(line, lhs, JDivideOp(line, lhs, assignmentExpression()));
+		} else if (have(ALSHIFT_ASSIGN)) {
+        	return new JAssignOp(line, lhs, JArithLeftShift(line, lhs, assignmentExpression()));
+		} else if (have(ARSHIFT_ASSIGN)) {
+        	return new JAssignOp(line, lhs, JArithRightShift(line, lhs, assignmentExpression()));
+		} else if (have(LRSHIFT_ASSIGN)) {
+        	return new JAssignOp(line, lhs, JLogicRightShift(line, lhs, assignmentExpression()));
+		} else if (have(MOD_ASSIGN)) {
+        	return new JAssignOp(line, lhs, JRemainderOp(line, lhs, assignmentExpression()));
+		} else if (have(BAND_ASSIGN)) {
+        	return new JAssignOp(line, lhs, JBitwiseAND(line, lhs, assignmentExpression()));
+		} else if (have(BXOR_ASSIGN)) {
+        	return new JAssignOp(line, lhs, JBitwiseXOR(line, lhs, assignmentExpression()));
+		} else if (have(BOR_ASSIGN)) {
+        	return new JAssignOp(line, lhs, JBitwiseOR(line, lhs, assignmentExpression()));
+		} else {
             return lhs;
         }
     }
