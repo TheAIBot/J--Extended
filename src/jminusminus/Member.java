@@ -2,6 +2,9 @@
 
 package jminusminus;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A wrapper for members (eg Fields, Methods, Constructors) in the Java API.
  * Members are used in message expressions, field selections, and new object
@@ -163,6 +166,19 @@ class Method extends Member {
     public Type returnType() {
         return Type.typeFor(method.getReturnType());
     }
+    
+    
+    /**
+     * Return the exceptions declared to be thrown by this method.
+     * @return
+     */
+    public List<Type> exceptions() {
+    	ArrayList<Type> thrownExceptions = new ArrayList<Type>();
+    	for (Class<?> exception : method.getExceptionTypes()) {
+    		thrownExceptions.add(Type.typeFor(exception));
+    	}
+    	return thrownExceptions;
+    }
 
     /**
      * Method equality is defined HERE as having override-equivalent signatures.
@@ -272,6 +288,18 @@ class Constructor extends Member {
 
     public Type declaringType() {
         return Type.typeFor(constructor.getDeclaringClass());
+    }
+    
+    /**
+     * Return the exceptions declared to be thrown by this method.
+     * @return
+     */
+    public List<Type> exceptions() {
+    	ArrayList<Type> thrownExceptions = new ArrayList<Type>();
+    	for (Class<?> exception : constructor.getExceptionTypes()) {
+    		thrownExceptions.add(Type.typeFor(exception));
+    	}
+    	return thrownExceptions;
     }
 
     /**

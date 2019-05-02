@@ -366,37 +366,6 @@ class LocalContext extends Context {
     }
     
     /**
-     * Is the exception allowed to be thrown within this context or the
-     * surrounding contexts? 
-     * All unchecked exceptions (subtypes of java.lang.Error and 
-     * java.lang.RuntimeException) and their subtypes are allowed.
-     * @param exception
-     * 					fully qualified form
-     * @return
-     */
-//    public boolean isExceptionAllowed(Type exception) {
-//    	if (Type.typeFor(java.lang.Error.class).isJavaAssignableFrom(exception)
-//    	 || Type.typeFor(java.lang.RuntimeException.class)
-//    					.isJavaAssignableFrom(exception)) {
-//    		return true;
-//    	} 
-//    	if (allowedExceptions.contains(exception)) {
-//    		return true;
-//    	}
-//    	// Is the exception a subtype of an allowed exception?
-//		for (Type allowedEx : allowedExceptions) {
-//			if (allowedEx.isJavaAssignableFrom(exception)) {
-//				return true;
-//			}
-//		}
-//		// Does the surrounding contexts allow this exception?
-//    	if (surroundingContext() instanceof LocalContext) {
-//    		return ((LocalContext)surroundingContext()).isExceptionAllowed(exception);
-//    	} 
-//        return false;
-//    }
-    
-    /**
      * Add an exception that is thrown inside this context. An 
      * exception should be added every time an exception is declared
      * to be thrown through a JMessageExpression, JNewOp, or JThrowStatement.
