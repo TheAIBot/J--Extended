@@ -66,7 +66,7 @@ class JVariableDeclaration extends JStatement {
             // Local variables are declared here (fields are
             // declared
             // in preAnalyze())
-            int offset = ((LocalContext) context).nextOffset(); // todo double offset
+            int offset = ((LocalContext) context).nextOffset();
             LocalVariableDefn defn = new LocalVariableDefn(decl.type().resolve(
                     context), offset);
 
