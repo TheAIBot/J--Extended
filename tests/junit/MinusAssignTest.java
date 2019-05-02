@@ -20,5 +20,10 @@ public class MinusAssignTest extends TestCase {
 		TestCase.assertEquals(minusAssign.minusAssign(6 , 6),  6 - 6);
 		TestCase.assertEquals(minusAssign.minusAssign(7 , 3),  7 - 3);
 		TestCase.assertEquals(minusAssign.minusAssign(13, 2), 13 - 2);
+		
+		TestCase.assertEquals(minusAssign.minusAssignD(3d , 6d),  3d - 6d);
+		TestCase.assertEquals(minusAssign.minusAssignD(6d , 6d),  6d - 6d);
+		TestCase.assertEquals(minusAssign.minusAssignD(7d , 3d),  7d - 3d);
+		TestCase.assertEquals(minusAssign.minusAssignD(13d, 2d), 13d - 2d);
 	}
 }

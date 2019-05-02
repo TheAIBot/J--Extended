@@ -7,4 +7,10 @@ public class MinusAssign {
 		t -= y;
 		return t;
 	}
+	
+	public double minusAssignD(double x, double y) {
+		double t = x;
+		t -= y;
+		return t;
+	}
 }
