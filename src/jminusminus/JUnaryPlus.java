@@ -19,8 +19,8 @@ public class JUnaryPlus extends JUnaryExpression {
     @Override
     public JExpression analyze(Context context) {
         arg = arg.analyze(context);
-        arg.type().mustMatchExpected(line(), Type.INT);
-        type = Type.INT;
+        arg.type().mustMatchOneOf(line, Type.INT, Type.DOUBLE);
+        type = arg.type();
         return this;
     }
 
