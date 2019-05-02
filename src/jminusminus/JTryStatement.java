@@ -1,8 +1,10 @@
 package jminusminus;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.TreeSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class JTryStatement extends JStatement {
 
@@ -26,7 +28,8 @@ public class JTryStatement extends JStatement {
 	 * @param catchBlocks
 	 * @param finallyBlock
 	 */
-	protected JTryStatement(int line, JBlock tryBlock, ArrayList<JCatchStatement> catchStatements, 
+	protected JTryStatement(int line, JBlock tryBlock, 
+							ArrayList<JCatchStatement> catchStatements, 
 							JBlock finallyBlock) {
 		super(line);
 		this.tryBlock = tryBlock;
@@ -37,37 +40,52 @@ public class JTryStatement extends JStatement {
 	@Override
 	public JTryStatement analyze(Context context) {
 		this.context = new LocalContext(context);
-		TreeSet<Type> caughtExceptions = new TreeSet();
-		// analyze each catch statement
+		Set<Type> caughtExceptions = new HashSet<Type>();
+		// Analyze each catch statement and add the caught exceptions to this
+		// context's allowed exceptions.
 		for (int i = 0; i < catchStatements.size(); i++) {
 			catchStatements.set(i, catchStatements.get(i).analyze(context));
 			for (Type exception : catchStatements.get(i).getCaughtExceptions()) {
 				// check that an exception type is caught only once
 				if (caughtExceptions.contains(exception)) {
 					JAST.compilationUnit.reportSemanticError(catchStatements.get(i).line(), 
-							"The exception " + exception + " is already caught "
-									+ "by another catch statement.");
+							"The exception %s is already caught by another catch-"
+							+ "statement.", exception.toString());
 				}
 				caughtExceptions.add(exception);
 				this.context.addAllowedException(exception);
 			}
 		}
-		// thrown exceptions are added to local context in tryBlock.analyze()
+		// Thrown exceptions are added to the context in tryBlock.analyze()
 		tryBlock = tryBlock.analyze(this.context);
+		Map<Type, List<Integer>> thrownExceptions = this.context.getThrownExceptions();
+		// Ensure that all thrown exception are caught.
+		Set<Type> leftoverExceptions = new HashSet<Type>(thrownExceptions.keySet());
+		leftoverExceptions.removeAll(caughtExceptions);
+		for (Type exception : leftoverExceptions) {
+			for (int line : thrownExceptions.get(exception)) {
+				JAST.compilationUnit.reportSemanticError(line, "The exception %s "
+						+ " is never being caught.", exception.toString());
+			}
+		}
 		// Go through each catch statement and check that every caught exception
-		// is actually thrown inside the try-block.
+		// is actually thrown inside the try-block (unless the caught exception 
+		// is unchecked).
 		for (JCatchStatement cStatement : catchStatements) {
 			for (Type exception : cStatement.getCaughtExceptions()) {
-				if (!this.context.thrownExceptions.contains(exception)) {
+				if (!Type.typeFor(java.lang.Error.class).isJavaAssignableFrom(exception)
+				 && !Type.typeFor(java.lang.RuntimeException.class)
+	    					.isJavaAssignableFrom(exception)
+				 && !thrownExceptions.keySet().contains(exception)) {
 					JAST.compilationUnit.reportSemanticError(cStatement.line(), 
-							"Exception " + exception + " is never thrown "
-									+ "in the corresponding try-block.");
+							"Exception %s is never thrown in the corresponding "
+							+ "try-block.", exception.toString());
 				}
 			}
 		}
 		return this;
 	}
-
+	
 	@Override
 	public void codegen(CLEmitter output) {
 		String startLabel = output.createLabel();
@@ -166,8 +184,6 @@ class JCatchStatement extends JStatement {
         				"Type " + exceptions.get(i) + " is not a Throwable type.");
         	}
         }
-		// add caught exceptions to local context
-		
 		this.context = new LocalContext(context);
 		// Create a local variable declaration corresponding to the caught exceptions.
 		// If this is a multicatch, then the Throwable-type should be used.
@@ -182,7 +198,7 @@ class JCatchStatement extends JStatement {
 		// Analyze the body
 		if (body != null) {
 			body = body.analyze(this.context);
-		}
+		}		
 		return this;
 	}
 

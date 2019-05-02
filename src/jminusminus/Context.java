@@ -5,6 +5,8 @@ package jminusminus;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -309,11 +311,12 @@ class LocalContext extends Context {
     protected int offset;
     
     /** The exceptions that are allowed to occur in this local context. */
-    protected ArrayList<Type> allowedExceptions = new ArrayList();
+    protected Set<Type> allowedExceptions = new HashSet<Type>();
 
-    /** The exceptions that actually gets thrown inside this context. */
-    protected ArrayList<Type> thrownExceptions = new ArrayList();
-    
+    /** The exceptions that actually gets thrown inside this context including
+     *  the line number at which they occur. */
+    protected Map<Type, List<Integer>> thrownExceptions = new HashMap<Type, List<Integer>>();
+     
     /**
      * Construct a local context. A local context is constructed for each block.
      * 
@@ -356,6 +359,7 @@ class LocalContext extends Context {
      * or because we are currently inside a try-block where it can be
      * caught. 
      * @param exception
+     * 					fully qualified form
      */
     public void addAllowedException(Type exception) {
     	allowedExceptions.add(exception);
@@ -365,64 +369,78 @@ class LocalContext extends Context {
      * Is the exception allowed to be thrown within this context or the
      * surrounding contexts? 
      * All unchecked exceptions (subtypes of java.lang.Error and 
-     * java.lang.RuntimeException) are allowed.
-     * A subtype of an allowed exception is also allowed.
+     * java.lang.RuntimeException) and their subtypes are allowed.
+     * @param exception
+     * 					fully qualified form
      * @return
      */
-    public boolean isExceptionAllowed(Type exception) {
-    	if (Type.typeFor(java.lang.Error.class).isJavaAssignableFrom(exception)
-    			|| Type.typeFor(java.lang.RuntimeException.class)
-    					.isJavaAssignableFrom(exception)) {
-    		return true;
-    	} 
-    	if (allowedExceptions.contains(exception)) {
-    		return true;
-    	}
-    	// Is the exception a subtype of an allowed exception
-		for (Type allowedEx : allowedExceptions) {
-			if (allowedEx.isJavaAssignableFrom(exception)) {
-				return true;
-			}
-		}
-		// Does the surrounding contexts allow this exception?
-    	if (surroundingContext() instanceof LocalContext) {
-    		return ((LocalContext)surroundingContext()).isExceptionAllowed(exception);
-    	} 
-        return false;
-    }
+//    public boolean isExceptionAllowed(Type exception) {
+//    	if (Type.typeFor(java.lang.Error.class).isJavaAssignableFrom(exception)
+//    	 || Type.typeFor(java.lang.RuntimeException.class)
+//    					.isJavaAssignableFrom(exception)) {
+//    		return true;
+//    	} 
+//    	if (allowedExceptions.contains(exception)) {
+//    		return true;
+//    	}
+//    	// Is the exception a subtype of an allowed exception?
+//		for (Type allowedEx : allowedExceptions) {
+//			if (allowedEx.isJavaAssignableFrom(exception)) {
+//				return true;
+//			}
+//		}
+//		// Does the surrounding contexts allow this exception?
+//    	if (surroundingContext() instanceof LocalContext) {
+//    		return ((LocalContext)surroundingContext()).isExceptionAllowed(exception);
+//    	} 
+//        return false;
+//    }
     
     /**
      * Add an exception that is thrown inside this context. An 
      * exception should be added every time an exception is declared
-     * to be thrown through a method call or a throw-statement.
+     * to be thrown through a JMessageExpression, JNewOp, or JThrowStatement.
      * @param exception
+     * 					 fully qualified form
      */
-    public void addThrownException(Type exception) {
-    	if (allowedExceptions.contains(exception)) {
-    		thrownExceptions.add(exception);
+    public void addThrownException(Type exception, int line) {
+    	if (Type.typeFor(java.lang.Error.class).isJavaAssignableFrom(exception)
+    	 || Type.typeFor(java.lang.RuntimeException.class)
+    					.isJavaAssignableFrom(exception)) {
+    		return;
+    	} 
+    	if (allowedExceptions.contains(exception) || this instanceof MethodContext) {
+    		// If the exception is allowed, add to thrown exceptions.
+    		// OR if the exception is not allowed and this LocalContext is a MethodContext,
+    		// add it. This will produce a semantic error later on in JTryStatement.analyze().
+    		if (thrownExceptions.containsKey(exception)) {
+    			thrownExceptions.get(exception).add(line);
+    		} else {
+    			ArrayList<Integer> lines = new ArrayList<Integer>();
+    			lines.add(line);
+    			thrownExceptions.put(exception, lines);
+    		}
     	} else if (surroundingContext() instanceof LocalContext) {
-    		// If this context doesnt allow this exception, perhaps the surrounding
-    		// context does
-    		((LocalContext)surroundingContext()).addThrownException(exception);
-    	} else {
-    		thrownExceptions.add(exception);
+    		// If this context doesn't allow this exception, perhaps the surrounding
+    		// local context does
+    		((LocalContext)surroundingContext()).addThrownException(exception, line);
     	}
     }
     
     /**
-     * The exceptions that are actually thrown in this context. Only 
-     * valid after this context has been analyzed.
+     * The exceptions that are actually thrown in this context, including line
+     * numbers at which it occurs. Only valid after this context has been fully 
+     * analyzed.
      * @param exception
      * @return
      */
-    public ArrayList<Type> getThrownExceptions() {
+    public Map<Type, List<Integer>> getThrownExceptions() {
     	return thrownExceptions;
     }
 
     /**
      * @inheritDoc
      */
-
     public void writeToStdOut(PrettyPrinter p) {
         p.println("<LocalContext>");
         p.indentRight();

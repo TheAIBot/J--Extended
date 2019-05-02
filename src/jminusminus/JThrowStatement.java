@@ -20,14 +20,10 @@ public class JThrowStatement extends JStatement {
 		expr = expr.analyze(context);
 		Type type = expr.type();
 		if (Type.typeFor(java.lang.Throwable.class).isJavaAssignableFrom(type)) {
-			JAST.compilationUnit.reportSemanticError(line(), "Type " + type 
-					+ " is not a Throwable type.");
+			JAST.compilationUnit.reportSemanticError(line(), "Type %s"
+					+ " is not a Throwable type.", type.toString());
 		}
-		if (!((LocalContext)context).isExceptionAllowed(type)) {
-			JAST.compilationUnit.reportSemanticError(line(), "Exception " 
-					+ type + " is never caught or declared in the method declaration.");
-		}
-		((LocalContext)context).addThrownException(type);
+		((LocalContext)context).addThrownException(type, line());
 		return this;
 	}
 
