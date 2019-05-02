@@ -32,6 +32,12 @@ class Type {
 
     /** The primitive type, int. */
     public final static Type INT = typeFor(int.class);
+    
+    /** The primitive type, long. */
+    public final static Type LONG = typeFor(long.class);
+    
+    /** The primitive type, float. */
+    public final static Type FLOAT = typeFor(double.class);
 
     /** The primitive type, double. */
     public final static Type DOUBLE = typeFor(double.class);
