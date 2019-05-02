@@ -1,11 +1,18 @@
 package pass;
 
+import java.lang.System;
+
 public class ForLoops {
 
-    public static void main() {
+    public static void main(String[] args) {
         int[] array = new int[5];
         array[0] = 5;
         for(int i : array) {
+            System.out.println("Test");
+        }
+
+        int l = array.length;
+        for(int i = 0; i > l; ++i) {
 
         }
 
@@ -17,7 +24,7 @@ public class ForLoops {
 
         }
 
-        for(int i = 0;; i++) {
+        for(int i = 0;; ++i) {
 
         }
     }

@@ -853,7 +853,7 @@ public class Parser {
 
             JVariableDeclaration before = null;
             JExpression condition = null;
-            JExpression postIter = null;
+            JStatement postIter = null;
             //Variable declaration
             if(!see(SEMI)) {
                 JVariableDeclarator varDec = variableDeclarator(type());
@@ -870,7 +870,7 @@ public class Parser {
 
             //Post iteration
             if(!see(RPAREN))
-                postIter = expression();
+                postIter = statementExpression();
             mustBe(RPAREN);
 
             JStatement statement = statement();
