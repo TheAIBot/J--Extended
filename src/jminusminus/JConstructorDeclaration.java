@@ -89,7 +89,7 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
         definingClass = 
 	    (JClassDeclaration) context.classContext().definition();
         MethodContext methodContext =
-            new MethodContext(context, isStatic, returnType);
+            new MethodContext(context, isStatic, returnType, super.exceptions);
         this.context = methodContext;
 
         if (!isStatic) {

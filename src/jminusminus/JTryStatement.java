@@ -56,6 +56,7 @@ public class JTryStatement extends JStatement {
 				this.context.addAllowedException(exception);
 			}
 		}
+		finallyBlock = finallyBlock.analyze(context);
 		// Thrown exceptions are added to the context in tryBlock.analyze()
 		tryBlock = tryBlock.analyze(this.context);
 		Map<Type, List<Integer>> thrownExceptions = this.context.getThrownExceptions();
