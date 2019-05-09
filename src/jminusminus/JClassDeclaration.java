@@ -144,8 +144,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         CLEmitter partial = new CLEmitter(false);
-        ArrayList<String> superInterfaces = (ArrayList<String>) implementsList.stream().map(TypeName::jvmName).collect(Collectors.toList());
-        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), superInterfaces,
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null,
                 false); // Object for superClass, just for now
         thisType = Type.typeFor(partial.toClass());
         context.addType(line, thisType);
@@ -183,8 +182,13 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
 
-        ArrayList<String> superInterfaces = (ArrayList<String>) implementsList.stream().map(TypeName::jvmName).collect(Collectors.toList());
-        partial.addClass(mods, qualifiedName, superType.jvmName(), superInterfaces, false);
+        ArrayList<String> interfacesJvm = new ArrayList<>();
+        for (TypeName tn : implementsList) {
+            Type newType = tn.resolve(this.context);
+            interfacesJvm.add(newType.jvmName());
+        }
+
+        partial.addClass(mods, qualifiedName, superType.jvmName(), interfacesJvm, false);
 
         // Pre-analyze the members and add them to the partial class
         for (JMember member : classBlock) {
