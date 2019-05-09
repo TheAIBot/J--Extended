@@ -141,11 +141,10 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      */
 
     public void declareThisType(Context context) {
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         CLEmitter partial = new CLEmitter(false);
-        ArrayList<String> superInterfaces = (ArrayList<String>) implementsList.stream().map(TypeName::jvmName).collect(Collectors.toList());
-        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), superInterfaces,
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null,
                 false); // Object for superClass, just for now
         thisType = Type.typeFor(partial.toClass());
         context.addType(line, thisType);
@@ -180,12 +179,16 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         CLEmitter partial = new CLEmitter(false);
 
         // Add the class header to the partial class
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
 
-        ArrayList<String> superInterfaces = (ArrayList<String>) implementsList.stream().map(TypeName::jvmName).collect(Collectors.toList());
+        ArrayList<String> interfacesJvm = new ArrayList<>();
+        for (TypeName tn : implementsList) {
+            Type newType = tn.resolve(this.context);
+            interfacesJvm.add(newType.jvmName());
+        }
 
-        partial.addClass(mods, qualifiedName, superType.jvmName(), superInterfaces, false);
+        partial.addClass(mods, qualifiedName, superType.jvmName(), interfacesJvm, false);
 
         // Pre-analyze the members and add them to the partial class
         for (JMember member : classBlock) {
@@ -246,8 +249,6 @@ class JClassDeclaration extends JAST implements JTypeDecl {
             }
         }
 
-
-        //todo:kasper check at metoder i interfaces er implementeret
         for (TypeName curInterface : implementsList){
             Class classRep = curInterface.resolve(this.context).classRep();
             java.lang.reflect.Method[] methods = classRep.getDeclaredMethods();
@@ -344,7 +345,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
     public void codegen(CLEmitter output) {
         // The class header
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         ArrayList<String> superInterfaces = (ArrayList<String>) implementsList.stream().map(TypeName::jvmName).collect(Collectors.toList());
         output.addClass(mods, qualifiedName, superType.jvmName(), superInterfaces, false);

@@ -49,6 +49,7 @@ public class JLiteralDouble extends JExpression {
 
     @Override
     public void writeToStdOut(PrettyPrinter p) {
-        // todo:klso
+        p.printf("<JLiteralDouble line=\"%d\" type=\"%s\" " + "value=\"%s\"/>\n",
+                line(), ((type == null) ? "" : type.toString()), text);
     }
 }
