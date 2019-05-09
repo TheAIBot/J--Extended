@@ -271,7 +271,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
                 JMethodDeclaration thisMethod = null;
                 for (JMethodDeclaration jMethodDeclaration : jmethodOptions){
                     // check return type
-                    if (!jMethodDeclaration.returnType.classRep().equals(methodReturnType)){
+                    if (!methodReturnType.isAssignableFrom(jMethodDeclaration.returnType.classRep())){
                         break;
                     }
 
