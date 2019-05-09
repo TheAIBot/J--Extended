@@ -97,7 +97,7 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
         CLEmitter partial = new CLEmitter(false);
 
         // Add the class header to the partial class
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         partial.addClass(mods, qualifiedName, superType.jvmName(), null, false);
 
@@ -149,7 +149,7 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
     @Override
     public void codegen(CLEmitter output) {
         // The class header
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         output.addClass(mods, qualifiedName, superType.jvmName(), null, false);
 
@@ -201,7 +201,7 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
      */
 
     public void declareThisType(Context context) {
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         CLEmitter partial = new CLEmitter(false);
         partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null,

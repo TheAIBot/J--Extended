@@ -141,7 +141,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      */
 
     public void declareThisType(Context context) {
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         CLEmitter partial = new CLEmitter(false);
         ArrayList<String> superInterfaces = (ArrayList<String>) implementsList.stream().map(TypeName::jvmName).collect(Collectors.toList());
@@ -180,7 +180,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         CLEmitter partial = new CLEmitter(false);
 
         // Add the class header to the partial class
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
 
         ArrayList<String> superInterfaces = (ArrayList<String>) implementsList.stream().map(TypeName::jvmName).collect(Collectors.toList());
@@ -341,7 +341,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
     public void codegen(CLEmitter output) {
         // The class header
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         ArrayList<String> superInterfaces = (ArrayList<String>) implementsList.stream().map(TypeName::jvmName).collect(Collectors.toList());
         output.addClass(mods, qualifiedName, superType.jvmName(), superInterfaces, false);
