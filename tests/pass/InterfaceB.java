@@ -1,12 +1,15 @@
 package pass;
 
-import InterfaceA;
-
 /**
  * @author Kasper
  */
 
-public class InterfaceB implements InterfaceA {
+
+interface InterfaceA {
+    public int f(int x);
+}
+
+public class InterfaceB implements pass.InterfaceA {
     public int f(int x) {
         return x * x;
     }

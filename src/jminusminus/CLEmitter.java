@@ -10,11 +10,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.DataOutputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Stack;
-import java.util.StringTokenizer;
-import java.util.TreeMap;
+import java.util.*;
+
 import static jminusminus.CLConstants.*;
 import static jminusminus.CLConstants.Category.*;
 

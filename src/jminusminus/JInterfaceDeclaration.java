@@ -2,8 +2,6 @@ package jminusminus;
 
 import java.util.ArrayList;
 
-import static jminusminus.CLConstants.ALOAD_0;
-import static jminusminus.CLConstants.INVOKESPECIAL;
 import static jminusminus.CLConstants.RETURN;
 
 /**
@@ -59,6 +57,8 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
                                     Type superType, ArrayList<JMember> interfaceBlock) {
         super(line);
         this.mods = mods;
+        this.mods.add("interface");
+        this.mods.add("abstract");
         this.name = name;
         this.superType = superType;
         this.interfaceBlock = interfaceBlock;
@@ -143,7 +143,6 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
             }
         }
 
-        // todo: maybe add warnings for private methods. They don't really make sense in our interfaces.
         return this;
     }
 
