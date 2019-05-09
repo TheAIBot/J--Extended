@@ -56,9 +56,9 @@ abstract class JBooleanBinaryExpression extends JBinaryExpression {
 }
 
 final class JTernaryOp extends JExpression {
-	private final JExpression conditional;
-	private final JExpression ifTrue;
-	private final JExpression ifFalse;
+	private JExpression conditional;
+	private JExpression ifTrue;
+	private JExpression ifFalse;
 
     public JTernaryOp(int line, JExpression conditional, JExpression ifTrue, JExpression ifFalse) {
         super(line);
@@ -68,12 +68,35 @@ final class JTernaryOp extends JExpression {
     }
 
     public void codegen(CLEmitter output) {
-    	throw new Error("Code generator for the ternary operator isn't implemented yet.");
+        String isNotTrue = output.createLabel();
+        String out = output.createLabel();
+        
+        //branch to else if it's not true
+        conditional.codegen(output, isNotTrue, false);
+        
+        //if it's true then it goes immediately to this and then ends
+        ifTrue.codegen(output);
+        output.addBranchInstruction(GOTO, out);
+        
+        //if it's not true then jump to here and then end
+        output.addLabel(isNotTrue);
+        ifFalse.codegen(output);
+        
+        output.addLabel(out);
     }
 
 	@Override
 	public JExpression analyze(Context context) {
-		throw new Error("Analyze for the ternary operator isn't implemented yet.");
+		conditional = conditional.analyze(context);
+		ifTrue = ifTrue.analyze(context);
+		ifFalse = ifFalse.analyze(context);
+		
+		conditional.type().mustMatchExpected(line, Type.BOOLEAN);
+		ifTrue.type().mustMatchExpected(line, ifFalse.type());
+		
+		type = ifTrue.type();
+		
+		return this;
 	}
 
 	@Override
