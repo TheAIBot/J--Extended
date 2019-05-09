@@ -8,11 +8,11 @@ import static jminusminus.CLConstants.*;
 
 public class JForStatement extends JStatement {
 
-    private Context context;
-
     JVariableDeclaration before;
-    JExpression condition, postIter;
-    JStatement body;
+    JExpression condition;
+    JStatement body, postIter;
+
+    private Context context;
 
     /**
      * Construct an AST node for a for expression given its line number, initialization,
@@ -20,7 +20,7 @@ public class JForStatement extends JStatement {
      *
      * @param line line in which the expression occurs in the source file.
      */
-    protected JForStatement(int line, JVariableDeclaration before, JExpression condition, JStatement body, JExpression postIter) {
+    protected JForStatement(int line, JVariableDeclaration before, JExpression condition, JStatement body, JStatement postIter) {
         super(line);
         this.before = before;
         this.condition = condition;
@@ -43,8 +43,7 @@ public class JForStatement extends JStatement {
         }
 
         if(postIter != null) {
-            postIter = postIter.analyze(this.context);
-            postIter.type().mustMatchOneOf(line(), Type.INT, Type.DOUBLE);
+            postIter = (JStatement) postIter.analyze(this.context);
         }
 
         body = (JStatement) body.analyze(this.context);
