@@ -905,8 +905,8 @@ private JStatement statement(): {
     JStatement alternate = null;
     JStatement body = null;
     JBlock tryBlock = null;
-    ArrayList<ArrayList<JFormalParameter>> catchParameters = null;
-    ArrayList<JBlock> catchBlocks = null;
+    ArrayList<JCatchStatement> catchStatements = null;
+    JCatchStatement catchStatement = null;
     ArrayList<JFormalParameter> parameters = null;
     JBlock block = null;
     JBlock finallyBlock = null;
@@ -940,20 +940,16 @@ private JStatement statement(): {
         { statement = new JWhileStatement( line, test, body ); } |
         <TRY> { line = token.beginLine; }
         tryBlock = block()
-        { catchParameters = new ArrayList(); }
-        { catchBlocks = new ArrayList(); }
+        { catchStatements = new ArrayList<JCatchStatement>(); }
         (
-        	<CATCH>
-        	parameters = formalParameters()
-        	block = block()
-        	{ catchParameters.add(parameters); }
-        	{ catchBlocks.add(block); }
+        	LOOKAHEAD(<CATCH>)
+        	catchStatement = catchStatement()
+        	{ catchStatements.add(catchStatement); }
         )*
         [
         	<FINALLY> finallyBlock = block()
         ]
-        { statement = new JTryStatement(line, tryBlock, catchParameters,
-        								catchBlocks, finallyBlock); } |
+        { statement = new JTryStatement(line, tryBlock, catchStatements, finallyBlock); } |
         <FOR> {line = token.beginLine; }
         (
             //Look ahead to see if it's a for loop
@@ -1008,6 +1004,42 @@ private JStatement statement(): {
     }
     { return statement; }
 }
+
+
+/**
+ * Parse a catch-statement.
+ * @return
+ */
+private JCatchStatement catchStatement(): {
+	int line = 0;
+	ArrayList<Type> exceptions new ArrayList<Type>();
+	Type exception = null;
+	String name = null;
+	JBlock block = null;
+	JCatchStatement statement = null;
+}
+{
+	try {
+		<CATCH> { line = token.beginLine; }
+		<LPAREN>
+		(
+			exception = type()
+			<BOR>
+			{ exceptions.add(exception); }
+		)*
+		exception = type()
+		{ exceptions.add(exception); }
+		<IDENTIFIER> { name = token.image; }
+		<RPAREN>
+		block = block()
+		{ statement = new JCatchStatement(line, exceptions, name, block); }
+	}
+	catch ( ParseException e ) {
+		recoverFromError( new int[] { SEMI, EOF }, e );
+	}
+	{ return statement; }
+}
+
 
 /**
  * Parse formal parameters.

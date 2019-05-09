@@ -893,7 +893,10 @@ public class Parser {
         }
     }
     
-    
+    /**
+     * Parse a catch-statement.
+     * @return
+     */
     private JCatchStatement catchStatement() {
     	int line = scanner.token().line();
     	mustBe(CATCH);
