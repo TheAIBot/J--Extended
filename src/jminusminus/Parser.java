@@ -513,7 +513,12 @@ public class Parser {
             boolean moreInterfaces = true;
             while (moreInterfaces){
                 mustBe(IDENTIFIER);
-                implementsList.add(new TypeName(line, scanner.previousToken().image()));
+                String interfaceIdentifier = scanner.previousToken().image();
+                while (have(DOT)){
+                    mustBe(IDENTIFIER);
+                    interfaceIdentifier += "." + scanner.previousToken().image();
+                }
+                implementsList.add(new TypeName(line, interfaceIdentifier));
                 moreInterfaces = have(COMMA);
             }
         }

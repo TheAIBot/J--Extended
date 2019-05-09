@@ -8,7 +8,7 @@ public class BORAssignTest extends TestCase {
 
 	protected void setUp() throws Exception {
 	    super.setUp();
-	    bXORAssign = new BORAssign();
+	    bORAssign = new BORAssign();
 	}
 	
 	protected void tearDown() throws Exception {

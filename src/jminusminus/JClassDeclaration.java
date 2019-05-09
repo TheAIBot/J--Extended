@@ -2,6 +2,7 @@
 
 package jminusminus;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -181,7 +182,9 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         // Add the class header to the partial class
         String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
+
         ArrayList<String> superInterfaces = (ArrayList<String>) implementsList.stream().map(TypeName::jvmName).collect(Collectors.toList());
+
         partial.addClass(mods, qualifiedName, superType.jvmName(), superInterfaces, false);
 
         // Pre-analyze the members and add them to the partial class
@@ -246,31 +249,40 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
         //todo:kasper check at metoder i interfaces er implementeret
         for (TypeName curInterface : implementsList){
-            Class classRep = curInterface.resolve(context).classRep();
-            java.lang.reflect.Method[] methods = classRep.getMethods();
+            Class classRep = curInterface.resolve(this.context).classRep();
+            java.lang.reflect.Method[] methods = classRep.getDeclaredMethods();
             for (java.lang.reflect.Method method : methods){
+                Class methodReturnType = method.getReturnType();
+
+                int mods = method.getModifiers();
+                String methodModifiers = Modifier.toString(mods);
+
+                List<Class> methodParams = Arrays.asList(method.getParameterTypes());
+
+                // finding method(s) of the same name
                 List<JMethodDeclaration> jmethodOptions = jmethods.stream().filter(m -> m.name.equals(method.getName())).collect(Collectors.toList());
                 if (jmethodOptions.isEmpty()){
                     JAST.compilationUnit.reportSemanticError(line, "Class must implement %s " +
                             "as defined in interface %s", method.getName(), curInterface.simpleName());
                     break;
                 }
-                List<Class> parameterTypes = Arrays.asList(method.getParameterTypes());
+
                 JMethodDeclaration thisMethod = null;
                 for (JMethodDeclaration jMethodDeclaration : jmethodOptions){
                     // check return type
-                    if (!jMethodDeclaration.returnType.classRep().equals(method.getReturnType())){
+                    if (!jMethodDeclaration.returnType.classRep().equals(methodReturnType)){
                         break;
                     }
 
                     // check parameters
-                    if (jMethodDeclaration.params.size() != parameterTypes.size()){
+                    if (jMethodDeclaration.params.size() != methodParams.size()){
                         break;
                     }
 
                     boolean paramsMatch = true;
                     for (JFormalParameter param : jMethodDeclaration.params){
-                        if (!parameterTypes.contains(param.type().classRep())){
+
+                        if (!methodParams.contains(param.type().classRep())){
                                paramsMatch = false;
                                break;
                         }
@@ -279,8 +291,23 @@ class JClassDeclaration extends JAST implements JTypeDecl {
                         break;
                     }
 
-                    // todo: check modifiers
+                    boolean acceptableMods = true;
+                    String[] signatureMods = methodModifiers.split(" ");
+                    for (String mod : signatureMods){
+                        if (mod.equalsIgnoreCase("abstract")){
+                            continue;
+                        }
+                        if (!jMethodDeclaration.mods.contains(mod)){
+                            acceptableMods = false;
+                        }
+                    }
+                    if (jMethodDeclaration.mods.size() != signatureMods.length - 1) {  // minus 1 because the signature has the abstract mod
+                        acceptableMods = false;
+                    }
 
+                    if (!acceptableMods){
+                        break;
+                    }
 
                     thisMethod = jMethodDeclaration;
                 }
