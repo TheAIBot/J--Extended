@@ -12,6 +12,10 @@ public class InitializationBlocks {
         int two = 1;
 
         myStaticInt = one + two;
+
+        for(int i = 2; i > 0; i--) {
+            myStaticInt += 1;
+        }
     }
 
     {
