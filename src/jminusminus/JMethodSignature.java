@@ -98,7 +98,7 @@ public class JMethodSignature extends JAST implements JMember {
         // Declare the parameters. We consider a formal parameter
         // to be always initialized, via a function call.
         for (JFormalParameter param : params) {
-            LocalVariableDefn defn = new LocalVariableDefn(param.type(), this.context.nextOffset());
+            LocalVariableDefn defn = new LocalVariableDefn(param.type(), this.context.nextOffset(param.type()));
             defn.initialize();
             this.context.addEntry(param.line(), param.name(), defn);
         }
