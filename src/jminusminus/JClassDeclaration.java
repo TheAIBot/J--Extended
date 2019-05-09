@@ -184,7 +184,6 @@ class JClassDeclaration extends JAST implements JTypeDecl {
                 : JAST.compilationUnit.packageName() + "/" + name;
 
         ArrayList<String> superInterfaces = (ArrayList<String>) implementsList.stream().map(TypeName::jvmName).collect(Collectors.toList());
-
         partial.addClass(mods, qualifiedName, superType.jvmName(), superInterfaces, false);
 
         // Pre-analyze the members and add them to the partial class
@@ -246,8 +245,6 @@ class JClassDeclaration extends JAST implements JTypeDecl {
             }
         }
 
-
-        //todo:kasper check at metoder i interfaces er implementeret
         for (TypeName curInterface : implementsList){
             Class classRep = curInterface.resolve(this.context).classRep();
             java.lang.reflect.Method[] methods = classRep.getDeclaredMethods();
