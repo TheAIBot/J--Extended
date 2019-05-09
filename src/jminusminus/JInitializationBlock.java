@@ -24,6 +24,20 @@ class JInitializationBlock extends JBlock implements JMember {
 
     }
 
+    public JBlock analyze(Context context) {
+        // { ... } defines a new level of scope.
+        this.context = new LocalContext(context);
+
+        //We need to start at the next offset since offset 0 will be the class reference
+        this.context.nextOffset();
+
+        for (int i = 0; i < statements.size(); i++) {
+            statements.set(i, (JStatement) statements.get(i).analyze(
+                    this.context));
+        }
+        return this;
+    }
+
     @Override
     public void codegen(CLEmitter output) {
 

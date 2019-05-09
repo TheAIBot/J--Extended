@@ -234,8 +234,27 @@ class JPostIncrementOp extends JUnaryExpression {
 
 	@Override
 	public void codegen(CLEmitter output) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+        if (arg instanceof JVariable) {
+            // A local variable; otherwise analyze() would
+            // have replaced it with an explicit field selection.
+            int offset = ((LocalVariableDefn) ((JVariable) arg).iDefn())
+                    .offset();
+            if (!isStatementExpression) {
+                // Loading its original rvalue
+                arg.codegen(output);
+            }
+            output.addIINCInstruction(offset, 1);
+        } else {
+            ((JLhs) arg).codegenLoadLhsLvalue(output);
+            ((JLhs) arg).codegenLoadLhsRvalue(output);
+            if (!isStatementExpression) {
+                // Loading its original rvalue
+                ((JLhs) arg).codegenDuplicateRvalue(output);
+            }
+            output.addNoArgInstruction(ICONST_1);
+            output.addNoArgInstruction(IADD);
+            ((JLhs) arg).codegenStore(output);
+        }
 	}
 	
 }
