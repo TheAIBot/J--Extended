@@ -29,7 +29,7 @@ public class JForEachStatement extends JStatement {
         this.context = new LocalContext(context);
 
         //Declare the variable
-        LocalVariableDefn defn = new LocalVariableDefn(internalVariable.type(), this.context.methodContext().nextOffset());
+        LocalVariableDefn defn = new LocalVariableDefn(internalVariable.type(), context.methodContext().nextOffset(internalVariable.type()));
         defn.initialize();
         this.context.addEntry(internalVariable.line(), internalVariable.name(), defn);
 
