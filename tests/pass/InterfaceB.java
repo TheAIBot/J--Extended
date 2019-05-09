@@ -10,6 +10,7 @@ import java.util.ArrayList;
 interface InterfaceA {
     public int f(int x);
     public Object q();
+    public void manyParameters(int x, Object b, String d, double qq);
 }
 
 public class InterfaceB implements InterfaceA {
@@ -19,5 +20,8 @@ public class InterfaceB implements InterfaceA {
 
     public String q(){
         return "";
+    }
+
+    public void manyParameters(int x, String b, String d, double qq) {
     }
 }

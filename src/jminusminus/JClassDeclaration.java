@@ -281,13 +281,15 @@ class JClassDeclaration extends JAST implements JTypeDecl {
                     }
 
                     boolean paramsMatch = true;
-                    for (JFormalParameter param : jMethodDeclaration.params){
-
-                        if (!methodParams.contains(param.type().classRep())){
-                               paramsMatch = false;
-                               break;
+                    for (int i = 0; i < jMethodDeclaration.params.size(); i++){
+                        if (!methodParams.get(i).
+                                isAssignableFrom(jMethodDeclaration.params.get(i).type().classRep())){
+                            paramsMatch = false;
+                            break;
                         }
                     }
+
+
                     if (!paramsMatch){
                         break;
                     }
