@@ -1012,7 +1012,7 @@ private JStatement statement(): {
  */
 private JCatchStatement catchStatement(): {
 	int line = 0;
-	ArrayList<Type> exceptions new ArrayList<Type>();
+	ArrayList<Type> exceptions = new ArrayList<Type>();
 	Type exception = null;
 	String name = null;
 	JBlock block = null;
@@ -1023,6 +1023,7 @@ private JCatchStatement catchStatement(): {
 		<CATCH> { line = token.beginLine; }
 		<LPAREN>
 		(
+			LOOKAHEAD(type() <BOR>)
 			exception = type()
 			<BOR>
 			{ exceptions.add(exception); }
