@@ -912,7 +912,7 @@ private JStatement statement(): {
     JBlock finallyBlock = null;
     JExpression expr = null;
     JExpression condition = null;
-    JExpression postIter = null;
+    JStatement postIter = null;
     JFormalParameter internalVar = null;
     JVariableDeclaration varDec = null;
     Type ref = null;
@@ -970,9 +970,9 @@ private JStatement statement(): {
             LOOKAHEAD(<LPAREN> <SEMI>)
             <LPAREN>
             <SEMI>
-            [condition = expression()]
+            [condition = parExpression()]
             <SEMI>
-            [postIter = expression()]
+            [postIter = statementExpression()]
             <RPAREN>
             body = statement()
             { statement = new JForStatement(line, varDec, condition, body, postIter);} |
@@ -980,9 +980,9 @@ private JStatement statement(): {
             //LOOKAHEAD(type() <IDENTIFIER> <EQUAL>)
             <LPAREN>
             varDec = localVariableDeclarationStatement()
-            [condition = expression()]
+            [condition = parExpression()]
             <SEMI>
-            [postIter = expression()]
+            [postIter = statementExpression()]
             <RPAREN>
             body = statement()
             { statement = new JForStatement(line, varDec, condition, body, postIter);}

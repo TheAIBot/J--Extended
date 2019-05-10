@@ -870,7 +870,7 @@ public class Parser {
 
             //Condition test
             if(!see(SEMI))
-                condition = expression();
+                condition = parExpression();
             mustBe(SEMI);
 
             //Post iteration
