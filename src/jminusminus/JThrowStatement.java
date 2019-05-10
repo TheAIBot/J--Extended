@@ -19,7 +19,7 @@ public class JThrowStatement extends JStatement {
 	public JThrowStatement analyze(Context context) {
 		expr = expr.analyze(context);
 		Type type = expr.type();
-		if (Type.typeFor(java.lang.Throwable.class).isJavaAssignableFrom(type)) {
+		if (!Type.typeFor(java.lang.Throwable.class).isJavaAssignableFrom(type)) {
 			JAST.compilationUnit.reportSemanticError(line(), "Type %s"
 					+ " is not a Throwable type.", type.toString());
 		}
