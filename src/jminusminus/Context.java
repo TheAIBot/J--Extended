@@ -426,6 +426,24 @@ class LocalContext extends Context {
             p.indentLeft();
         }
         p.println("</Entries>");
+        p.println("<AllowedException>");
+        if (!allowedExceptions.isEmpty()) {
+        	p.indentRight();
+        	for (Type exception : allowedExceptions) {
+        		p.printf("<Exception type=\"%s\"/>\n", exception.toString());
+        	}
+        	p.indentLeft();
+        }
+        p.println("</AllowedException>");
+        p.println("<ThrownException>");
+        if (!thrownExceptions.isEmpty()) {
+        	p.indentRight();
+        	for (Type exception : thrownExceptions.keySet()) {
+        		p.printf("<Exception type=\"%s\"/>\n", exception.toString());
+        	}
+        	p.indentLeft();
+        }
+        p.println("</ThrownExceptions>");
         p.indentLeft();
         p.println("</LocalContext>");
     }
