@@ -2,6 +2,8 @@ package jminusminus;
 
 import java.util.ArrayList;
 
+import static jminusminus.CLConstants.RETURN;
+
 /**
  * @author Kasper
  */
@@ -26,9 +28,6 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
 
     /** Context for this class. */
     private ClassContext context;
-
-    /** Whether this class has an explicit constructor. */
-    private boolean hasExplicitConstructor;
 
     /** Instance fields of this class. */
     private ArrayList<JFieldDeclaration> instanceFieldInitializations;
@@ -58,10 +57,11 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
                                     Type superType, ArrayList<JMember> interfaceBlock) {
         super(line);
         this.mods = mods;
+        this.mods.add("interface");
+        this.mods.add("abstract");
         this.name = name;
         this.superType = superType;
         this.interfaceBlock = interfaceBlock;
-        hasExplicitConstructor = false;
         instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
         staticFieldInitializations = new ArrayList<JFieldDeclaration>();
     }
@@ -97,23 +97,13 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
         CLEmitter partial = new CLEmitter(false);
 
         // Add the class header to the partial class
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         partial.addClass(mods, qualifiedName, superType.jvmName(), null, false);
 
-        // Pre-analyze the members and add them to the partial
-        // class
+        // Pre-analyze the members and add them to the partial class
         for (JMember member : interfaceBlock) {
             member.preAnalyze(this.context, partial);
-            if (member instanceof JConstructorSignature
-                    && ((JConstructorSignature) member).params.size() == 0) {
-                hasExplicitConstructor = true;
-            }
-        }
-
-        // Add the implicit empty constructor?
-        if (!hasExplicitConstructor) {
-            codegenPartialImplicitConstructor(partial);
         }
 
         // Get the Class rep for the (partial) class and make it
@@ -125,18 +115,53 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
     }
 
 
-    @Override
+    /**
+     * Perform semantic analysis on the interface and all of its members within the
+     * given context. Analysis includes field initializations and the method
+     * bodies.
+     *
+     * @param context
+     *            the parent (compilation unit) context. Ignored here.
+     * @return the analyzed (and possibly rewritten) AST subtree.
+     */
+
     public JAST analyze(Context context) {
-        return null;
+        // Analyze all members
+        for (JMember member : interfaceBlock) {
+            ((JAST) member).analyze(this.context);
+        }
+
+        // Copy declared fields for purposes of initialization.
+        for (JMember member : interfaceBlock) {
+            if (member instanceof JFieldDeclaration) {
+                JFieldDeclaration fieldDecl = (JFieldDeclaration) member;
+                if (fieldDecl.mods().contains("static")) {
+                    staticFieldInitializations.add(fieldDecl);
+                } else {
+                    instanceFieldInitializations.add(fieldDecl);
+                }
+            }
+        }
+
+        return this;
     }
 
     @Override
     public void codegen(CLEmitter output) {
-    	throw new UnsupportedOperationException();
-    }
+        // The class header
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
+                : JAST.compilationUnit.packageName() + "/" + name;
+        output.addClass(mods, qualifiedName, superType.jvmName(), null, false);
 
-    private void codegenPartialImplicitConstructor(CLEmitter partial) {
+        // The members
+        for (JMember member : interfaceBlock) {
+            ((JAST) member).codegen(output);
+        }
 
+        // Generate a class initialization method?
+        if (staticFieldInitializations.size() > 0) {
+            codegenClassInit(output);
+        }
     }
 
     @Override
@@ -176,7 +201,7 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
      */
 
     public void declareThisType(Context context) {
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         CLEmitter partial = new CLEmitter(false);
         partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null,
@@ -199,4 +224,30 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
     public Type thisType() {
         return thisType;
     }
+
+
+    /**
+     * Generate code for class initialization, in j-- this means static field
+     * initializations.
+     *
+     * @param output
+     *            the code emitter (basically an abstraction for producing the
+     *            .class file).
+     */
+    private void codegenClassInit(CLEmitter output) {
+        ArrayList<String> mods = new ArrayList<String>();
+        mods.add("public");
+        mods.add("static");
+        output.addMethod(mods, "<clinit>", "()V", null, false);
+
+        // If there are instance initializations, generate code
+        // for them
+        for (JFieldDeclaration staticField : staticFieldInitializations) {
+            staticField.codegenInitializations(output);
+        }
+
+        // Return
+        output.addNoArgInstruction(RETURN);
+    }
+
 }

@@ -13,7 +13,7 @@ import java.util.Set;
  * A Context encapsulates the environment in which an AST is analyzed. It
  * represents a scope; the scope of a variable is captured by its context. It's
  * the symbol table.
- * 
+ *
  * Because scopes are lexically nested in Java (and so in j--), the environment
  * can be seen as a stack of contexts, each of which is a mapping from names to
  * their definitions (IDefns). A Context keeps track of it's (most closely)
@@ -23,12 +23,12 @@ import java.util.Set;
  * compilation unit (a CompilationUnitContext), a class (a ClassContext), each
  * method (a MethodContext), and each block (a LocalContext). If we were to add
  * the for-statement to j--, we would necessarily create a (local) context.
- * 
+ *
  * From the outside, the structure looks like a tree strung over the AST. But
  * from any location on the AST, that is from any point along a particular
  * branch, it looks like a stack of context objects leading back to the root of
  * the AST, that is, back to the JCompilationUnit object at the root.
- * 
+ *
  * Part of this structure is built during pre-analysis; pre-analysis reaches
  * only into the type (eg class) declaration for typing the members;
  * pre-analysis does not reach into the method bodies. The rest of it is built
@@ -56,7 +56,7 @@ class Context {
 
     /**
      * Construct a Context.
-     * 
+     *
      * @param surrounding
      *            the surrounding context (scope).
      * @param classContext
@@ -77,7 +77,7 @@ class Context {
     /**
      * Add an entry to the symbol table, binding a name to its definition in the
      * current context.
-     * 
+     *
      * @param name
      *            the name being declared.
      * @param definition
@@ -96,7 +96,7 @@ class Context {
     /**
      * Return the definition for a name in the environment. If it's not found in
      * this context, we look for it in the surrounding context(s).
-     * 
+     *
      * @param name
      *            the name whose definition we're looking for.
      * @return the definition (or null, if not found).
@@ -112,7 +112,7 @@ class Context {
     /**
      * Return the definition for a type name in the environment. For now, we
      * look for types only in the CompilationUnitContext.
-     * 
+     *
      * @param name
      *            the name of the type whose definition we're looking for.
      * @return the definition (or null, if not found).
@@ -125,7 +125,7 @@ class Context {
 
     /**
      * Add the type to the environment.
-     * 
+     *
      * @param line
      *            line number of type declaration.
      * @param type
@@ -143,7 +143,7 @@ class Context {
     /**
      * The type that defines this context (used principally for checking
      * acessibility).
-     * 
+     *
      * @return the type that defines this context.
      */
 
@@ -153,7 +153,7 @@ class Context {
 
     /**
      * Return the surrounding context (scope) in the stack of contexts.
-     * 
+     *
      * @return the surrounding context.
      */
 
@@ -163,7 +163,7 @@ class Context {
 
     /**
      * Return the surrounding class context.
-     * 
+     *
      * @return the surrounding class context.
      */
 
@@ -174,7 +174,7 @@ class Context {
     /**
      * Return the surrounding compilation unit context. This is where imported
      * types and other types defined in the compilation unit are declared.
-     * 
+     *
      * @return the compilation unit context.
      */
 
@@ -185,7 +185,7 @@ class Context {
     /**
      * Return the closest surrounding method context. Return null if we're not
      * within a method.
-     * 
+     *
      * @return the method context.
      */
 
@@ -199,7 +199,7 @@ class Context {
 
     /**
      * The names declared in this context.
-     * 
+     *
      * @return the set of declared names.
      */
 
@@ -209,7 +209,7 @@ class Context {
 
     /**
      * Write the contents of this context to STDOUT.
-     * 
+     *
      * @param p
      *            for pretty printing with indentation.
      */
@@ -272,7 +272,7 @@ class ClassContext extends Context {
 
     /**
      * Construct a class context.
-     * 
+     *
      * @param definition
      *            the AST node of the type that this class represents.
      * @param surrounding
@@ -287,7 +287,7 @@ class ClassContext extends Context {
 
     /**
      * Return the AST node of the type defined by this class.
-     * 
+     *
      * @return the AST of the type defined by this class.
      */
 
@@ -319,7 +319,7 @@ class LocalContext extends Context {
      
     /**
      * Construct a local context. A local context is constructed for each block.
-     * 
+     *
      * @param surrounding
      *            the surrounding context.
      */
@@ -335,7 +335,7 @@ class LocalContext extends Context {
     /**
      * The "next" offset. A simple getter. Not to be used for allocating new
      * offsets (nextOffset() is used for that).
-     * 
+     *
      * @return the next available offset.
      */
 
@@ -345,7 +345,7 @@ class LocalContext extends Context {
 
     /**
      * Allocate a new offset (eg for a parameter or local variable).
-     * 
+     *
      * @return the next allocated offset.
      */
 
@@ -405,6 +405,16 @@ class LocalContext extends Context {
      */
     public Map<Type, List<Integer>> getThrownExceptions() {
     	return thrownExceptions;
+    }
+
+    public int nextOffset(Type type) {
+    	if (type == Type.DOUBLE) {
+    		int toReturn = offset;
+			offset += 2;
+			return toReturn;
+		} else {
+	        return offset++;
+		}
     }
 
     /**
@@ -469,7 +479,7 @@ class MethodContext extends LocalContext {
     
     /**
      * Construct a method context.
-     * 
+     *
      * @param surrounding
      *            the surrounding (class) context.
      * @param isStatic
@@ -495,7 +505,7 @@ class MethodContext extends LocalContext {
 
     /**
      * Is this method static?
-     * 
+     *
      * @return true or false.
      */
 
@@ -513,7 +523,7 @@ class MethodContext extends LocalContext {
 
     /**
      * Does this (non-void) method have at least one return?
-     * 
+     *
      * @return true or false.
      */
 
@@ -523,7 +533,7 @@ class MethodContext extends LocalContext {
 
     /**
      * Return the return type of this method.
-     * 
+     *
      * @return return type of this method.
      */
 

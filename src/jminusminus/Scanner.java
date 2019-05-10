@@ -244,6 +244,7 @@ class Scanner {
                 nextCh();
                 return new TokenInfo(LAND, line);
             } else if (ch == '='){
+            	nextCh();
                 return new TokenInfo(BAND_ASSIGN, line);
             }
             else {

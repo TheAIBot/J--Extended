@@ -912,7 +912,7 @@ private JStatement statement(): {
     JBlock finallyBlock = null;
     JExpression expr = null;
     JExpression condition = null;
-    JExpression postIter = null;
+    JStatement postIter = null;
     JFormalParameter internalVar = null;
     JVariableDeclaration varDec = null;
     Type ref = null;
@@ -966,9 +966,9 @@ private JStatement statement(): {
             LOOKAHEAD(<LPAREN> <SEMI>)
             <LPAREN>
             <SEMI>
-            [condition = expression()]
+            [condition = parExpression()]
             <SEMI>
-            [postIter = expression()]
+            [postIter = statementExpression()]
             <RPAREN>
             body = statement()
             { statement = new JForStatement(line, varDec, condition, body, postIter);} |
@@ -976,9 +976,9 @@ private JStatement statement(): {
             //LOOKAHEAD(type() <IDENTIFIER> <EQUAL>)
             <LPAREN>
             varDec = localVariableDeclarationStatement()
-            [condition = expression()]
+            [condition = parExpression()]
             <SEMI>
-            [postIter = expression()]
+            [postIter = statementExpression()]
             <RPAREN>
             body = statement()
             { statement = new JForStatement(line, varDec, condition, body, postIter);}
@@ -1514,30 +1514,36 @@ private JExpression expression(): {
 
 private JExpression assignmentExpression(): {
     int line = 0;
-    JExpression lhs = null, rhs = null;
+    JExpression lhs = null;
 }
 {
     try {
         lhs = conditionalExpression() { line = lhs.line(); }
         [       
-            <ASSIGN> 
-            rhs = assignmentExpression()
-            { lhs = new JAssignOp( line, lhs, rhs ); } |
-            <PLUS_ASSIGN>
-            rhs = assignmentExpression()
-            { lhs = new JPlusAssignOp( line, lhs, rhs ); } |
+			<ASSIGN>
+			{ lhs = new JAssignOp(line, lhs, assignmentExpression()); |
+			<PLUS_ASSIGN>
+			{ lhs = new JAssignOp(line, lhs, new JPlusOp(line, lhs, assignmentExpression(); } |
 			<MINUS_ASSIGN>
-            rhs = assignmentExpression()
-            { lhs = new JMinusAssignOp( line, lhs, rhs ); } |
-			<DIV_ASSIGN>
-            rhs = assignmentExpression()
-            { lhs = new JDivAssignOp( line, lhs, rhs ); } |
+			{ lhs = new JAssignOp(line, lhs, new JSubtractOp(line, lhs, assignmentExpression(); } |
 			<STAR_ASSIGN>
-            rhs = assignmentExpression()
-            { lhs = new JStarAssignOp( line, lhs, rhs ); } |
+			{ lhs = new JAssignOp(line, lhs, new JMultiplyOp(line, lhs, assignmentExpression(); } |
+			<DIV_ASSIGN>
+			{ lhs = new JAssignOp(line, lhs, new JDivideOp(line, lhs, assignmentExpression(); } |
+			<ALSHIFT_ASSIGN>
+			{ lhs = new JAssignOp(line, lhs, new JArithLeftShift(line, lhs, assignmentExpression(); } |
+			<ARSHIFT_ASSIGN>
+			{ lhs = new JAssignOp(line, lhs, new JArithRightShift(line, lhs, assignmentExpression(); } |
+			<LRSHIFT_ASSIGN>
+			{ lhs = new JAssignOp(line, lhs, new JLogicRightShift(line, lhs, assignmentExpression(); } |
 			<MOD_ASSIGN>
-            rhs = assignmentExpression()
-            { lhs = new JModAssignOp( line, lhs, rhs ); }
+			{ lhs = new JAssignOp(line, lhs, new JRemainderOp(line, lhs, assignmentExpression(); } |
+			<BAND_ASSIGN>
+			{ lhs = new JAssignOp(line, lhs, new JBitwiseAND(line, lhs, assignmentExpression(); } |
+			<BXOR_ASSIGN>
+			{ lhs = new JAssignOp(line, lhs, new JBitwiseXOR(line, lhs, assignmentExpression(); } |
+			<BOR_ASSIGN>
+			{ lhs = new JAssignOp(line, lhs, new JBitwiseOR(line, lhs, assignmentExpression(); }
         ]
     } 
     catch ( ParseException e ) { 

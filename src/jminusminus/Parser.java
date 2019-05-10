@@ -513,7 +513,12 @@ public class Parser {
             boolean moreInterfaces = true;
             while (moreInterfaces){
                 mustBe(IDENTIFIER);
-                implementsList.add(new TypeName(line, scanner.previousToken().image()));
+                String interfaceIdentifier = scanner.previousToken().image();
+                while (have(DOT)){
+                    mustBe(IDENTIFIER);
+                    interfaceIdentifier += "." + scanner.previousToken().image();
+                }
+                implementsList.add(new TypeName(line, interfaceIdentifier));
                 moreInterfaces = have(COMMA);
             }
         }
@@ -850,7 +855,7 @@ public class Parser {
 
             JVariableDeclaration before = null;
             JExpression condition = null;
-            JExpression postIter = null;
+            JStatement postIter = null;
             //Variable declaration
             if(!see(SEMI)) {
                 JVariableDeclarator varDec = variableDeclarator(type());
@@ -862,12 +867,12 @@ public class Parser {
 
             //Condition test
             if(!see(SEMI))
-                condition = expression();
+                condition = parExpression();
             mustBe(SEMI);
 
             //Post iteration
             if(!see(RPAREN))
-                postIter = expression();
+                postIter = statementExpression();
             mustBe(RPAREN);
 
             JStatement statement = statement();
@@ -1194,6 +1199,7 @@ public class Parser {
         JExpression expr = expression();
         if (expr instanceof JAssignment || expr instanceof JPreIncrementOp
                 || expr instanceof JPostDecrementOp
+                || expr instanceof JPostIncrementOp
                 || expr instanceof JMessageExpression
                 || expr instanceof JSuperConstruction
                 || expr instanceof JThisConstruction || expr instanceof JNewOp
@@ -1242,16 +1248,28 @@ public class Parser {
         if (have(ASSIGN)) {
             return new JAssignOp(line, lhs, assignmentExpression());
         } else if (have(PLUS_ASSIGN)) {
-            return new JPlusAssignOp(line, lhs, assignmentExpression());
-        } else if (have(MINUS_ASSIGN)) {
-        	return new JMinusAssignOp(line, lhs, assignmentExpression());
-        } else if (have(STAR_ASSIGN)) {
-        	return new JStarAssignOp(line, lhs, assignmentExpression());
-        } else if (have(DIV_ASSIGN)) {
-        	return new JDivAssignOp(line, lhs, assignmentExpression());
-        } else if (have(MOD_ASSIGN)) {
-        	return new JModAssignOp(line, lhs, assignmentExpression());
-        } else {
+        	return new JAssignOp(line, lhs, new JPlusOp(line, lhs, assignmentExpression()));
+		} else if (have(MINUS_ASSIGN)) {
+        	return new JAssignOp(line, lhs, new JSubtractOp(line, lhs, assignmentExpression()));
+		} else if (have(STAR_ASSIGN)) {
+        	return new JAssignOp(line, lhs, new JMultiplyOp(line, lhs, assignmentExpression()));
+		} else if (have(DIV_ASSIGN)) {
+        	return new JAssignOp(line, lhs, new JDivideOp(line, lhs, assignmentExpression()));
+		} else if (have(ALSHIFT_ASSIGN)) {
+        	return new JAssignOp(line, lhs, new JArithLeftShift(line, lhs, assignmentExpression()));
+		} else if (have(ARSHIFT_ASSIGN)) {
+        	return new JAssignOp(line, lhs, new JArithRightShift(line, lhs, assignmentExpression()));
+		} else if (have(LRSHIFT_ASSIGN)) {
+        	return new JAssignOp(line, lhs, new JLogicRightShift(line, lhs, assignmentExpression()));
+		} else if (have(MOD_ASSIGN)) {
+        	return new JAssignOp(line, lhs, new JRemainderOp(line, lhs, assignmentExpression()));
+		} else if (have(BAND_ASSIGN)) {
+        	return new JAssignOp(line, lhs, new JBitwiseAND(line, lhs, assignmentExpression()));
+		} else if (have(BXOR_ASSIGN)) {
+        	return new JAssignOp(line, lhs, new JBitwiseXOR(line, lhs, assignmentExpression()));
+		} else if (have(BOR_ASSIGN)) {
+        	return new JAssignOp(line, lhs, new JBitwiseOR(line, lhs, assignmentExpression()));
+		} else {
             return lhs;
         }
     }

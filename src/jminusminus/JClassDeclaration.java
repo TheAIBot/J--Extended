@@ -2,7 +2,9 @@
 
 package jminusminus;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,10 +44,10 @@ class JClassDeclaration extends JAST implements JTypeDecl {
     private boolean hasExplicitConstructor;
 
     /** Instance fields of this class. */
-    private ArrayList<JFieldDeclaration> instanceFieldInitializations;
+    private ArrayList<JStatement> instanceFieldInitializations;
 
     /** Static (class) fields of this class. */
-    private ArrayList<JFieldDeclaration> staticFieldInitializations;
+    private ArrayList<JStatement> staticFieldInitializations;
 
     /**
      * Construct an AST node for a class declaration given the line number, list
@@ -73,8 +75,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         this.implementsList = new ArrayList<TypeName>();
         this.classBlock = classBlock;
         hasExplicitConstructor = false;
-        instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
-        staticFieldInitializations = new ArrayList<JFieldDeclaration>();
+        instanceFieldInitializations = new ArrayList<JStatement>();
+        staticFieldInitializations = new ArrayList<JStatement>();
     }
 
     public JClassDeclaration(int line, ArrayList<String> mods, String name,
@@ -86,8 +88,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         this.implementsList = implementsList;
         this.classBlock = classBlock;
         hasExplicitConstructor = false;
-        instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
-        staticFieldInitializations = new ArrayList<JFieldDeclaration>();
+        instanceFieldInitializations = new ArrayList<JStatement>();
+        staticFieldInitializations = new ArrayList<JStatement>();
     }
 
     /**
@@ -127,7 +129,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      * @return the field declarations having initializations.
      */
 
-    public ArrayList<JFieldDeclaration> instanceFieldInitializations() {
+    public ArrayList<JStatement> instanceFieldInitializations() {
         return instanceFieldInitializations;
     }
 
@@ -139,11 +141,10 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      */
 
     public void declareThisType(Context context) {
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
         CLEmitter partial = new CLEmitter(false);
-        ArrayList<String> superInterfaces = (ArrayList<String>) implementsList.stream().map(TypeName::jvmName).collect(Collectors.toList());
-        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), superInterfaces,
+        partial.addClass(mods, qualifiedName, Type.OBJECT.jvmName(), null,
                 false); // Object for superClass, just for now
         thisType = Type.typeFor(partial.toClass());
         context.addType(line, thisType);
@@ -178,12 +179,18 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         CLEmitter partial = new CLEmitter(false);
 
         // Add the class header to the partial class
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
-        partial.addClass(mods, qualifiedName, superType.jvmName(), null, false);
 
-        // Pre-analyze the members and add them to the partial
-        // class
+        ArrayList<String> interfacesJvm = new ArrayList<>();
+        for (TypeName tn : implementsList) {
+            Type newType = tn.resolve(this.context);
+            interfacesJvm.add(newType.jvmName());
+        }
+
+        partial.addClass(mods, qualifiedName, superType.jvmName(), interfacesJvm, false);
+
+        // Pre-analyze the members and add them to the partial class
         for (JMember member : classBlock) {
             member.preAnalyze(this.context, partial);
             if (member instanceof JConstructorDeclaration
@@ -198,8 +205,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
         }
 
         // Get the Class rep for the (partial) class and make it
-        // the
-        // representation for this type
+        // the representation for this type
         Type id = this.context.lookupType(name);
         if (id != null && !JAST.compilationUnit.errorHasOccurred()) {
             id.setClassRep(partial.toClass());
@@ -211,8 +217,7 @@ class JClassDeclaration extends JAST implements JTypeDecl {
      * given context. Analysis includes field initializations and the method
      * bodies.
      * 
-     * @param context
-     *            the parent (compilation unit) context. Ignored here.
+     * @param context the parent (compilation unit) context. Ignored here.
      * @return the analyzed (and possibly rewritten) AST subtree.
      */
 
@@ -222,17 +227,100 @@ class JClassDeclaration extends JAST implements JTypeDecl {
             ((JAST) member).analyze(this.context);
         }
 
+        List<JMethodDeclaration> jmethods = new ArrayList<>();
+
         // Copy declared fields for purposes of initialization.
         for (JMember member : classBlock) {
             if (member instanceof JFieldDeclaration) {
                 JFieldDeclaration fieldDecl = (JFieldDeclaration) member;
                 if (fieldDecl.mods().contains("static")) {
-                    staticFieldInitializations.add(fieldDecl);
+                    staticFieldInitializations.addAll(fieldDecl.initializations);
                 } else {
-                    instanceFieldInitializations.add(fieldDecl);
+                    instanceFieldInitializations.addAll(fieldDecl.initializations);
+                }
+            } else if(member instanceof JStaticInitializationBlock) {
+                JStaticInitializationBlock staticBlock = (JStaticInitializationBlock) member;
+                staticFieldInitializations.addAll(staticBlock.statements);
+            } else if(member instanceof JInitializationBlock) {
+                JInitializationBlock block = (JInitializationBlock) member;
+                instanceFieldInitializations.addAll(block.statements);
+            } else if (member instanceof JMethodDeclaration){
+                jmethods.add((JMethodDeclaration) member);
+            }
+        }
+
+        for (TypeName curInterface : implementsList){
+            Class classRep = curInterface.resolve(this.context).classRep();
+            java.lang.reflect.Method[] methods = classRep.getDeclaredMethods();
+            for (java.lang.reflect.Method method : methods){
+                Class methodReturnType = method.getReturnType();
+
+                int mods = method.getModifiers();
+                String methodModifiers = Modifier.toString(mods);
+
+                List<Class> methodParams = Arrays.asList(method.getParameterTypes());
+
+                // finding method(s) of the same name
+                List<JMethodDeclaration> jmethodOptions = jmethods.stream().filter(m -> m.name.equals(method.getName())).collect(Collectors.toList());
+                if (jmethodOptions.isEmpty()){
+                    JAST.compilationUnit.reportSemanticError(line, "Class must implement %s " +
+                            "as defined in interface %s", method.getName(), curInterface.simpleName());
+                    break;
+                }
+
+                JMethodDeclaration thisMethod = null;
+                for (JMethodDeclaration jMethodDeclaration : jmethodOptions){
+                    // check return type
+                    if (!methodReturnType.isAssignableFrom(jMethodDeclaration.returnType.classRep())){
+                        break;
+                    }
+
+                    // check parameters
+                    if (jMethodDeclaration.params.size() != methodParams.size()){
+                        break;
+                    }
+
+                    boolean paramsMatch = true;
+                    for (int i = 0; i < jMethodDeclaration.params.size(); i++){
+                        if (!methodParams.get(i).
+                                isAssignableFrom(jMethodDeclaration.params.get(i).type().classRep())){
+                            paramsMatch = false;
+                            break;
+                        }
+                    }
+
+
+                    if (!paramsMatch){
+                        break;
+                    }
+
+                    boolean acceptableMods = true;
+                    String[] signatureMods = methodModifiers.split(" ");
+                    for (String mod : signatureMods){
+                        if (mod.equalsIgnoreCase("abstract")){
+                            continue;
+                        }
+                        if (!jMethodDeclaration.mods.contains(mod)){
+                            acceptableMods = false;
+                        }
+                    }
+                    if (jMethodDeclaration.mods.size() != signatureMods.length - 1) {  // minus 1 because the signature has the abstract mod
+                        acceptableMods = false;
+                    }
+
+                    if (!acceptableMods){
+                        break;
+                    }
+
+                    thisMethod = jMethodDeclaration;
+                }
+                if (thisMethod == null){
+                    JAST.compilationUnit.reportSemanticError(line, "Method %s from interface %s" +
+                            " must be implemented!", method.getName(), curInterface.simpleName());
                 }
             }
         }
+
 
         // Finally, ensure that a non-abstract class has
         // no abstract methods.
@@ -259,9 +347,10 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
     public void codegen(CLEmitter output) {
         // The class header
-        String qualifiedName = JAST.compilationUnit.packageName() == "" ? name
+        String qualifiedName = JAST.compilationUnit.packageName().equals("") ? name
                 : JAST.compilationUnit.packageName() + "/" + name;
-        output.addClass(mods, qualifiedName, superType.jvmName(), null, false);
+        ArrayList<String> superInterfaces = (ArrayList<String>) implementsList.stream().map(TypeName::jvmName).collect(Collectors.toList());
+        output.addClass(mods, qualifiedName, superType.jvmName(), superInterfaces, false);
 
         // The implicit empty constructor?
         if (!hasExplicitConstructor) {
@@ -352,8 +441,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
         // If there are instance field initializations, generate
         // code for them
-        for (JFieldDeclaration instanceField : instanceFieldInitializations) {
-            instanceField.codegenInitializations(output);
+        for (JStatement instanceField : instanceFieldInitializations) {
+            instanceField.codegen(output);
         }
 
         // Return
@@ -377,8 +466,8 @@ class JClassDeclaration extends JAST implements JTypeDecl {
 
         // If there are instance initializations, generate code
         // for them
-        for (JFieldDeclaration staticField : staticFieldInitializations) {
-            staticField.codegenInitializations(output);
+        for (JStatement staticField : staticFieldInitializations) {
+            staticField.codegen(output);
         }
 
         // Return
