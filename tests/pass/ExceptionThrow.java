@@ -23,7 +23,6 @@ public class ExceptionThrow implements InterfaceWithThrow {
 		}
 	}
 	
-	@Override
 	public void interfaceMethodWithThrow() throws Exception {
 		throw new Exception();
 	}
