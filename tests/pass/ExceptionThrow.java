@@ -6,6 +6,23 @@ public class ExceptionThrow implements InterfaceWithThrow {
 		throw new Exception(message);
 	}
 
+	// No need for throws-declaration of unchecked exceptions
+	public void throwError(String message) {
+		throw new Error(message);
+	}
+	
+	public void throwInheritingException(String message) throws Exception {
+		throw new InheritingException(message);
+	}
+	
+	public void throwMultipleExceptions(boolean throwExceptionA) throws ExceptionA, ExceptionB {
+		if (throwExceptionA) {
+			throw new ExceptionA();
+		} else {
+			throw new ExceptionB();
+		}
+	}
+	
 	@Override
 	public void interfaceMethodWithThrow() throws Exception {
 		throw new Exception();
