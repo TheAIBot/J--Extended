@@ -55,7 +55,12 @@ class JCatchStatement extends JStatement {
 		// If this is a multicatch, then the Throwable-type should be used.
 		LocalVariableDefn defn;
 		if (exceptions.size() > 1) {
-			defn = new LocalVariableDefn(throwableType, this.context.nextOffset());
+			// Find common super type
+			Type commonType = null;
+			for (int i = 0; i < exceptions.size() - 1; i++) {
+				commonType = exceptions.get(i).commonSuperClass(exceptions.get(i + 1));
+			}
+			defn = new LocalVariableDefn(commonType, this.context.nextOffset());
 		} else {
 			defn = new LocalVariableDefn(exceptions.get(0), this.context.nextOffset());
 		}
@@ -64,7 +69,9 @@ class JCatchStatement extends JStatement {
 		// Analyze the body
 		if (body != null) {
 			body = body.analyze(this.context);
-		}		
+		} else {
+			JAST.compilationUnit.reportSemanticError(line(), "A catch-statement must have a body.");
+		}
 		return this;
 	}
 
