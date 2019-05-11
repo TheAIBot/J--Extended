@@ -966,7 +966,7 @@ private JStatement statement(): {
             LOOKAHEAD(<LPAREN> <SEMI>)
             <LPAREN>
             <SEMI>
-            [condition = parExpression()]
+            [condition = expression()]
             <SEMI>
             [postIter = statementExpression()]
             <RPAREN>
@@ -976,7 +976,7 @@ private JStatement statement(): {
             //LOOKAHEAD(type() <IDENTIFIER> <EQUAL>)
             <LPAREN>
             varDec = localVariableDeclarationStatement()
-            [condition = parExpression()]
+            [condition = expression()]
             <SEMI>
             [postIter = statementExpression()]
             <RPAREN>
