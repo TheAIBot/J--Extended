@@ -6,7 +6,6 @@ import junit.framework.TestCase;
 import pass.ExceptionA;
 import pass.ExceptionB;
 import pass.ExceptionThrow;
-import pass.InterfaceWithThrow;
 
 public class ThrowTest extends TestCase {
 

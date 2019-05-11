@@ -1,6 +1,9 @@
 package pass;
 
 import java.lang.Exception;
+import java.io.EOFException;
+import java.lang.RuntimeException;
+import java.lang.Error;
 
 public class TryCatch {
 	
@@ -28,21 +31,21 @@ public class TryCatch {
 		return exMessage;
 	}
 	
-	public Exception multicatchExceptions(boolean throwExceptionA) {
+	public Exception multicatchExceptions(boolean throwEOFException) {
 		try {
-			if (throwExceptionA) {
-				throw new ExceptionA();
+			if (throwEOFException) {
+				throw new EOFException();
 			} else {
-				throw new ExceptionB();
+				throw new RuntimeException();
 			}
-		} catch (ExceptionA | ExceptionB e) {
+		} catch (EOFException | RuntimeException e) {
 			return e;
 		}
 	}
 	
-	public Exception catchExceptionAsGeneralized() {
+	public Exception catchEOFExceptionsGeneralized() {
 		try {
-			throw new ExceptionA();
+			throw new EOFException();
 		} catch (Exception e) {
 			return e;
 		}
@@ -51,7 +54,7 @@ public class TryCatch {
 	public void avoidCatchingSuperException(String message) throws Exception {
 		try {
 			throw new Exception(message);
-		} catch (ExceptionA e) {
+		} catch (EOFException e) {
 		}
 	}
 	
@@ -90,7 +93,7 @@ public class TryCatch {
 		try {
 			try {
 				throw new Exception(message);
-			} catch (ExceptionA e) {
+			} catch (EOFException e) {
 				return new String();
 			}
 		} catch (Exception e) {
@@ -98,16 +101,16 @@ public class TryCatch {
 		}
 	}
 	
-	public Exception multipleCatch(boolean throwExceptionA) {
+	public Exception multipleCatch(boolean throwEOFException) {
 		try {
-			if (throwExceptionA) {
-				throw new ExceptionA();
+			if (throwEOFException) {
+				throw new EOFException();
 			} else {
-				throw new ExceptionB();
+				throw new RuntimeException();
 			}
-		} catch (ExceptionA e) {
+		} catch (EOFException e) {
 			return e;
-		} catch (ExceptionB e) {
+		} catch (RuntimeException e) {
 			return e;
 		}
 	}

@@ -1,6 +1,7 @@
 package pass;
 
 import java.io.EOFException;
+import java.io.IOException;
 import java.lang.RuntimeException;
 import java.lang.Exception;
 import java.lang.Error;
@@ -17,7 +18,7 @@ public class ExceptionThrow {
 	}
 	
 	public void throwInheritingException(String message) throws Exception {
-		throw new InheritingException(message);
+		throw new IOException(message);
 	}
 	
 	public void throwMultipleExceptions(boolean throwExceptionA) throws EOFException, RuntimeException {

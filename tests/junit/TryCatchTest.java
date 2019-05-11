@@ -1,8 +1,8 @@
 package junit;
 
 import junit.framework.TestCase;
-import pass.ExceptionA;
-import pass.ExceptionB;
+import java.io.EOFException;
+import java.lang.RuntimeException;
 import pass.ExceptionThrow;
 import pass.TryCatch;
 
@@ -28,12 +28,12 @@ public class TryCatchTest extends TestCase {
 	}
 
 	public void testMulticatch() {
-		assertTrue(tryCatch.multicatchExceptions(true) instanceof ExceptionA);
-		assertTrue(tryCatch.multicatchExceptions(false) instanceof ExceptionB);
+		assertTrue(tryCatch.multicatchExceptions(true) instanceof EOFException);
+		assertTrue(tryCatch.multicatchExceptions(false) instanceof RuntimeException);
 	}
 
-	public void testCatchExceptionAsGeneralized() {
-		assertTrue(tryCatch.catchExceptionAsGeneralized() instanceof ExceptionA);
+	public void testCatchEOFExceptionsGeneralized() {
+		assertTrue(tryCatch.catchEOFExceptionsGeneralized() instanceof EOFException);
 	}
 
 	public void testAvoidCatchingSuperException() {
@@ -67,8 +67,8 @@ public class TryCatchTest extends TestCase {
 	}
 
 	public void testMultipleCatch() {
-		assertTrue(tryCatch.multipleCatch(true) instanceof ExceptionA);
-		assertTrue(tryCatch.multipleCatch(false) instanceof ExceptionB);
+		assertTrue(tryCatch.multipleCatch(true) instanceof EOFException);
+		assertTrue(tryCatch.multipleCatch(false) instanceof RuntimeException);
 	}
 
 	public void testFinallyGetsRun() {

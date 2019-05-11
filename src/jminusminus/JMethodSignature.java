@@ -181,12 +181,13 @@ public class JMethodSignature extends JAST implements JMember {
             descriptor += param.type().toDescriptor();
         }
         descriptor += ")" + returnType.toDescriptor();
-
-        exceptionNames = new ArrayList<String>();
-        // Resolve exception types
-        for (int i = 0; i < exceptions.size(); i++) {
-        	exceptions.set(i, exceptions.get(i).resolve(context));
-        	exceptionNames.add(exceptions.get(i).jvmName());
+        if (exceptions != null) {
+        	exceptionNames = new ArrayList<String>();
+            // Resolve exception types
+            for (int i = 0; i < exceptions.size(); i++) {
+            	exceptions.set(i, exceptions.get(i).resolve(context));
+            	exceptionNames.add(exceptions.get(i).jvmName());
+            }
         }
         
         // Generate the method with an empty body (for now)
