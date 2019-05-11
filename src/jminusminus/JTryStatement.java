@@ -64,10 +64,16 @@ public class JTryStatement extends JStatement {
 		Map<Type, List<Integer>> thrownExceptions = this.context.getThrownExceptions();
 		// Ensure that all thrown exception are caught.
 		Set<Type> leftoverExceptions = new HashSet<Type>(thrownExceptions.keySet());
-		leftoverExceptions.removeAll(caughtExceptions);
+		for (Type caughtException : caughtExceptions) {
+			for (Type leftoverException : leftoverExceptions) {
+				if (caughtException.isJavaAssignableFrom(leftoverException)) {
+					leftoverExceptions.remove(leftoverException);
+				}
+			}
+		}
 		for (Type exception : leftoverExceptions) {
 			for (int line : thrownExceptions.get(exception)) {
-				JAST.compilationUnit.reportSemanticError(line, "The exception %s "
+				JAST.compilationUnit.reportSemanticError(line, "The exception %s"
 						+ " is never being caught.", exception.toString());
 			}
 		}
@@ -78,8 +84,7 @@ public class JTryStatement extends JStatement {
 			for (Type caughtException : cStatement.getCaughtExceptions()) {
 				if (!Type.typeFor(java.lang.Error.class).isJavaAssignableFrom(caughtException)
 				 && !Type.typeFor(java.lang.RuntimeException.class)
-	    					.isJavaAssignableFrom(caughtException)
-				 && !thrownExceptions.keySet().contains(caughtException)) {
+	    					.isJavaAssignableFrom(caughtException)) {
 					boolean isType = false;
 					for (Type thrownException : thrownExceptions.keySet()) {
 						if (caughtException.isJavaAssignableFrom(thrownException)) {

@@ -378,7 +378,14 @@ class LocalContext extends Context {
     					.isJavaAssignableFrom(exception)) {
     		return;
     	} 
-    	if (allowedExceptions.contains(exception) || this instanceof MethodContext) {
+    	boolean isType = false;
+    	for (Type allowedException : allowedExceptions) {
+    		if (allowedException.isJavaAssignableFrom(exception)) {
+    			isType = true;
+    			break;
+    		}
+    	}
+    	if (isType || this instanceof MethodContext) {
     		// If the exception is allowed, add to thrown exceptions.
     		// OR if the exception is not allowed and this LocalContext is a MethodContext,
     		// add it. This will produce a semantic error later on in JTryStatement.analyze().
@@ -391,7 +398,7 @@ class LocalContext extends Context {
     		}
     	} else if (surroundingContext() instanceof LocalContext) {
     		// If this context doesn't allow this exception, perhaps the surrounding
-    		// local context does
+    		// local or method context does
     		((LocalContext)surroundingContext()).addThrownException(exception, line);
     	}
     }
