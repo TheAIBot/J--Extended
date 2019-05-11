@@ -45,7 +45,7 @@ class JCatchStatement extends JStatement {
 		// Resolve exception types and ensure that it inherits Throwable
 		for (int i = 0; i < exceptions.size(); i++) {
         	exceptions.set(i, exceptions.get(i).resolve(context));
-        	if (!exceptions.get(i).isJavaAssignableFrom(throwableType)) {
+        	if (!throwableType.isJavaAssignableFrom(exceptions.get(i))) {
         		JAST.compilationUnit.reportSemanticError(line(), 
         				"Type " + exceptions.get(i) + " is not a Throwable type.");
         	}

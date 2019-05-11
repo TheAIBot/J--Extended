@@ -71,18 +71,27 @@ public class JTryStatement extends JStatement {
 						+ " is never being caught.", exception.toString());
 			}
 		}
-		// Go through each catch statement and check that every caught exception
-		// is actually thrown inside the try-block (unless the caught exception 
-		// is unchecked).
+		// Go through each catch statement and check that every caught exception or
+		// its supertype is actually thrown inside the try-block (unless the caught 
+		// exception is unchecked).
 		for (JCatchStatement cStatement : catchStatements) {
-			for (Type exception : cStatement.getCaughtExceptions()) {
-				if (!Type.typeFor(java.lang.Error.class).isJavaAssignableFrom(exception)
+			for (Type caughtException : cStatement.getCaughtExceptions()) {
+				if (!Type.typeFor(java.lang.Error.class).isJavaAssignableFrom(caughtException)
 				 && !Type.typeFor(java.lang.RuntimeException.class)
-	    					.isJavaAssignableFrom(exception)
-				 && !thrownExceptions.keySet().contains(exception)) {
-					JAST.compilationUnit.reportSemanticError(cStatement.line(), 
-							"Exception %s is never thrown in the corresponding "
-							+ "try-block.", exception.toString());
+	    					.isJavaAssignableFrom(caughtException)
+				 && !thrownExceptions.keySet().contains(caughtException)) {
+					boolean isType = false;
+					for (Type thrownException : thrownExceptions.keySet()) {
+						if (caughtException.isJavaAssignableFrom(thrownException)) {
+							isType = true;
+							break;
+						}
+					}
+					if (!isType) {
+						JAST.compilationUnit.reportSemanticError(cStatement.line(), 
+								"Exception %s is never thrown in the corresponding "
+								+ "try-block.", caughtException.toString());
+					}
 				}
 			}
 		}

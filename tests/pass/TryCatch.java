@@ -53,7 +53,10 @@ public class TryCatch {
 	
 	public void avoidCatchingSuperException(String message) throws Exception {
 		try {
-			throw new Exception(message);
+			if (true) {
+				throw new Exception(message);
+			}
+			throw new EOFException();
 		} catch (EOFException e) {
 		}
 	}
@@ -92,7 +95,10 @@ public class TryCatch {
 	public String catchExceptionInOuterTry(String message) {
 		try {
 			try {
-				throw new Exception(message);
+				if (true) {
+					throw new Exception(message);
+				}
+				throw new EOFException();
 			} catch (EOFException e) {
 				return new String();
 			}
