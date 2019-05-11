@@ -701,7 +701,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
                 name = token.image; 
             } 
             params = formalParameters()
-            thrownExceptions = throwsDeclaration()
+            [ thrownExceptions = throwsDeclaration() ]
             body = block()
             { 
                 memberDecl = 
@@ -718,7 +718,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
             { line = token.beginLine; }
             <IDENTIFIER> { name = token.image; } 
             params = formalParameters()
-            thrownExceptions = throwsDeclaration()
+            [ thrownExceptions = throwsDeclaration() ]
             ( 
                 body = block() | 
                 <SEMI> 
@@ -784,7 +784,7 @@ private JMember memberSig( ArrayList<String>  mods ): {
                 name = token.image;
             }
             params = formalParameters()
-            thrownExceptions = throwsDeclaration()
+            [ thrownExceptions = throwsDeclaration() ]
             <SEMI>
             {
                 memberSig =
@@ -801,7 +801,7 @@ private JMember memberSig( ArrayList<String>  mods ): {
             { line = token.beginLine; }
             <IDENTIFIER> { name = token.image; }
             params = formalParameters()
-            thrownExceptions = throwsDeclaration()
+            [ thrownExceptions = throwsDeclaration() ]
             <SEMI>
             {
                 memberSig =
@@ -1114,16 +1114,14 @@ private ArrayList<Type> throwsDeclaration(): {
 }
 {
 	try {
-		[
-			<THROWS>
-			exception = type()
+		<THROWS>
+		exception = type()
+		{ types.add(exception); }
+		(
+			LOOKAHEAD(<COMMA> type())
+			<COMMA> exception = type()
 			{ types.add(exception); }
-			(
-				LOOKAHEAD(<COMMA> type())
-				<COMMA> exception = type()
-				{ types.add(exception); }
-			)*
-		]
+		)*
 	}
 	catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 

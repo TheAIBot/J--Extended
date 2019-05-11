@@ -1,5 +1,7 @@
 package junit;
 
+import java.io.EOFException;
+
 import junit.framework.TestCase;
 import pass.ExceptionA;
 import pass.ExceptionB;
@@ -9,12 +11,10 @@ import pass.InterfaceWithThrow;
 public class ThrowTest extends TestCase {
 
 	private ExceptionThrow thrower;
-	private InterfaceWithThrow interfaceThrower;
 	
 	protected void setUp() throws Exception {
 		super.setUp();
 		thrower = new ExceptionThrow();
-		interfaceThrower = new ExceptionThrow();
 	}
 	
 	protected void tearDown() throws Exception {
@@ -53,26 +53,19 @@ public class ThrowTest extends TestCase {
 			// Make the method throw ExceptionA
 			thrower.throwMultipleExceptions(true);
 			fail();
-		} catch (ExceptionB e) {
+		} catch (RuntimeException e) {
 			fail();
-		} catch (ExceptionA e) {
+		} catch (EOFException e) {
 		}
 		
 		try {
 			// Make the method throw ExceptionB
 			thrower.throwMultipleExceptions(false);
 			fail();
-		} catch (ExceptionA e) {
+		} catch (EOFException e) {
 			fail();
-		} catch (ExceptionB e) {
+		} catch (RuntimeException e) {
 		}
 	}
 	
-	public void testInterfaceMethodWithThrow() {
-		try {
-			interfaceThrower.interfaceMethodWithThrow();
-			fail();
-		} catch (Exception e) {
-		}
-	}
 }

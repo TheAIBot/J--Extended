@@ -1,6 +1,11 @@
 package pass;
 
-public class ExceptionThrow implements InterfaceWithThrow {
+import java.io.EOFException;
+import java.lang.RuntimeException;
+import java.lang.Exception;
+import java.lang.Error;
+
+public class ExceptionThrow {
 
 	public void throwException(String message) throws Exception {
 		throw new Exception(message);
@@ -15,16 +20,12 @@ public class ExceptionThrow implements InterfaceWithThrow {
 		throw new InheritingException(message);
 	}
 	
-	public void throwMultipleExceptions(boolean throwExceptionA) throws ExceptionA, ExceptionB {
+	public void throwMultipleExceptions(boolean throwExceptionA) throws EOFException, RuntimeException {
 		if (throwExceptionA) {
-			throw new ExceptionA();
+			throw new EOFException();
 		} else {
-			throw new ExceptionB();
+			throw new RuntimeException();
 		}
-	}
-	
-	public void interfaceMethodWithThrow() throws Exception {
-		throw new Exception();
 	}
 	
 }

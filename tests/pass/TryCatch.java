@@ -1,5 +1,7 @@
 package pass;
 
+import java.lang.Exception;
+
 public class TryCatch {
 	
 	private void throwException(String message) throws Exception {

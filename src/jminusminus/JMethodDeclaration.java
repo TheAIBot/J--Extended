@@ -118,12 +118,14 @@ class JMethodDeclaration extends JAST implements JMember {
             JAST.compilationUnit.reportSemanticError(line(),
                 "static method cannot be declared abstract");
         }
-
-        exceptionNames = new ArrayList<String>();
-        // Resolve exception types
-        for (int i = 0; i < exceptions.size(); i++) {
-        	exceptions.set(i, exceptions.get(i).resolve(context));
-        	exceptionNames.add(exceptions.get(i).jvmName());
+        
+        if (exceptions != null) {
+        	exceptionNames = new ArrayList<String>();
+            // Resolve exception types
+            for (int i = 0; i < exceptions.size(); i++) {
+            	exceptions.set(i, exceptions.get(i).resolve(context));
+            	exceptionNames.add(exceptions.get(i).jvmName());
+            }
         }
         
         // Compute descriptor
