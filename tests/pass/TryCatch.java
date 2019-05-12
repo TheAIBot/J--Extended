@@ -132,6 +132,15 @@ public class TryCatch {
 		return returnMessage;
 	}
 	
+	public String tryWithOnlyFinally(String message) {
+		String returnMessage = "";
+		try {
+		} finally {
+			returnMessage = message;
+		}
+		return returnMessage;
+	}
+	
 	public String finallyGetsRunBeforeReturn(String message) {
 		String returnMessage = "";
 		try {

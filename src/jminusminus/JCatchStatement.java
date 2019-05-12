@@ -52,10 +52,10 @@ class JCatchStatement extends JStatement {
         }
 		this.context = new LocalContext(context);
 		// Create a local variable declaration corresponding to the caught exceptions.
-		// If this is a multicatch, then the Throwable-type should be used.
+		// If this is a multicatch, then the common super type should be used.
 		LocalVariableDefn defn;
 		if (exceptions.size() > 1) {
-			// Find common super type
+			// Use common super class as type definition
 			Type commonType = null;
 			for (int i = 0; i < exceptions.size() - 1; i++) {
 				commonType = exceptions.get(i).commonSuperClass(exceptions.get(i + 1));

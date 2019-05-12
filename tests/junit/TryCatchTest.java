@@ -74,8 +74,12 @@ public class TryCatchTest extends TestCase {
 	public void testFinallyGetsRun() {
 		assertTrue(tryCatch.finallyGetsRun("test").equals("test"));
 	}
-
-	public void testFinallyGetsRunBeforeReturn() {
-		assertTrue(tryCatch.finallyGetsRunBeforeReturn("test").equals("test"));
+	
+	public void testTryWithOnlyFinally() {
+		assertTrue(tryCatch.tryWithOnlyFinally("test").equals("test"));
 	}
+
+	//public void testFinallyGetsRunBeforeReturn() {
+		//assertTrue(tryCatch.finallyGetsRunBeforeReturn("test").equals("test"));
+	//}
 }
