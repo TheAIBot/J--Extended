@@ -233,6 +233,21 @@ class Type {
     public boolean isJavaAssignableFrom(Type that) {
         return this.classRep.isAssignableFrom(that.classRep);
     }
+    
+    /**
+     * Returns the common super class between this and that, or null
+     * if no common super class was found. Does not consider common
+     * interfaces.
+     * @param that
+     * @return
+     */
+    public Type commonSuperClass(Type that) {
+    	Type common = this;
+    	while (common != null && !common.isJavaAssignableFrom(that)) {
+    		common = common.superClass();
+    	}
+    	return common;
+    }
 
     /**
      * Return a list of this class' abstract methods? It does has abstract

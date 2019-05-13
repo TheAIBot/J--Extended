@@ -1,7 +1,7 @@
 package jminusminus;
 
 public class JThrowStatement extends JStatement {
-
+	
 	/** The expression thrown. */
 	private JExpression expr;
 	
@@ -16,15 +16,21 @@ public class JThrowStatement extends JStatement {
 	}
 
 	@Override
-	public JStatement analyze(Context context) {
-		// TODO
-		throw new UnsupportedOperationException();
+	public JThrowStatement analyze(Context context) {
+		expr = expr.analyze(context);
+		Type type = expr.type();
+		if (!Type.typeFor(java.lang.Throwable.class).isJavaAssignableFrom(type)) {
+			JAST.compilationUnit.reportSemanticError(line(), "Type %s"
+					+ " is not a Throwable type.", type.toString());
+		}
+		((LocalContext)context).addThrownException(type, line());
+		return this;
 	}
 
 	@Override
 	public void codegen(CLEmitter output) {
-		// TODO Auto-generated method stub
-		throw new UnsupportedOperationException();
+		expr.codegen(output);
+		output.addNoArgInstruction(CLConstants.ATHROW);
 	}
 
 	/**

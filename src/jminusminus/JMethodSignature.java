@@ -31,14 +31,13 @@ public class JMethodSignature extends JAST implements JMember {
      */
     protected ArrayList<JFormalParameter> params;
 
-    /**
-     * The declared exceptions thrown by the method.
-     */
-    protected ArrayList<TypeName> exceptionList;
-
-    /**
-     * Built in analyze().
-     */
+    /** The declared exceptions thrown by the method. */
+    protected ArrayList<Type> exceptions;
+    
+    /** The exception names in internal form. Computed by preAnalyze(). */
+    protected ArrayList<String> exceptionNames;
+    
+    /** Built in analyze(). */
     protected MethodContext context;
 
     /**
@@ -74,13 +73,13 @@ public class JMethodSignature extends JAST implements JMember {
 
     public JMethodSignature(int line, ArrayList<String> mods, String name,
                             Type returnType, ArrayList<JFormalParameter> params,
-                            ArrayList<TypeName> exceptionList) {
+                            ArrayList<Type> exceptions) {
         super(line);
         this.mods = mods;
         this.name = name;
         this.returnType = returnType;
         this.params = params;
-        this.exceptionList = exceptionList;
+        this.exceptions = exceptions;
         this.isAbstract = mods.contains("abstract");
         this.isStatic = mods.contains("static");
         this.isPrivate = mods.contains("private");
@@ -88,7 +87,7 @@ public class JMethodSignature extends JAST implements JMember {
 
     @Override
     public JAST analyze(Context context) {
-        this.context = new MethodContext(context, isStatic, returnType);
+        this.context = new MethodContext(context, isStatic, returnType, exceptions);
 
         if (!isStatic) {
             // Offset 0 is used to address "this".
@@ -102,12 +101,24 @@ public class JMethodSignature extends JAST implements JMember {
             defn.initialize();
             this.context.addEntry(param.line(), param.name(), defn);
         }
+        
+        // Enforce exception is subclass of Throwable
+        if (exceptions != null) {
+        	Type throwableType = Type.typeFor(java.lang.Throwable.class);
+            for (Type exception : exceptions) {
+            	if (!throwableType.isJavaAssignableFrom(exception)) {
+            		JAST.compilationUnit.reportSemanticError(line(), "Type %s "
+            				+ "is not a Throwable-type.", exception);
+            	}
+            }
+        }
+        
         return this;
     }
 
     @Override
     public void codegen(CLEmitter output) {
-        output.addMethod(mods, name, descriptor, null, false);
+        output.addMethod(mods, name, descriptor, exceptionNames, false);
 
         // Add implicit RETURN
         if (returnType == Type.VOID) {
@@ -142,14 +153,14 @@ public class JMethodSignature extends JAST implements JMember {
             }
             p.println("</FormalParameters>");
         }
-        if (exceptionList != null) {
-            p.println("<ThrownExceptions>");
-            p.indentRight();
-            for (TypeName type : exceptionList) {
-                p.printf("<Exception type=\"%s\"/>\n", type.toString());
-            }
-            p.indentLeft();
-            p.println("</ThrownExceptions>");
+        if (exceptions != null) {
+        	p.println("<ThrownExceptions>");
+        	p.indentRight();
+        	for (Type type : exceptions) {
+        		p.printf("<Exception type=\"%s\"/>\n", type.toString());
+        	}
+        	p.indentLeft();
+        	p.println("</ThrownExceptions>");
         }
         p.indentLeft();
         p.println("</JMethodSignature>");
@@ -182,7 +193,16 @@ public class JMethodSignature extends JAST implements JMember {
             descriptor += param.type().toDescriptor();
         }
         descriptor += ")" + returnType.toDescriptor();
-
+        
+        if (exceptions != null) {
+        	exceptionNames = new ArrayList<String>();
+            // Resolve exception types
+            for (int i = 0; i < exceptions.size(); i++) {
+            	exceptions.set(i, exceptions.get(i).resolve(context));
+            	exceptionNames.add(exceptions.get(i).jvmName());
+            }
+        }
+        
         // Generate the method with an empty body (for now)
         partialCodegen(context, partial);
     }
@@ -199,7 +219,7 @@ public class JMethodSignature extends JAST implements JMember {
         // Generate a method with an empty body; need a return to
         // make
         // the class verifier happy.
-        partial.addMethod(mods, name, descriptor, null, false);
+        partial.addMethod(mods, name, descriptor, exceptionNames, false);
 
         // Add implicit RETURN
         if (returnType == Type.VOID) {

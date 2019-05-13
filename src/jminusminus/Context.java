@@ -3,7 +3,10 @@
 package jminusminus;
 
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -306,7 +309,14 @@ class LocalContext extends Context {
 
     /** Next offset for a local variable. */
     protected int offset;
+    
+    /** The exceptions that are allowed to occur in this local context. */
+    protected Set<Type> allowedExceptions = new HashSet<Type>();
 
+    /** The exceptions that actually gets thrown inside this context including
+     *  the line number at which they occur. */
+    protected Map<Type, List<Integer>> thrownExceptions = new HashMap<Type, List<Integer>>();
+     
     /**
      * Construct a local context. A local context is constructed for each block.
      *
@@ -342,6 +352,67 @@ class LocalContext extends Context {
     public int nextOffset() {
         return offset++;
     }
+    
+    /**
+     * Add an exception that is allowed to be thrown in this context, 
+     * because the exception is either part of the method declaration 
+     * or because we are currently inside a try-block where it can be
+     * caught. 
+     * @param exception
+     * 					fully qualified form
+     */
+    public void addAllowedException(Type exception) {
+    	allowedExceptions.add(exception);
+    }
+    
+    /**
+     * Add an exception that is thrown inside this context. An 
+     * exception should be added every time an exception is declared
+     * to be thrown through a JMessageExpression, JNewOp, or JThrowStatement.
+     * @param exception
+     * 					 fully qualified form
+     */
+    public void addThrownException(Type exception, int line) {
+    	if (Type.typeFor(java.lang.Error.class).isJavaAssignableFrom(exception)
+    	 || Type.typeFor(java.lang.RuntimeException.class)
+    					.isJavaAssignableFrom(exception)) {
+    		return;
+    	} 
+    	boolean isType = false;
+    	for (Type allowedException : allowedExceptions) {
+    		if (allowedException.isJavaAssignableFrom(exception)) {
+    			isType = true;
+    			break;
+    		}
+    	}
+    	if (isType || this instanceof MethodContext) {
+    		// If the exception is allowed, add to thrown exceptions.
+    		// OR if the exception is not allowed and this LocalContext is a MethodContext,
+    		// add it. This will produce a semantic error later on in JTryStatement.analyze().
+    		if (thrownExceptions.containsKey(exception)) {
+    			thrownExceptions.get(exception).add(line);
+    		} else {
+    			ArrayList<Integer> lines = new ArrayList<Integer>();
+    			lines.add(line);
+    			thrownExceptions.put(exception, lines);
+    		}
+    	} else if (surroundingContext() instanceof LocalContext) {
+    		// If this context doesn't allow this exception, perhaps the surrounding
+    		// local or method context does
+    		((LocalContext)surroundingContext()).addThrownException(exception, line);
+    	}
+    }
+    
+    /**
+     * The exceptions that are actually thrown in this context, including line
+     * numbers at which it occurs. Only valid after this context has been fully 
+     * analyzed.
+     * @param exception
+     * @return
+     */
+    public Map<Type, List<Integer>> getThrownExceptions() {
+    	return thrownExceptions;
+    }
 
     public int nextOffset(Type type) {
     	if (type == Type.DOUBLE) {
@@ -356,7 +427,6 @@ class LocalContext extends Context {
     /**
      * @inheritDoc
      */
-
     public void writeToStdOut(PrettyPrinter p) {
         p.println("<LocalContext>");
         p.indentRight();
@@ -373,6 +443,24 @@ class LocalContext extends Context {
             p.indentLeft();
         }
         p.println("</Entries>");
+        p.println("<AllowedException>");
+        if (!allowedExceptions.isEmpty()) {
+        	p.indentRight();
+        	for (Type exception : allowedExceptions) {
+        		p.printf("<Exception type=\"%s\"/>\n", exception.toString());
+        	}
+        	p.indentLeft();
+        }
+        p.println("</AllowedException>");
+        p.println("<ThrownException>");
+        if (!thrownExceptions.isEmpty()) {
+        	p.indentRight();
+        	for (Type exception : thrownExceptions.keySet()) {
+        		p.printf("<Exception type=\"%s\"/>\n", exception.toString());
+        	}
+        	p.indentLeft();
+        }
+        p.println("</ThrownExceptions>");
         p.indentLeft();
         p.println("</LocalContext>");
     }
@@ -395,7 +483,7 @@ class MethodContext extends LocalContext {
 
     /** Does (non-void) method have at least one return? */
     private boolean hasReturnStatement = false;
-
+    
     /**
      * Construct a method context.
      *
@@ -405,13 +493,20 @@ class MethodContext extends LocalContext {
      *            is this method static?
      * @param methodReturnType
      *            return type of this method.
+     * @param declaredExceptions
+     * 			  the exceptions declared to be thrown. 
+     * 			  These exceptions become part of the allowed exceptions
+     * 			  inside this context. Can be null.
      */
 
     public MethodContext(Context surrounding, boolean isStatic,
-            Type methodReturnType) {
+            Type methodReturnType, ArrayList<Type> declaredExceptions) {
         super(surrounding);
         this.isStatic = isStatic;
         this.methodReturnType = methodReturnType;
+        if (declaredExceptions != null) {
+        	super.allowedExceptions.addAll(declaredExceptions);
+        }
         offset = 0;
     }
 

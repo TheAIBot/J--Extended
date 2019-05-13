@@ -688,7 +688,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
     ArrayList<JFormalParameter> params = null;
     JBlock body = null;
     ArrayList<JVariableDeclarator> variableDeclarators = null;
-    ArrayList<TypeName> thrownExceptions = null;
+    ArrayList<Type> thrownExceptions = null;
     JMember memberDecl = null;
 }
 {
@@ -701,7 +701,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
                 name = token.image; 
             } 
             params = formalParameters()
-            thrownExceptions = throwsDeclaration()
+            [ thrownExceptions = throwsDeclaration() ]
             body = block()
             { 
                 memberDecl = 
@@ -718,7 +718,7 @@ private JMember memberDecl( ArrayList<String>  mods ): {
             { line = token.beginLine; }
             <IDENTIFIER> { name = token.image; } 
             params = formalParameters()
-            thrownExceptions = throwsDeclaration()
+            [ thrownExceptions = throwsDeclaration() ]
             ( 
                 body = block() | 
                 <SEMI> 
@@ -769,7 +769,7 @@ private JMember memberSig( ArrayList<String>  mods ): {
     Type type = null;
     String name = "";
     ArrayList<JFormalParameter> params = null;
-    ArrayList<TypeName> thrownExceptions = null;
+    ArrayList<Type> thrownExceptions = null;
     JBlock body = null;
     ArrayList<JVariableDeclarator> variableDeclarators = null;
     JMember memberSig = null;
@@ -784,7 +784,7 @@ private JMember memberSig( ArrayList<String>  mods ): {
                 name = token.image;
             }
             params = formalParameters()
-            thrownExceptions = throwsDeclaration()
+            [ thrownExceptions = throwsDeclaration() ]
             <SEMI>
             {
                 memberSig =
@@ -801,7 +801,7 @@ private JMember memberSig( ArrayList<String>  mods ): {
             { line = token.beginLine; }
             <IDENTIFIER> { name = token.image; }
             params = formalParameters()
-            thrownExceptions = throwsDeclaration()
+            [ thrownExceptions = throwsDeclaration() ]
             <SEMI>
             {
                 memberSig =
@@ -905,14 +905,14 @@ private JStatement statement(): {
     JStatement alternate = null;
     JStatement body = null;
     JBlock tryBlock = null;
-    ArrayList<ArrayList<JFormalParameter>> catchParameters = null;
-    ArrayList<JBlock> catchBlocks = null;
+    ArrayList<JCatchStatement> catchStatements = null;
+    JCatchStatement catchStatement = null;
     ArrayList<JFormalParameter> parameters = null;
     JBlock block = null;
     JBlock finallyBlock = null;
     JExpression expr = null;
     JExpression condition = null;
-    JExpression postIter = null;
+    JStatement postIter = null;
     JFormalParameter internalVar = null;
     JVariableDeclaration varDec = null;
     Type ref = null;
@@ -940,20 +940,16 @@ private JStatement statement(): {
         { statement = new JWhileStatement( line, test, body ); } |
         <TRY> { line = token.beginLine; }
         tryBlock = block()
-        { catchParameters = new ArrayList(); }
-        { catchBlocks = new ArrayList(); }
+        { catchStatements = new ArrayList<JCatchStatement>(); }
         (
-        	<CATCH>
-        	parameters = formalParameters()
-        	block = block()
-        	{ catchParameters.add(parameters); }
-        	{ catchBlocks.add(block); }
+        	LOOKAHEAD(<CATCH>)
+        	catchStatement = catchStatement()
+        	{ catchStatements.add(catchStatement); }
         )*
         [
         	<FINALLY> finallyBlock = block()
         ]
-        { statement = new JTryStatement(line, tryBlock, catchParameters,
-        								catchBlocks, finallyBlock); } |
+        { statement = new JTryStatement(line, tryBlock, catchStatements, finallyBlock); } |
         <FOR> {line = token.beginLine; }
         (
             //Look ahead to see if it's a for loop
@@ -972,7 +968,7 @@ private JStatement statement(): {
             <SEMI>
             [condition = expression()]
             <SEMI>
-            [postIter = expression()]
+            [postIter = statementExpression()]
             <RPAREN>
             body = statement()
             { statement = new JForStatement(line, varDec, condition, body, postIter);} |
@@ -982,7 +978,7 @@ private JStatement statement(): {
             varDec = localVariableDeclarationStatement()
             [condition = expression()]
             <SEMI>
-            [postIter = expression()]
+            [postIter = statementExpression()]
             <RPAREN>
             body = statement()
             { statement = new JForStatement(line, varDec, condition, body, postIter);}
@@ -1008,6 +1004,43 @@ private JStatement statement(): {
     }
     { return statement; }
 }
+
+
+/**
+ * Parse a catch-statement.
+ * @return
+ */
+private JCatchStatement catchStatement(): {
+	int line = 0;
+	ArrayList<Type> exceptions = new ArrayList<Type>();
+	Type exception = null;
+	String name = null;
+	JBlock block = null;
+	JCatchStatement statement = null;
+}
+{
+	try {
+		<CATCH> { line = token.beginLine; }
+		<LPAREN>
+		(
+			LOOKAHEAD(type() <BOR>)
+			exception = type()
+			<BOR>
+			{ exceptions.add(exception); }
+		)*
+		exception = type()
+		{ exceptions.add(exception); }
+		<IDENTIFIER> { name = token.image; }
+		<RPAREN>
+		block = block()
+		{ statement = new JCatchStatement(line, exceptions, name, block); }
+	}
+	catch ( ParseException e ) {
+		recoverFromError( new int[] { SEMI, EOF }, e );
+	}
+	{ return statement; }
+}
+
 
 /**
  * Parse formal parameters.
@@ -1075,23 +1108,20 @@ private JFormalParameter formalParameter(): {
 /**
 *	Parse a throws-declaration as a list of qualified identifiers.
 */
-private ArrayList<TypeName> throwsDeclaration(): {
-	int line = 0;
-	ArrayList<TypeName> types = new ArrayList<TypeName>();
-	TypeName aType;
+private ArrayList<Type> throwsDeclaration(): {
+	ArrayList<Type> types = new ArrayList<Type>();
+	Type exception;
 }
 {
 	try {
-		[
-			<THROWS>
-			{ line = token.beginLine; }
-			aType = qualifiedIdentifier()
-			{ types.add(aType); }
-			(
-				<COMMA> aType = qualifiedIdentifier()
-				{ types.add(aType); }
-			)*
-		]
+		<THROWS>
+		exception = type()
+		{ types.add(exception); }
+		(
+			LOOKAHEAD(<COMMA> type())
+			<COMMA> exception = type()
+			{ types.add(exception); }
+		)*
 	}
 	catch ( ParseException e ) { 
         recoverFromError( new int[] { SEMI, EOF }, e ); 
@@ -1489,29 +1519,29 @@ private JExpression assignmentExpression(): {
         lhs = conditionalExpression() { line = lhs.line(); }
         [       
 			<ASSIGN>
-			{ lhs = new JAssignOp(line, lhs, assignmentExpression()); |
+			{ lhs = new JAssignOp(line, lhs, assignmentExpression()); } |
 			<PLUS_ASSIGN>
-			{ lhs = new JAssignOp(line, lhs, new JPlusOp(line, lhs, assignmentExpression(); } |
+			{ lhs = new JAssignOp(line, lhs, new JPlusOp(line, lhs, assignmentExpression())); } |
 			<MINUS_ASSIGN>
-			{ lhs = new JAssignOp(line, lhs, new JSubtractOp(line, lhs, assignmentExpression(); } |
+			{ lhs = new JAssignOp(line, lhs, new JSubtractOp(line, lhs, assignmentExpression())); } |
 			<STAR_ASSIGN>
-			{ lhs = new JAssignOp(line, lhs, new JMultiplyOp(line, lhs, assignmentExpression(); } |
+			{ lhs = new JAssignOp(line, lhs, new JMultiplyOp(line, lhs, assignmentExpression())); } |
 			<DIV_ASSIGN>
-			{ lhs = new JAssignOp(line, lhs, new JDivideOp(line, lhs, assignmentExpression(); } |
+			{ lhs = new JAssignOp(line, lhs, new JDivideOp(line, lhs, assignmentExpression())); } |
 			<ALSHIFT_ASSIGN>
-			{ lhs = new JAssignOp(line, lhs, new JArithLeftShift(line, lhs, assignmentExpression(); } |
+			{ lhs = new JAssignOp(line, lhs, new JArithLeftShift(line, lhs, assignmentExpression())); } |
 			<ARSHIFT_ASSIGN>
-			{ lhs = new JAssignOp(line, lhs, new JArithRightShift(line, lhs, assignmentExpression(); } |
+			{ lhs = new JAssignOp(line, lhs, new JArithRightShift(line, lhs, assignmentExpression())); } |
 			<LRSHIFT_ASSIGN>
-			{ lhs = new JAssignOp(line, lhs, new JLogicRightShift(line, lhs, assignmentExpression(); } |
+			{ lhs = new JAssignOp(line, lhs, new JLogicRightShift(line, lhs, assignmentExpression())); } |
 			<MOD_ASSIGN>
-			{ lhs = new JAssignOp(line, lhs, new JRemainderOp(line, lhs, assignmentExpression(); } |
+			{ lhs = new JAssignOp(line, lhs, new JRemainderOp(line, lhs, assignmentExpression())); } |
 			<BAND_ASSIGN>
-			{ lhs = new JAssignOp(line, lhs, new JBitwiseAND(line, lhs, assignmentExpression(); } |
+			{ lhs = new JAssignOp(line, lhs, new JBitwiseAND(line, lhs, assignmentExpression())); } |
 			<BXOR_ASSIGN>
-			{ lhs = new JAssignOp(line, lhs, new JBitwiseXOR(line, lhs, assignmentExpression(); } |
+			{ lhs = new JAssignOp(line, lhs, new JBitwiseXOR(line, lhs, assignmentExpression())); } |
 			<BOR_ASSIGN>
-			{ lhs = new JAssignOp(line, lhs, new JBitwiseOR(line, lhs, assignmentExpression(); }
+			{ lhs = new JAssignOp(line, lhs, new JBitwiseOR(line, lhs, assignmentExpression())); }
         ]
     } 
     catch ( ParseException e ) { 

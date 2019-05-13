@@ -622,7 +622,7 @@ public class Parser {
             mustBe(IDENTIFIER);
             String name = scanner.previousToken().image();
             ArrayList<JFormalParameter> params = formalParameters();
-            ArrayList<TypeName> exceptionTypes = null;
+            ArrayList<Type> exceptionTypes = null;
             if (see(THROWS)) {
             	exceptionTypes = readThrowsDeclaration();
             }
@@ -643,7 +643,7 @@ public class Parser {
                 mustBe(IDENTIFIER);
                 String name = scanner.previousToken().image();
                 ArrayList<JFormalParameter> params = formalParameters();
-                ArrayList<TypeName> exceptionTypes = null;
+                ArrayList<Type> exceptionTypes = null;
                 if (see(THROWS)) {
                 	exceptionTypes = readThrowsDeclaration();
                 }
@@ -657,7 +657,7 @@ public class Parser {
                     mustBe(IDENTIFIER);
                     String name = scanner.previousToken().image();
                     ArrayList<JFormalParameter> params = formalParameters();
-                    ArrayList<TypeName> exceptionTypes = null;
+                    ArrayList<Type> exceptionTypes = null;
                     if (see(THROWS)) {
                     	exceptionTypes = readThrowsDeclaration();
                     }
@@ -696,7 +696,7 @@ public class Parser {
             mustBe(IDENTIFIER);
             String name = scanner.previousToken().image();
             ArrayList<JFormalParameter> params = formalParameters();
-            ArrayList<TypeName> exceptionTypes = null;
+            ArrayList<Type> exceptionTypes = null;
             if (see(THROWS)) {
             	exceptionTypes = readThrowsDeclaration();
             }
@@ -725,12 +725,12 @@ public class Parser {
         return memberSig;
     }
     
-    private ArrayList<TypeName> readThrowsDeclaration() {
-    	ArrayList<TypeName> exceptionTypes = new ArrayList();
+    private ArrayList<Type> readThrowsDeclaration() {
+    	ArrayList<Type> exceptionTypes = new ArrayList();
     	mustBe(THROWS);
-    	exceptionTypes.add(qualifiedIdentifier());
+    	exceptionTypes.add(type());
     	while (have(COMMA)) {
-    		exceptionTypes.add(qualifiedIdentifier());
+    		exceptionTypes.add(type());
     	}
     	return exceptionTypes;
     }
@@ -742,7 +742,7 @@ public class Parser {
         if (!mods.contains("public")) mods.add("public");
         if (!mods.contains("abstract")) mods.add("abstract");
         checkMethodSignatureModifiers(mods);
-        ArrayList<TypeName> exceptionList = null;
+        ArrayList<Type> exceptionList = null;
         if (see(THROWS)) {
         	exceptionList = readThrowsDeclaration();
         }
@@ -828,18 +828,15 @@ public class Parser {
             return new JWhileStatement(line, test, statement);
         } else if (have(TRY)) {
         	JBlock tryBlock = block();
-        	ArrayList<ArrayList<JFormalParameter>> catchParameters = new ArrayList();
-        	ArrayList<JBlock> catchBlocks = new ArrayList();
+        	ArrayList<JCatchStatement> catchStatements = new ArrayList();
         	JBlock finallyBlock = null;
-        	while (have(CATCH)) {
-        		catchParameters.add(formalParameters());
-        		catchBlocks.add(block());
+        	while (see(CATCH)) {
+        		catchStatements.add(catchStatement());
         	}
         	if (have(FINALLY)) {
         		finallyBlock = block();
         	}
-        	return new JTryStatement(line, tryBlock, catchParameters, 
-        							catchBlocks, finallyBlock);
+        	return new JTryStatement(line, tryBlock, catchStatements, finallyBlock);
         } else if (have(FOR)) {
             mustBe(LPAREN);
             scanner.recordPosition(); //Record position so we can return and parse an expression if it's a for loop
@@ -899,6 +896,26 @@ public class Parser {
             mustBe(SEMI);
             return statement;
         }
+    }
+    
+    /**
+     * Parse a catch-statement.
+     * @return
+     */
+    private JCatchStatement catchStatement() {
+    	int line = scanner.token().line();
+    	mustBe(CATCH);
+    	mustBe(LPAREN);
+    	ArrayList<Type> exceptions = new ArrayList<Type>();
+    	exceptions.add(type());
+    	while (have(BOR)) {
+    		exceptions.add(type());
+    	}
+    	mustBe(IDENTIFIER);
+    	String name = scanner.previousToken().image();
+    	mustBe(RPAREN);
+    	JBlock block = block();
+    	return new JCatchStatement(line, exceptions, name, block);
     }
 
     /**

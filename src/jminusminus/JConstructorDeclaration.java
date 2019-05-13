@@ -37,9 +37,9 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
      */
 
     public JConstructorDeclaration(int line, ArrayList<String> mods, String name,
-                                   ArrayList<JFormalParameter> params, ArrayList<TypeName> exceptionList,
+                                   ArrayList<JFormalParameter> params, ArrayList<Type> exceptions,
                                    JBlock body) {
-        super(line, mods, name, Type.CONSTRUCTOR, params, exceptionList, body);
+        super(line, mods, name, Type.CONSTRUCTOR, params, exceptions, body);
     }
 
     /**
@@ -89,7 +89,7 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
         definingClass = 
 	    (JClassDeclaration) context.classContext().definition();
         MethodContext methodContext =
-            new MethodContext(context, isStatic, returnType);
+            new MethodContext(context, isStatic, returnType, super.exceptions);
         this.context = methodContext;
 
         if (!isStatic) {
@@ -124,7 +124,7 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
      */
 
     public void partialCodegen(Context context, CLEmitter partial) {
-        partial.addMethod(mods, "<init>", descriptor, null, false);
+        partial.addMethod(mods, "<init>", descriptor, exceptionNames, false);
         if (!invokesConstructor) {
             partial.addNoArgInstruction(ALOAD_0);
             partial.addMemberAccessInstruction(INVOKESPECIAL,
@@ -143,7 +143,7 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
      */
 
     public void codegen(CLEmitter output) {
-        output.addMethod(mods, "<init>", descriptor, null, false);
+        output.addMethod(mods, "<init>", descriptor, exceptionNames, false);
         if (!invokesConstructor) {
             output.addNoArgInstruction(ALOAD_0);
             output.addMemberAccessInstruction(INVOKESPECIAL,
@@ -189,10 +189,10 @@ class JConstructorDeclaration extends JMethodDeclaration implements JMember {
             }
             p.println("</FormalParameters>");
         }
-        if (exceptionList != null) {
+        if (exceptions != null) {
         	p.println("<ThrownExceptions>");
         	p.indentRight();
-        	for (TypeName type : exceptionList) {
+        	for (Type type : exceptions) {
         		p.printf("<Exception type=\"%s\"/>\n", type.toString());
         	}
         	p.indentLeft();

@@ -64,7 +64,7 @@ public class JForEachStatement extends JStatement {
         index = new JVariable(line(), "very illegal index").analyze(this.context);
 
         //Create array element variable
-        JArrayExpression arrayExpression = new JArrayExpression(line(), realArray, new JVariable(line(), "very illegal index"));
+        JArrayExpression arrayExpression = new JArrayExpression(line(), realArray, index);
         JVariableDeclarator arrayElementdecl = new JVariableDeclarator(line(), internalVariable.name(), internalVariable.type(), arrayExpression);
         ArrayList<JVariableDeclarator> arrayElementDecls = new ArrayList<>();
         arrayElementDecls.add(arrayElementdecl);
@@ -73,6 +73,7 @@ public class JForEachStatement extends JStatement {
         //Create incrementor
         increment = new JPreIncrementOp(line(), index);
         increment.isStatementExpression = true;
+        increment.analyze(this.context);
 
 
         body = (JStatement) body.analyze(this.context);
@@ -85,8 +86,8 @@ public class JForEachStatement extends JStatement {
         String test = output.createLabel();
         String out = output.createLabel();
 
-        indexDeclaration.codegen(output);
         arrayLengthDeclaration.codegen(output);
+        indexDeclaration.codegen(output);
 
         // Branch out of the loop on the test condition
         // being false
@@ -101,7 +102,6 @@ public class JForEachStatement extends JStatement {
 
         //Codegen incrementor
         increment.codegen(output);
-
 
         // Unconditional jump back up to test
         output.addBranchInstruction(GOTO, test);

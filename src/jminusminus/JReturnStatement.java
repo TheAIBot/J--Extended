@@ -77,7 +77,11 @@ class JReturnStatement
                     // type must match the return type of the
                     // method
                     expr = expr.analyze(context);
-                    expr.type().mustMatchExpected(line(), returnType);
+                    if (!returnType.isJavaAssignableFrom(expr.type())) {
+                    	JAST.compilationUnit.reportSemanticError(line(), 
+                    			"%s cannot be cast to return type %s", 
+                    			expr.type(), returnType);
+                    }
                 }
             } else {
                 // The method better have void as return type
