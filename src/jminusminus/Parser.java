@@ -1328,7 +1328,7 @@ public class Parser {
     	if (have(TER)) {
     		JExpression ifTrue = inclusiveOrExpression();
     		mustBe(COLON);
-			JExpression ifFalse = inclusiveOrExpression();
+			JExpression ifFalse = conditionalExpression();
 
 			return new JTernaryOp(line, conditional, ifTrue, ifFalse);
 		}
