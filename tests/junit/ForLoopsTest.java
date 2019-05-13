@@ -24,9 +24,11 @@ public class ForLoopsTest extends TestCase {
     public void testForEachLoops() {
         int[] intArray = {1, 2, 3, 4, 5};
         this.assertEquals(15, forLoops.forEachLoop(intArray));
+        this.assertEquals(75, forLoops.nestedForEachLoop(intArray));
 
         double[] doubleArray = {2d, 4d, 6d};
         this.assertEquals(12d, forLoops.forEachLoop(doubleArray));
+        this.assertEquals(36d, forLoops.nestedForEachLoop(doubleArray));
     }
 
 }

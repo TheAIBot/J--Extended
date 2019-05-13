@@ -30,11 +30,33 @@ public class ForLoops {
 
         return sum;
     }
+    
+    public int nestedForEachLoop(int[] array) {
+        int sum = 0;
+        for(int i : array) {
+            for(int z : array) {
+                sum += z;
+            }
+        }
+
+        return sum;
+    }
 
     public double forEachLoop(double[] array) {
         double sum = 0d;
         for(double d : array) {
             sum += d;
+        }
+
+        return sum;
+    }
+    
+    public double nestedForEachLoop(double[] array) {
+        double sum = 0d;
+        for(double d : array) {
+            for(double z : array) {
+                sum += z;
+            }
         }
 
         return sum;
