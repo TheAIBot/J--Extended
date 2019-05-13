@@ -106,7 +106,12 @@ class JPlusOp extends JBinaryExpression {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
         
-        lhs.type().mustMatchOneOf(line, Type.STRING, Type.INT, Type.DOUBLE);
+        if (lhs.type() == Type.STRING || rhs.type() == Type.STRING) {
+            return (new JStringConcatenationOp(line, lhs, rhs))
+                    .analyze(context);
+        }
+        
+        lhs.type().mustMatchOneOf(line, Type.INT, Type.DOUBLE);
         lhs.type().mustMatchExpected(line, rhs.type());
         
         type = lhs.type();
