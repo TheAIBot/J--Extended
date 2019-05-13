@@ -4,6 +4,6 @@ import java.io.EOFException;
 
 public class ExceptionNotDeclared {
 	public static void main() {
-		throw new EOFException();
+		throw new EOFException();jj//todo: fix this error
 	}
 }
