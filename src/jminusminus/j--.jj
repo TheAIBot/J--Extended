@@ -1452,6 +1452,7 @@ private JStatement statementExpression(): {
             if ( expr instanceof JAssignment
               || expr instanceof JPreIncrementOp
               || expr instanceof JPostDecrementOp
+              || expr instanceof JPostIncrementOp
               || expr instanceof JMessageExpression
               || expr instanceof JSuperConstruction
               || expr instanceof JThisConstruction 
@@ -1787,9 +1788,8 @@ private JExpression relationalExpression(): {
             { lhs = new JGreaterThanOp( line, lhs, rhs ); } |
             <LEQ> 
             rhs = shiftExpression()
-            { lhs = new JLessEqualOp( line, lhs, rhs ); }
-            // |
-            //<GEQ> 
+            { lhs = new JLessEqualOp( line, lhs, rhs ); } |
+            //<GEQ>
             //rhs = shiftExpression()
             //{ lhs = new JGreaterEqualOp( line, lhs, rhs ); } |
             <INSTANCEOF> 
