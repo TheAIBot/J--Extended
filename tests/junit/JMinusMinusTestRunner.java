@@ -48,6 +48,8 @@ public class JMinusMinusTestRunner {
         suite.addTestSuite(PlusTest.class);
         suite.addTestSuite(SubtractTest.class);
         suite.addTestSuite(MultiplyTest.class);
+        suite.addTestSuite(TryCatchTest.class);
+        suite.addTestSuite(ThrowTest.class);
         return suite;
     }
 
