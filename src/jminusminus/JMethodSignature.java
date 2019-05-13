@@ -101,6 +101,18 @@ public class JMethodSignature extends JAST implements JMember {
             defn.initialize();
             this.context.addEntry(param.line(), param.name(), defn);
         }
+        
+        // Enforce exception is subclass of Throwable
+        if (exceptions != null) {
+        	Type throwableType = Type.typeFor(java.lang.Throwable.class);
+            for (Type exception : exceptions) {
+            	if (!throwableType.isJavaAssignableFrom(exception)) {
+            		JAST.compilationUnit.reportSemanticError(line(), "Type %s "
+            				+ "is not a Throwable-type.", exception);
+            	}
+            }
+        }
+        
         return this;
     }
 
@@ -181,6 +193,7 @@ public class JMethodSignature extends JAST implements JMember {
             descriptor += param.type().toDescriptor();
         }
         descriptor += ")" + returnType.toDescriptor();
+        
         if (exceptions != null) {
         	exceptionNames = new ArrayList<String>();
             // Resolve exception types
