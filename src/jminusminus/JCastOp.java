@@ -128,12 +128,13 @@ class Conversions {
 
         put(Type.CHAR, Type.INT, Converter.Identity);
         put(Type.INT, Type.CHAR, new I2C());
+        put(Type.INT, Type.DOUBLE, new I2D());
+        put(Type.DOUBLE, Type.INT, new D2I());
 
         // Boxing
         put(Type.CHAR, Type.BOXED_CHAR, new Boxing(Type.CHAR, Type.BOXED_CHAR));
         put(Type.INT, Type.BOXED_INT, new Boxing(Type.INT, Type.BOXED_INT));
-        put(Type.BOOLEAN, Type.BOXED_BOOLEAN, new Boxing(Type.BOOLEAN,
-                Type.BOXED_BOOLEAN));
+        put(Type.BOOLEAN, Type.BOXED_BOOLEAN, new Boxing(Type.BOOLEAN, Type.BOXED_BOOLEAN));
 
         // Un-boxing
         put(Type.BOXED_CHAR, Type.CHAR, new UnBoxing(Type.BOXED_CHAR,
@@ -337,13 +338,19 @@ class UnBoxing implements Converter {
  */
 
 class I2C implements Converter {
-
-    /**
-     * @inheritDoc
-     */
-
     public void codegen(CLEmitter output) {
         output.addNoArgInstruction(I2C);
     }
+}
 
+class I2D implements Converter {
+    public void codegen(CLEmitter output) {
+        output.addNoArgInstruction(I2D);
+    }
+}
+
+class D2I implements Converter {
+    public void codegen(CLEmitter output) {
+        output.addNoArgInstruction(D2I);
+    }
 }

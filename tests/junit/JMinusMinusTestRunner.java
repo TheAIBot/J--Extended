@@ -54,6 +54,7 @@ public class JMinusMinusTestRunner {
         suite.addTestSuite(ThrowTest.class);
         suite.addTestSuite(ForLoopsTest.class);
         suite.addTestSuite(InitializationBlocksTest.class);
+        suite.addTestSuite(DoubleTest.class);
         return suite;
     }
 
