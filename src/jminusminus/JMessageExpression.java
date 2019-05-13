@@ -156,11 +156,11 @@ class JMessageExpression extends JExpression {
                                             + "cannot be referenced from a static context");
                 }
             }
-        }
-        
-        // Add the declared method exceptions to this context's thrown exceptions
-        for (Type exception : method.exceptions()) {
-        	((LocalContext) context).addThrownException(exception, line());
+            
+            // Add the declared method exceptions to this context's thrown exceptions
+            for (Type exception : method.exceptions()) {
+            	((LocalContext) context).addThrownException(exception, line());
+            }
         }
         
         return this;
