@@ -44,6 +44,7 @@ public class JTryStatement extends JStatement {
 	@Override
 	public JTryStatement analyze(Context context) {
 		this.context = new LocalContext(context);
+		
 		Set<Type> caughtExceptions = new HashSet<Type>();
 		// Analyze each catch statement and add the caught exceptions to this
 		// context's allowed exceptions.
@@ -66,7 +67,7 @@ public class JTryStatement extends JStatement {
 			LocalVariableDefn defn = new LocalVariableDefn(Type.typeFor(java.lang.Throwable.class), 
 					this.context.nextOffset(Type.typeFor(java.lang.Throwable.class)));
 			defn.initialize();
-			context.addEntry(line(), "uncaught cariable", defn);
+			context.addEntry(line(), "uncaught variable", defn);
 			uncaughtVariable = new JVariable(line(), "uncaught variable");
 			uncaughtVariable.analyzeLhs(context);
 		}
