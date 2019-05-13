@@ -22,9 +22,9 @@ public class ForLoops {
 
     public int forEachLoop(int[] array) {
         int sum = 0;
-        int[] intArray = {1, 2, 3, 4, 5};
-        for(int i : intArray) {
-            System.out.println("Integer For Each Loop " + i);
+        //int[] intArray = {1, 2, 3, 4, 5};
+        for(int i : array) {
+            //System.out.println("Integer For Each Loop " + i);
             sum += i;
         }
 
