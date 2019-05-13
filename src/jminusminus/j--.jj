@@ -517,7 +517,7 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
     String name = "";
     Type superClass = Type.OBJECT;
     ArrayList<JMember> classBody = null;
-    ArrayList<String> implementsList = new ArrayList<String>();
+    ArrayList<TypeName> implementsList = new ArrayList<TypeName>();
 }
 {
     try {
@@ -532,13 +532,15 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
         [
             <IMPLEMENTS> <IDENTIFIER>
             {
-                implementsList.add(token.image);
+                implementsList.add(qualifiedIdentifier());
             }
+
             (
                 <COMMA> <IDENTIFIER>
                 {
-                    implementsList.add(token.image);
+                    implementsList.add(qualifiedIdentifier());
                 }
+
             )*
         ]
         classBody = classBody()           
