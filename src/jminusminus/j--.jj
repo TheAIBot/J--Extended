@@ -530,13 +530,13 @@ private JClassDeclaration classDeclaration( ArrayList<String> mods ): {
             <EXTENDS> superClass = qualifiedIdentifier() 
         ]
         [
-            <IMPLEMENTS> <IDENTIFIER>
+            <IMPLEMENTS>
             {
                 implementsList.add(qualifiedIdentifier());
             }
 
             (
-                <COMMA> <IDENTIFIER>
+                <COMMA>
                 {
                     implementsList.add(qualifiedIdentifier());
                 }
@@ -806,6 +806,8 @@ private JMember memberSig( ArrayList<String>  mods ): {
             [ thrownExceptions = throwsDeclaration() ]
             <SEMI>
             {
+                mods.add("public");
+                mods.add("abstract");
                 memberSig =
                    new JMethodSignature( line, mods, name, type, 
                    						 params, thrownExceptions );
@@ -816,6 +818,10 @@ private JMember memberSig( ArrayList<String>  mods ): {
             variableDeclarators = variableDeclarators( type )
             <SEMI>
             {
+                mods = new ArrayList<String>();
+                mods.add("public");
+                mods.add("static");
+                mods.add("final");
                 memberSig = new JFieldDeclaration( line, mods,
                     variableDeclarators );
             }
