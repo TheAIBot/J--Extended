@@ -29,9 +29,6 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
     /** Context for this class. */
     private ClassContext context;
 
-    /** Instance fields of this class. */
-    private ArrayList<JFieldDeclaration> instanceFieldInitializations;
-
     /** Static (class) fields of this class. */
     private ArrayList<JFieldDeclaration> staticFieldInitializations;
 
@@ -62,7 +59,6 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
         this.name = name;
         this.superType = superType;
         this.interfaceBlock = interfaceBlock;
-        instanceFieldInitializations = new ArrayList<JFieldDeclaration>();
         staticFieldInitializations = new ArrayList<JFieldDeclaration>();
     }
 
@@ -129,20 +125,12 @@ public class JInterfaceDeclaration extends JAST implements JTypeDecl {
         // Analyze all members
         for (JMember member : interfaceBlock) {
             ((JAST) member).analyze(this.context);
-        }
 
-        // Copy declared fields for purposes of initialization.
-        for (JMember member : interfaceBlock) {
             if (member instanceof JFieldDeclaration) {
                 JFieldDeclaration fieldDecl = (JFieldDeclaration) member;
-                if (fieldDecl.mods().contains("static")) {
-                    staticFieldInitializations.add(fieldDecl);
-                } else {
-                    instanceFieldInitializations.add(fieldDecl);
-                }
+                staticFieldInitializations.add(fieldDecl);
             }
         }
-
         return this;
     }
 

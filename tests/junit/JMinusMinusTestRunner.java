@@ -46,6 +46,7 @@ public class JMinusMinusTestRunner {
         suite.addTestSuite(TernaryTest.class);
         suite.addTestSuite(PostIncTest.class);
         suite.addTestSuite(MultiLineCommentTest.class);
+        suite.addTestSuite(InterfaceTest.class);
         return suite;
     }
 
