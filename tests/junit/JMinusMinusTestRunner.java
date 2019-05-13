@@ -50,6 +50,7 @@ public class JMinusMinusTestRunner {
         suite.addTestSuite(MultiplyTest.class);
         suite.addTestSuite(TryCatchTest.class);
         suite.addTestSuite(ThrowTest.class);
+        suite.addTestSuite(ForLoopsTest.class);
         return suite;
     }
 

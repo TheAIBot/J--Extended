@@ -5,27 +5,38 @@ import java.lang.System;
 public class ForLoops {
 
     public static void main(String[] args) {
-        int[] array = new int[5];
-        array[0] = 5;
-        for(int i : array) {
-            System.out.println("Test");
+        ForLoops forLoops = new ForLoops();
+        int[] intArray = {1, 2, 3, 4, 5};
+        int sum = forLoops.forEachLoop(intArray);
+        System.out.println(sum);
+    }
+
+    public int forLoop(int startValue, int endValue, int increment) {
+        int rounds = 0;
+        for(int i = startValue; endValue > i; i += increment) {
+            rounds++;
         }
 
-        int l = array.length;
-        for(int i = 0; i > l; ++i) {
+        return rounds;
+    }
 
+    public int forEachLoop(int[] array) {
+        int sum = 0;
+        int[] intArray = {1, 2, 3, 4, 5};
+        for(int i : intArray) {
+            System.out.println("Integer For Each Loop " + i);
+            sum += i;
         }
 
-        for(int i = 0; i > 10;) {
+        return sum;
+    }
 
+    public double forEachLoop(double[] array) {
+        double sum = 0d;
+        for(double d : array) {
+            sum += d;
         }
 
-        for(;;) {
-
-        }
-
-        for(int i = 0;; ++i) {
-
-        }
+        return sum;
     }
 }
