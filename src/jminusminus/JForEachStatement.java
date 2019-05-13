@@ -32,6 +32,8 @@ public class JForEachStatement extends JStatement {
         this.body = body;
     }
 
+    private static int nameUniqer = 0;
+    
     @Override
     public JAST analyze(Context context) {
         this.context = new LocalContext(context);
@@ -50,18 +52,20 @@ public class JForEachStatement extends JStatement {
 
         //Create array length
         JFieldSelection realArrayLength = new JFieldSelection(line(), realArray, "length");
-        JVariableDeclarator arrayLengthDecl = new JVariableDeclarator(line(), "very illegal array length", Type.INT, realArrayLength);
+        String arrLenghtName = "very illegal array length" + nameUniqer++;
+        JVariableDeclarator arrayLengthDecl = new JVariableDeclarator(line(), arrLenghtName, Type.INT, realArrayLength);
         ArrayList<JVariableDeclarator> arrayLengthDecls = new ArrayList<>();
         arrayLengthDecls.add(arrayLengthDecl);
         arrayLengthDeclaration = new JVariableDeclaration(line(), new ArrayList<>(), arrayLengthDecls).analyze(this.context);
-        arrayLength = new JVariable(line(), "very illegal array length").analyze(this.context);
+        arrayLength = new JVariable(line(), arrLenghtName).analyze(this.context);
 
         //Create index
-        JVariableDeclarator indexDecl = new JVariableDeclarator(line(), "very illegal index", Type.INT, new JLiteralInt(line(), "0"));
+        String indexName = "very illegal index" + nameUniqer++;
+        JVariableDeclarator indexDecl = new JVariableDeclarator(line(), indexName, Type.INT, new JLiteralInt(line(), "0"));
         ArrayList<JVariableDeclarator> indexDecls = new ArrayList<>();
         indexDecls.add(indexDecl);
         indexDeclaration = new JVariableDeclaration(line(), new ArrayList<>(), indexDecls).analyze(this.context);
-        index = new JVariable(line(), "very illegal index").analyze(this.context);
+        index = new JVariable(line(), indexName).analyze(this.context);
 
         //Create array element variable
         JArrayExpression arrayExpression = new JArrayExpression(line(), realArray, index);
