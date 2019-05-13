@@ -105,18 +105,11 @@ class JPlusOp extends JBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-        if (lhs.type() == Type.STRING || rhs.type() == Type.STRING) {
-            return (new JStringConcatenationOp(line, lhs, rhs))
-                    .analyze(context);
-        } else if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
-            type = Type.INT;
-        } else if (lhs.type() == Type.DOUBLE && rhs.type() == Type.DOUBLE) {
-        	type = Type.DOUBLE;
-		} else {
-            type = Type.ANY;
-            JAST.compilationUnit.reportSemanticError(line(),
-                    "Invalid operand types for +");
-        }
+        
+        lhs.type().mustMatchOneOf(line, Type.STRING, Type.INT, Type.DOUBLE);
+        lhs.type().mustMatchExpected(line, rhs.type());
+        
+        type = lhs.type();
         return this;
     }
 
@@ -180,15 +173,11 @@ class JSubtractOp extends JBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-        if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
-            type = Type.INT;
-        } else if (lhs.type() == Type.DOUBLE && rhs.type() == Type.DOUBLE) {
-        	type = Type.DOUBLE;
-		} else {
-            type = Type.ANY;
-            JAST.compilationUnit.reportSemanticError(line(),
-                    "Invalid operand types for -");
-        }
+        
+        lhs.type().mustMatchOneOf(line, Type.INT, Type.DOUBLE);
+        lhs.type().mustMatchExpected(line, rhs.type());
+        
+        type = lhs.type();
         return this;
     }
 
@@ -250,15 +239,11 @@ class JMultiplyOp extends JBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-        if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
-            type = Type.INT;
-        } else if (lhs.type() == Type.DOUBLE && rhs.type() == Type.DOUBLE) {
-        	type = Type.DOUBLE;
-		} else {
-            type = Type.ANY;
-            JAST.compilationUnit.reportSemanticError(line(),
-                    "Invalid operand types for *");
-        }
+        
+        lhs.type().mustMatchOneOf(line, Type.INT, Type.DOUBLE);
+        lhs.type().mustMatchExpected(line, rhs.type());
+        
+        type = lhs.type();
         return this;
     }
 
@@ -294,15 +279,11 @@ class JDivideOp extends JBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-        if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
-            type = Type.INT;
-        } else if (lhs.type() == Type.DOUBLE && rhs.type() == Type.DOUBLE) {
-        	type = Type.DOUBLE;
-		} else {
-            type = Type.ANY;
-            JAST.compilationUnit.reportSemanticError(line(),
-                    "Invalid operand types for /");
-        }
+        
+        lhs.type().mustMatchOneOf(line, Type.INT, Type.DOUBLE);
+        lhs.type().mustMatchExpected(line, rhs.type());
+        
+        type = lhs.type();
         return this;
     }
 
@@ -328,15 +309,11 @@ class JRemainderOp extends JBinaryExpression {
     public JExpression analyze(Context context) {
         lhs = (JExpression) lhs.analyze(context);
         rhs = (JExpression) rhs.analyze(context);
-        if (lhs.type() == Type.INT && rhs.type() == Type.INT) {
-            type = Type.INT;
-        } else if (lhs.type() == Type.DOUBLE && rhs.type() == Type.DOUBLE) {
-        	type = Type.DOUBLE;
-		} else {
-            type = Type.ANY;
-            JAST.compilationUnit.reportSemanticError(line(),
-                    "Invalid operand types for %");
-        }
+        
+        lhs.type().mustMatchOneOf(line, Type.INT, Type.DOUBLE);
+        lhs.type().mustMatchExpected(line, rhs.type());
+        
+        type = lhs.type();
         return this;
     }
 
