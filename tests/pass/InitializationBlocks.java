@@ -8,8 +8,8 @@ public class InitializationBlocks {
     public int myInstanceInt;
 
     static {
-        int one = 2;
-        int two = 1;
+        int one = 1;
+        int two = 2;
 
         myStaticInt = one + two;
 
@@ -19,17 +19,8 @@ public class InitializationBlocks {
     }
 
     {
-        int one = 2;
-        int two = 3;
+        int one = 1;
+        int two = 2;
         myInstanceInt = one + two;
-    }
-
-    public InitializationBlocks() {
-        System.out.println(myInstanceInt);
-    }
-
-    public static void main(String[] args) {
-        System.out.println(myStaticInt);
-        new InitializationBlocks();
     }
 }
