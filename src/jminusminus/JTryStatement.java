@@ -20,6 +20,10 @@ public class JTryStatement extends JStatement {
 	/** The local context of the try-block. */
 	private LocalContext context;
 	
+	/** The variable that should store an uncaught exception in the
+	 * finally-block. This is necessary to further throw the exception. */
+	private JVariable uncaughtVariable;
+	
 	/**
 	 * Constructs an AST-node for the try-catch-finally statement.
 	 * @param line
@@ -58,6 +62,13 @@ public class JTryStatement extends JStatement {
 		}
 		if (finallyBlock != null) {
 			finallyBlock = finallyBlock.analyze(context);
+			// Initiate the variable used by a finally-block if an exception is uncaught
+			LocalVariableDefn defn = new LocalVariableDefn(Type.typeFor(java.lang.Throwable.class), 
+					this.context.nextOffset(Type.typeFor(java.lang.Throwable.class)));
+			defn.initialize();
+			context.addEntry(line(), "uncaught cariable", defn);
+			uncaughtVariable = new JVariable(line(), "uncaught variable");
+			uncaughtVariable.analyzeLhs(context);
 		}
 		// Thrown exceptions are added to the context in tryBlock.analyze()
 		tryBlock = tryBlock.analyze(this.context);
@@ -74,7 +85,7 @@ public class JTryStatement extends JStatement {
 		for (Type exception : leftoverExceptions) {
 			for (int line : thrownExceptions.get(exception)) {
 				JAST.compilationUnit.reportSemanticError(line, "The exception %s"
-						+ " is never being caught.", exception.toString());
+						+ " is not declared.", exception.toString());
 			}
 		}
 		// Go through each catch statement and check that every caught exception or
@@ -100,14 +111,32 @@ public class JTryStatement extends JStatement {
 				}
 			}
 		}
+		
+	
+		
+	
 		return this;
 	}
 	
+	/**
+	 * Codegen for a TryStatement involves creating the exception table by
+	 * specifying an exception handler for each exception, which consists of
+	 * the range at which we should look for a specific thrown exception, 
+	 * and the label to which we should branch.
+	 */
 	@Override
 	public void codegen(CLEmitter output) {
 		String startLabel = output.createLabel();
 		String endLabel = output.createLabel();
+		// We create two different versions of the finally block, one 
+		// that should apply after we have caught an exception, and
+		// one that should apply when the exception hasn't been caught 
+		// by any of the catch-statements. In the latter, the exception
+		// should be rethrown so that it can be handled by a surrounding
+		// exception handler.
 		String finallyLabel = output.createLabel();
+		String finallyEndLabel = output.createLabel();
+		String uncaughtFinallyEndLabel = output.createLabel();
 		output.addLabel(startLabel);
 		tryBlock.codegen(output);
 		output.addBranchInstruction(CLConstants.GOTO, finallyLabel);
@@ -116,11 +145,23 @@ public class JTryStatement extends JStatement {
 			cStatement.setTryStartLabel(startLabel);
 			cStatement.setTryEndLabel(endLabel);
 			cStatement.codegen(output);
+			output.addBranchInstruction(CLConstants.GOTO, finallyLabel);
 		}
+		// Use finallyLabel as the end of the try-catch, even if finally is null
 		output.addLabel(finallyLabel);
 		if (finallyBlock != null) {
-			output.addExceptionHandler(startLabel, finallyLabel, finallyLabel, null);
 			finallyBlock.codegen(output);
+			output.addBranchInstruction(CLConstants.GOTO, uncaughtFinallyEndLabel);
+			output.addExceptionHandler(startLabel, finallyLabel, finallyLabel, null);
+			output.addExceptionHandler(finallyLabel, finallyEndLabel, finallyLabel, null);
+			// Go to the end of the finally for uncaught exceptions
+			output.addLabel(finallyEndLabel);
+			uncaughtVariable.codegenStore(output);
+			// The finally for uncaught exceptions
+			finallyBlock.codegen(output);
+			uncaughtVariable.codegen(output);
+			output.addNoArgInstruction(CLConstants.ATHROW);
+			output.addLabel(uncaughtFinallyEndLabel);
 		}
 	}
 	

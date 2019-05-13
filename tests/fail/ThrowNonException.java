@@ -1,8 +1,13 @@
 package fail;
 
 public class ThrowNonException {
-	
-	public static void main() throws String {
-		throw new String();
+
+	public static void main() {
+		try {
+			throw new String();
+		} catch (String e) {
+			
+		}
 	}
+	
 }

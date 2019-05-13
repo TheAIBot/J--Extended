@@ -3,6 +3,9 @@
 package jminusminus;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+
 import static jminusminus.CLConstants.*;
 
 /**
@@ -184,12 +187,31 @@ class JMethodDeclaration extends JAST implements JMember {
         
         if (body != null) {
             body = body.analyze(this.context);
-	    if (returnType!=Type.VOID && ! methodContext.methodHasReturn()){
-		JAST.compilationUnit.reportSemanticError(line(),
-		    "Non-void method must have a return statement");
-	    }
+		    if (returnType!=Type.VOID && ! methodContext.methodHasReturn()){
+		    	JAST.compilationUnit.reportSemanticError(line(),
+		    			"Non-void method must have a return statement");
+		    }
         }
-	return this;
+        
+        // Ensure that all thrown exception declared
+ 		Set<Type> leftoverExceptions = new HashSet<Type>((this.context.thrownExceptions).keySet());
+ 		if (exceptions != null) {
+	 		for (Type declaredException : exceptions) {
+	 			for (Type leftoverException : leftoverExceptions) {
+	 				if (declaredException.isJavaAssignableFrom(leftoverException)) {
+	 					leftoverExceptions.remove(leftoverException);
+	 				}
+	 			}
+	 		}
+ 		}
+ 		for (Type exception : leftoverExceptions) {
+ 			for (int line : this.context.thrownExceptions.get(exception)) {
+ 				JAST.compilationUnit.reportSemanticError(line, "The exception %s"
+ 						+ " is never being caught.", exception.toString());
+ 			}
+ 		}
+        
+        return this;
     }
 
     /**

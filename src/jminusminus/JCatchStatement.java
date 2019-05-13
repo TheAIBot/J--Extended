@@ -16,6 +16,9 @@ class JCatchStatement extends JStatement {
 	/** The local context for this catch statement. Created in analyze(). */
 	private LocalContext context; 
 	
+	/** The exception variable. Created in analyze(). */
+	private JVariable variable; 
+	
 	/** JVM start label for corresponding try-block. Only set and used during codegen. */
 	private String tryStartLabel;
 	
@@ -41,6 +44,11 @@ class JCatchStatement extends JStatement {
 				
 	@Override
 	public JCatchStatement analyze(Context context) {
+		if (exceptions == null || exceptions.isEmpty()) {
+			// Shouldn't be possible using parser
+			JAST.compilationUnit.reportSemanticError(line(), "A catch-statement must catch "
+					+ "at least one exception.");
+		}
 		Type throwableType = Type.typeFor(java.lang.Throwable.class);
 		// Resolve exception types and ensure that it inherits Throwable
 		for (int i = 0; i < exceptions.size(); i++) {
@@ -51,21 +59,21 @@ class JCatchStatement extends JStatement {
         	}
         }
 		this.context = new LocalContext(context);
-		// Create a local variable declaration corresponding to the caught exceptions.
+		Type commonType = exceptions.get(0);
 		// If this is a multicatch, then the common super type should be used.
-		LocalVariableDefn defn;
 		if (exceptions.size() > 1) {
 			// Use common super class as type definition
-			Type commonType = null;
-			for (int i = 0; i < exceptions.size() - 1; i++) {
+			for (int i = 1; i < exceptions.size() - 1; i++) {
 				commonType = exceptions.get(i).commonSuperClass(exceptions.get(i + 1));
 			}
-			defn = new LocalVariableDefn(commonType, this.context.nextOffset());
-		} else {
-			defn = new LocalVariableDefn(exceptions.get(0), this.context.nextOffset());
 		}
+		// Create a local variable declaration corresponding to the caught exceptions.
+		LocalVariableDefn defn = new LocalVariableDefn(commonType, this.context.nextOffset(commonType));
 		defn.initialize();
 		this.context.addEntry(line(), name, defn);
+		// Create a variable representing the exception variable and analyze it
+		variable = new JVariable(line(), name);
+		variable = (JVariable) variable.analyzeLhs(this.context);
 		// Analyze the body
 		if (body != null) {
 			body = body.analyze(this.context);
@@ -99,6 +107,8 @@ class JCatchStatement extends JStatement {
 			String internalName = type.jvmName();
 			output.addExceptionHandler(tryStartLabel, tryEndLabel, handlerLabel, internalName);
 		}
+		// Generate code for storing the exception on the stack
+		variable.codegenStore(output);
 		body.codegen(output);
 	}
 

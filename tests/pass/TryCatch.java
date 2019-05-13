@@ -151,4 +151,22 @@ public class TryCatch {
 			returnMessage = message;
 		}
 	}
+	
+	public int finallyWithMultipleCatches(int n) {
+		int i = 0;
+		try {
+			if (n <= 5) {
+				throw new EOFException();
+			} else {
+				throw new RuntimeException();
+			}
+		} catch (EOFException e) {
+			i = 1;
+		} catch (RuntimeException e) {
+			i = 2;
+		} finally {
+			i = n;
+		}
+		return i;
+	}
 }
