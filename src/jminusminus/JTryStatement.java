@@ -150,7 +150,7 @@ public class JTryStatement extends JStatement {
 		}
 		// Use finallyLabel as the end of the try-catch, even if finally is null
 		output.addLabel(finallyLabel);
-		if (finallyBlock != null) {
+		if (finallyBlock != null && false) {
 			finallyBlock.codegen(output);
 			output.addBranchInstruction(CLConstants.GOTO, uncaughtFinallyEndLabel);
 			output.addExceptionHandler(startLabel, finallyLabel, finallyLabel, null);
